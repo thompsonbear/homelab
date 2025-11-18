@@ -62,6 +62,7 @@ resource "proxmox_vm_qemu" "talos_vms" {
     type = "disk"
     storage = "data"
     slot = "virtio0"
+    format = "raw"
     size = each.value.type.disk_size
   }
 

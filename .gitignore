@@ -1,3 +1,5 @@
 .env
 terraform.tfstate*
 .terraform*
+*.tfplan
+Crash.log
