@@ -89,3 +89,9 @@ resource "talos_cluster_kubeconfig" "this" {
   node = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"][0]
 }
 
+data "talos_cluster_health" "cluster_health" {
+  client_configuration = talos_machine_secrets.this.client_configuration
+  control_plane_nodes = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"] 
+  endpoints = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"]
+  worker_nodes = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "worker"]
+}
