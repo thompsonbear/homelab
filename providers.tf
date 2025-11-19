@@ -32,3 +32,12 @@ provider "proxmox" {
   pm_api_token_secret = var.pm_api_token_secret
 }
 
+provider "helm" {
+  kubernetes = {
+    host = talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
+    ca_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)
+    client_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)
+    client_key = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)
+    insecure = var.insecure
+  }
+}

@@ -1,20 +1,21 @@
 locals {
   cluster_name = "bear"
-  cluster_endpoint = "https://172.21.8.11:6443" # Node 1 ipv4 (cluster needs to bootstrap before vip is available)
+  k8s_api_vip = "172.21.8.10"
+  k8s_api_port = "6443"
 }
 
 resource "talos_machine_secrets" "this" {}
 
 data "talos_machine_configuration" "controlplanes_config" {
     cluster_name = local.cluster_name
-    cluster_endpoint = local.cluster_endpoint
+    cluster_endpoint = "https://${local.k8s_api_vip}:${local.k8s_api_port}"
     machine_type = "controlplane"
     machine_secrets = talos_machine_secrets.this.machine_secrets
 }
 
 data "talos_machine_configuration" "workers_config" {
     cluster_name = local.cluster_name
-    cluster_endpoint = local.cluster_endpoint
+    cluster_endpoint = "https://${local.k8s_api_vip}:${local.k8s_api_port}"
     machine_type = "worker"
     machine_secrets = talos_machine_secrets.this.machine_secrets
 }
@@ -44,7 +45,7 @@ resource "talos_machine_configuration_apply" "controlplanes_config_apply" {
             interface = "eth0"
             dhcp = false
             vip = {
-              ip = "172.21.8.10"
+              ip = "${local.k8s_api_vip}"
             }
           }]
         }
@@ -79,17 +80,18 @@ resource "talos_machine_bootstrap" "this" {
 
   client_configuration  = talos_machine_secrets.this.client_configuration
   node = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"][0]
-  
 }
 
 resource "talos_cluster_kubeconfig" "this" {
   depends_on = [talos_machine_bootstrap.this]
 
-  client_configuration  = talos_machine_secrets.this.client_configuration
+  client_configuration  =  talos_machine_secrets.this.client_configuration
   node = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"][0]
 }
 
-data "talos_cluster_health" "cluster_health" {
+data "talos_cluster_health" "this" {
+  depends_on = [talos_machine_bootstrap.this]
+  
   client_configuration = talos_machine_secrets.this.client_configuration
   control_plane_nodes = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"] 
   endpoints = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"]
