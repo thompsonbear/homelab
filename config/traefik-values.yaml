@@ -1,0 +1,50 @@
+image:
+  registry: docker.io
+  repository: traefik
+  tag: v3.6.2
+  pullPolicy: IfNotPresent
+deployment:
+  enabled: true
+  kind: Deployment
+  replicas: 2
+ingressClass:
+  enabled: true
+  isDefaultClass: true
+  name: "traefik"
+gateway:
+  enabled: false
+api:
+  dashboard: false
+providers:
+  kubernetesCRD:
+    enabled: true
+    allowExternalNameServices: true
+    ingressClass: ""
+ports:
+  web:
+    redirections:
+      entryPoint:
+        to: websecure
+        scheme: https
+        permanent: true
+  websecure:
+    port: 443
+    tls:
+      enabled: true
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75
+service:
+  enabled: true
+  type: LoadBalancer
+  spec:
+    loadBalancerIP: "172.21.8.100"
+  loadBalancerSourceRanges: []

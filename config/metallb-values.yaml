@@ -1,0 +1,19 @@
+controller:
+  enabled: true
+  image:
+    repository: quay.io/metallb/controller
+    tag: v0.15.2
+  serviceAccount:
+    create: true
+    name: "metallb-controller-svc"
+
+speaker:
+  enabled: true
+  image:
+    repository: quay.io/metallb/speaker
+    tag: v0.15.2
+    pullPolicy:
+  serviceAccount:
+    create: true
+    name: "metallb-speaker-svc"
+  ignoreExcludeLB: true
