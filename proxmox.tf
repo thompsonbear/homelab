@@ -15,7 +15,7 @@ locals {
   }
   
   node_types = {
-    control-plane = {cores = 3, ram = 3072, disk_size = "128G", k8s_role = "control-plane"}
+    control-plane = {cores = 3, ram = 4096, disk_size = "128G", k8s_role = "control-plane"}
     worker = {cores = 6, ram = 12288, disk_size = "512G", k8s_role = "worker"}
   }
 }

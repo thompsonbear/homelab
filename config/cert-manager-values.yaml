@@ -1,0 +1,59 @@
+crds:
+  enabled: true
+replicaCount: 2
+image:
+  repository: quay.io/jetstack/cert-manager-controller
+  tag: v1.19.1
+  pullPolicy: IfNotPresent
+namespace: "cert-manager"
+serviceAccount:
+  create: true
+  name: "cert-manager-svc"
+enableCertificateOwnerRef: true
+approveSignerNames:
+- issuers.cert-manager.io/*
+- clusterissuers.cert-manager.io/*
+- issuers.ejbca-issuer.keyfactor.com/*
+- clusterissuers.ejbca-issuer.keyfactor.com/*
+
+webhook:
+  replicaCount: 2
+  podDisruptionBudget:
+    enabled: true
+  image:
+    repository: quay.io/jetstack/cert-manager-webhook
+    tag: v1.19.1
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    name: "cert-manager-webhook-svc"
+
+cainjector:
+  enabled: true
+  replicaCount: 2
+  podDisruptionBudget:
+    enabled: true
+  image:
+    repository: quay.io/jetstack/cert-manager-cainjector
+    tag: v1.19.1
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    name: "cert-manager-cainjector-svc"
+
+acmesolver:
+  image:
+    repository: quay.io/jetstack/cert-manager-acmesolver
+    tag: v1.19.1
+    pullPolicy: IfNotPresent
+
+startupapicheck:
+  enabled: true
+  image:
+    repository: quay.io/jetstack/cert-manager-startupapicheck
+    tag: v1.19.1
+    pullPolicy: IfNotPresent
+  serviceAccount:
+    create: true
+    name: "cert-manager-startupapicheck-svc"
+

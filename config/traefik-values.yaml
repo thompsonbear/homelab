@@ -11,15 +11,19 @@ ingressClass:
   enabled: true
   isDefaultClass: true
   name: "traefik"
+additionalArguments:
+  - --serversTransport.insecureSkipVerify=true
 gateway:
   enabled: false
 api:
   dashboard: false
 providers:
   kubernetesCRD:
+    enabled: false
+  kubernetesIngress:
     enabled: true
     allowExternalNameServices: true
-    ingressClass: ""
+    ingressClass: "traefik"
 ports:
   web:
     redirections:
@@ -28,7 +32,8 @@ ports:
         scheme: https
         permanent: true
   websecure:
-    port: 443
+    http3:
+      enabled: true
     tls:
       enabled: true
 autoscaling:
@@ -47,4 +52,3 @@ service:
   type: LoadBalancer
   spec:
     loadBalancerIP: "172.21.8.100"
-  loadBalancerSourceRanges: []

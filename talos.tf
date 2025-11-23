@@ -6,6 +6,37 @@ locals {
 
 resource "talos_machine_secrets" "this" {}
 
+
+data "talos_image_factory_extensions_versions" "this" {
+  talos_version = "v1.11.5"
+  filters = {
+    names = [
+      "qemu-guest-agent",
+      "iscsi-tools",
+      "util-linux-tools"
+    ]
+  }
+}
+
+resource "talos_image_factory_schematic" "this" {
+  schematic = yamlencode(
+    {
+      customization = {
+        systemExtensions = {
+          officialExtensions = data.talos_image_factory_extensions_versions.this.extensions_info.*.name
+        }
+      }
+    }
+  )
+}
+
+data "talos_image_factory_urls" "this" {
+  talos_version = "1.11.5"
+  schematic_id  = talos_image_factory_schematic.this.id
+  platform      = "nocloud"
+  architecture  = "amd64"
+}
+
 data "talos_machine_configuration" "controlplanes_config" {
     cluster_name = local.cluster_name
     cluster_endpoint = "https://${local.k8s_api_vip}:${local.k8s_api_port}"
@@ -37,7 +68,16 @@ resource "talos_machine_configuration_apply" "controlplanes_config_apply" {
     yamlencode({
       machine = {
         install = {
+          image = "${data.talos_image_factory_urls.this.urls.installer}"
           disk = "/dev/vda"
+        }
+        kubelet = {
+          extraMounts = [{
+            destination = "/var/lib/longhorn"
+            type = "bind"
+            source = "/var/lib/longhorn"
+            options = ["bind", "rshared", "rw"]
+          }]
         }
         network = {
           hostname = each.key
@@ -65,7 +105,16 @@ resource "talos_machine_configuration_apply" "workers_config_apply" {
     yamlencode({
       machine = {
         install = {
+          image = "${data.talos_image_factory_urls.this.urls.installer}"
           disk = "/dev/vda"
+        }
+        kubelet = {
+          extraMounts = [{
+            destination = "/var/lib/longhorn"
+            type = "bind"
+            source = "/var/lib/longhorn"
+            options = ["bind", "rshared", "rw"]
+          }]
         }
         network = {
           hostname = each.key
@@ -90,7 +139,7 @@ resource "talos_cluster_kubeconfig" "this" {
 }
 
 data "talos_cluster_health" "this" {
-  depends_on = [talos_machine_bootstrap.this]
+  depends_on = [talos_machine_bootstrap.this, talos_cluster_kubeconfig.this]
   
   client_configuration = talos_machine_secrets.this.client_configuration
   control_plane_nodes = [for k, v in local.cluster_nodes : v.ipv4 if v.type.k8s_role == "control-plane"] 

@@ -19,3 +19,19 @@ variable "insecure" {
   description = "Whether to use an insecure tls connection"
   type = bool
 }
+
+variable "cloudflare_token" {
+  description = "Token with permissions to manage DNS records for the managed domain in cloudflare"
+  type = string
+  sensitive = true
+}
+
+variable "acme_email" {
+  description = "Email for registering for an ACME account (Let's Encrypt)"
+  type = string
+}
+
+variable "base_public_domain" {
+  description = "Domain for publicly exposing services (example.com)"
+  type = string
+}

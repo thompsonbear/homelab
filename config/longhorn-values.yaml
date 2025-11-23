@@ -1,0 +1,60 @@
+image:
+  longhorn:
+    engine:
+      repository: longhornio/longhorn-engine
+      tag: v1.10.1
+    manager:
+      repository: longhornio/longhorn-manager
+      tag: v1.10.1
+    ui:
+      repository: longhornio/longhorn-ui
+      tag: v1.10.1
+    instanceManager:
+      repository: longhornio/longhorn-instance-manager
+      tag: v1.10.1
+    shareManager:
+      repository: longhornio/longhorn-share-manager
+      tag: v1.10.1
+    backingImageManager:
+      repository: longhornio/backing-image-manager
+      tag: v1.10.1
+    supportBundleKit:
+      repository: longhornio/support-bundle-kit
+      tag: v0.0.71
+  csi:
+    attacher:
+      repository: longhornio/csi-attacher
+      tag: v4.10.0-20251030
+    provisioner:
+      repository: longhornio/csi-provisioner
+      tag: v5.3.0-20251030
+    nodeDriverRegistrar:
+      repository: longhornio/csi-node-driver-registrar
+      tag: v2.15.0-20251030
+    resizer:
+      repository: longhornio/csi-resizer
+      tag: v1.14.0-20251030
+    snapshotter:
+      repository: longhornio/csi-snapshotter
+      tag: v8.4.0-20251030
+    livenessProbe:
+      repository: longhornio/livenessprobe
+      tag: v2.17.0-20251030
+  pullPolicy: IfNotPresent
+persistence:
+  defaultClass: true
+  defaultClassReplicaCount: 2
+  migratable: true
+  snapshotterReplicaCount: ~
+longhornUI:
+  replicas: 2
+ingress:
+  enabled: true
+  ingressClassName: traefik
+  host: longhorn.bear.fyi
+  tls: true
+  secureBackends: true
+  tlsSecret: longhorn-bear-fyi
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+
