@@ -1,0 +1,12 @@
+replicaCount: 2
+image:
+  repository: ghcr.io/cloudnative-pg/cloudnative-pg
+  pullPolicy: IfNotPresent
+  tag: "1.27.1"
+serviceAccount:
+  create: true
+  name: "cnpg-svc"
+service:
+  type: ClusterIP
+  name: cnpg-webhook-service # DO NOT CHANGE
+  port: 443

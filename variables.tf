@@ -35,3 +35,9 @@ variable "base_public_domain" {
   description = "Domain for publicly exposing services (example.com)"
   type = string
 }
+
+variable "keycloak_admin_password" {
+  description = "Password for administrating Keycloak OIDC"
+  type = string
+  sensitive = true
+}

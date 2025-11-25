@@ -40,7 +40,7 @@ provider "talos" {}
 
 provider "helm" {
   kubernetes = {
-    host = "https://172.21.8.11:6443/" # talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
+    host = talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
     ca_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)
     client_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)
     client_key = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)
@@ -49,9 +49,8 @@ provider "helm" {
 }
 
 provider "kubectl" {
-    host = "https://172.21.8.11:6443/" #talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
+    host = talos_cluster_kubeconfig.this.kubernetes_client_configuration.host
     cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)
     client_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)
     client_key = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)
-    # insecure = var.insecure
 }

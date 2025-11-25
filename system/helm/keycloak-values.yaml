@@ -1,0 +1,61 @@
+image:
+  registry: docker.io
+  repository: keycloak/keycloak
+  tag: "26.4.5@sha256:653852bfdea2be6e958b9e90a976eff1c6de34edd55f2f679bdc48ef16bc528e"
+  imagePullPolicy: IfNotPresent
+replicaCount: 2
+keycloak:
+  adminUser: admin
+  existingSecret: "keycloak-admin-password"
+  secretKeys:
+    adminPasswordKey: "password"
+  hostname: "auth.bear.fyi"
+  hostnameStrict: true
+  httpEnabled: false
+  production: true
+tls:
+  enabled: true
+  certManager:
+    enabled: true
+    issuerRef:
+      name: "letsencrypt-staging"
+      kind: ClusterIssuer
+      group: cert-manager.io
+    secretName: "auth-bear-fyi"
+database:
+  type: postgres
+  host: keycloak-cnpg-cluster-rw
+  port: "5432"
+  name: keycloak
+  existingSecret: keycloak-cnpg-cluster-app
+  secretKeys:
+    passwordKey: "password"
+    usernameKey: "username"
+service:
+  type: ClusterIP
+  httpPort: 80
+  httpsPort: 443
+  httpTargetPort: 8080
+  httpsTargetPort: 8443
+ingress:
+  enabled: true
+  className: "traefik"
+  hosts:
+    - host: auth.bear.fyi
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: auth-bear-fyi
+      hosts:
+        - auth.bear.fyi
+persistence:
+  enabled: false
+serviceAccount:
+  create: true
+  name: "keycloak-svc"
+postgres:
+  enabled: false
+mariadb:
+  enabled: false
+
