@@ -1,0 +1,66 @@
+replicaCount: 2
+ejbca:
+  configdumpImport:
+    configMapKey: null
+    configMapName: null
+    enabled: false
+    initialize: false
+    inlineConfigdump: null
+  env:
+    LOG_AUDIT_TO_DB: true
+    LOG_LEVEL_APP: INFO
+    LOG_LEVEL_SERVER: INFO
+    METRICS_ENABLED: false
+    TLS_SETUP_ENABLED: later
+  envRaw:
+    - name: DATABASE_JDBC_URL
+      valueFrom:
+        secretKeyRef:
+          name: ejbca-cnpg-cluster-app
+          key: jdbc-uri
+    - name: DATABASE_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: ejbca-cnpg-cluster-app
+          key: password
+    - name: DATABASE_USER
+      valueFrom:
+        secretKeyRef:
+          name: ejbca-cnpg-cluster-app
+          key: username
+  importEjbcaConfFiles: false
+image:
+  pullPolicy: IfNotPresent
+  repository: keyfactor/ejbca-ce
+  tag: 9.1.1
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+  className: traefik
+  enabled: true
+  hosts:
+    - host: "ejbca.bear.fyi"
+      paths:
+        - path: /ejbca
+          pathType: Prefix
+  tls:
+    - hosts:
+        - ejbca.bear.fyi
+      secretName: ejbca-bear-fyi
+podDisruptionBudget:
+  create: true
+  minAvailable: 1
+serviceAnnotations:
+  traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+  traefik.ingress.kubernetes.io/service.sticky.cookie.name: "ejbcaCOOKIE"
+  traefik.ingress.kubernetes.io/service.sticky.cookie.maxAge: "172800"
+serviceAccount:
+  create: true
+  name: "ejbca-svc"
+services:
+  proxyHttp:
+    bindIP: 0.0.0.0
+    enabled: true
+    httpPort: 8081
+    httpsPort: 8082
+    type: ClusterIP

@@ -84,6 +84,18 @@ locals {
         instances = 2
       }
     }
+    ejbca = {
+      app_role = "service"
+      namespace = "ejbca"
+      chart_repo = "oci://repo.keyfactor.com/charts"
+      chart_name = "ejbca-ce"
+      chart_version = "9.1.1"
+      db = {
+        size = "10Gi"
+        wal = "1Gi"
+        instances = 2
+      }
+    }
   }
 
   # Manifests that need to be applied before other resources are created - ex. Secrets
@@ -116,7 +128,7 @@ locals {
 
   # Group flattened manifests so they may be applied in order by app_role
   post_install_manifests_by_role = {
-    for role in app_roles :
+    for role in local.app_roles :
     role => {
       for m in local.flattened_post_install_manifests :
       m.id => {
