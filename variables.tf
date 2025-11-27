@@ -1,43 +1,44 @@
 variable "pm_api_token_id" {
   description = "Proxmox API Token ID"
-  type = string
+  type        = string
 }
 
 variable "pm_api_token_secret" {
   description = "Proxmox API Token Secret"
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
 variable "ui_api_key" {
   description = "Unifi API Key (Network > Settings > Control Plane > Integrations)"
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
 variable "insecure" {
   description = "Whether to use an insecure tls connection"
-  type = bool
+  type        = bool
 }
 
 variable "cloudflare_token" {
   description = "Token with permissions to manage DNS records for the managed domain in cloudflare"
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
 
 variable "acme_email" {
   description = "Email for registering for an ACME account (Let's Encrypt)"
-  type = string
+  type        = string
 }
 
 variable "base_public_domain" {
   description = "Domain for publicly exposing services (example.com)"
-  type = string
+  type        = string
 }
 
 variable "keycloak_admin_password" {
   description = "Password for administrating Keycloak OIDC"
-  type = string
-  sensitive = true
+  type        = string
+  sensitive   = true
 }
+
