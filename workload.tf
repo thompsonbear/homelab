@@ -9,7 +9,7 @@ resource "kubectl_manifest" "create_namespaces" {
   })
 }
 
-# Apply all crds located in ./system/crds
+# Apply all crds located in ./crds
 # Required for any custom resources to be applied by the pre_apply_system_manifests resource
 resource "kubectl_manifest" "pre_apply_crds" {
   depends_on = [data.talos_cluster_health.this]
@@ -19,7 +19,7 @@ resource "kubectl_manifest" "pre_apply_crds" {
 }
 
 # Apply manifests that are required before other resources are created
-# If a custom resource is used, the crd must be added to ./system/crds
+# If a custom resource is used, the crd must be added to ./crds
 resource "kubectl_manifest" "pre_apply_manifests" {
   depends_on = [data.talos_cluster_health.this, kubectl_manifest.create_namespaces, kubectl_manifest.pre_apply_crds]
   for_each   = local.workload.pre_install_manifests
