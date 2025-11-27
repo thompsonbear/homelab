@@ -84,7 +84,7 @@ resource "helm_release" "storage_charts" {
   ]
 }
 resource "kubectl_manifest" "storage_manifests" {
-  depends_on = [data.talos_cluster_health.this, helm_release.install_storage_charts]
+  depends_on = [data.talos_cluster_health.this, helm_release.storage_charts]
   for_each   = try(local.workload.storage.manifests, {})
   yaml_body  = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
