@@ -19,7 +19,7 @@ api:
   dashboard: false
 providers:
   kubernetesCRD:
-    enabled: false
+    enabled: true
   kubernetesIngress:
     enabled: true
     allowExternalNameServices: true

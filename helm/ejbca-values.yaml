@@ -36,17 +36,18 @@ image:
 ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-staging
+    traefik.ingress.kubernetes.io/router.middlewares: ejbca-oauth2-proxy-errors@kubernetescrd,ejbca-oauth2-proxy-forwardauth@kubernetescrd
   className: traefik
   enabled: true
   hosts:
     - host: "ejbca.bear.fyi"
       paths:
-        - path: /ejbca
+        - path: /
           pathType: Prefix
   tls:
     - hosts:
         - ejbca.bear.fyi
-      secretName: ejbca-bear-fyi
+      secretName: ejbca-tls
 podDisruptionBudget:
   create: true
   minAvailable: 1

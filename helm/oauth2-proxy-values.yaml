@@ -1,0 +1,19 @@
+image:
+  registry: "quay.io"
+  repository: "oauth2-proxy/oauth2-proxy"
+  tag: "v7.13.0"
+  pullPolicy: "IfNotPresent"
+ingress:
+  enabled: true
+  className: traefik
+  path: /oauth2/
+httpScheme: http
+replicaCount: 2
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+initContainers:
+  waitForRedis:
+    enabled: false
+sessionStorage:
+  type: cookie

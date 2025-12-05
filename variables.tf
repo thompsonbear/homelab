@@ -42,3 +42,41 @@ variable "keycloak_admin_password" {
   sensitive   = true
 }
 
+variable "oauth2_proxy_client_secret" {
+  description = "Client Secret for oauth2-proxy"
+  type        = string
+  sensitive   = true
+}
+
+variable "oauth2_proxy_cookie_secret" {
+  description = "Cookie Secret for oauth2-proxy"
+  type        = string
+  sensitive   = true
+}
+
+variable "grafana_username" {
+  description = "Grafana admin username"
+  type        = string
+}
+
+variable "grafana_password" {
+  description = "Grafana admin password"
+  type        = string
+  sensitive   = true
+}
+
+variable "entra_client_id" {
+  description = "Microsoft Entra App Registration Client ID (Application ID)"
+  type = string
+}
+
+variable "entra_client_secret" {
+  description = "Microsoft Entra App Registration Client Secret"
+  type = string
+  sensitive = true
+}
+
+variable "entra_tenant_id" {
+  description = "Microsoft Entra Tenant ID"
+  type = string
+}

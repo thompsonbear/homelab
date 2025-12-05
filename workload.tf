@@ -1,7 +1,13 @@
+# Generate a random admin password for breakglass management/deployment
+resource "random_password" "admin_password" {
+  length  = 32
+  special = true
+}
+
 # Create privileged namespaces for all charts
 resource "kubectl_manifest" "create_namespaces" {
   depends_on = [data.talos_cluster_health.this]
-  for_each   = merge(local.workload.core.charts, local.workload.ingress.charts, local.workload.storage.charts, local.workload.app.charts)
+  for_each   = merge(local.workload.core, local.workload.ingress, local.workload.storage, local.workload.idp, local.workload.app)
 
   yaml_body = templatefile("./templates/privileged-namespace.yaml.tmpl", {
     namespace = each.value.namespace
@@ -21,16 +27,16 @@ resource "kubectl_manifest" "pre_apply_crds" {
 # Apply manifests that are required before other resources are created
 # If a custom resource is used, the crd must be added to ./crds
 resource "kubectl_manifest" "pre_apply_manifests" {
-  depends_on = [data.talos_cluster_health.this, kubectl_manifest.create_namespaces, kubectl_manifest.pre_apply_crds]
-  for_each   = local.workload.pre_install_manifests
+  depends_on = [kubectl_manifest.create_namespaces, kubectl_manifest.pre_apply_crds]
+  for_each   = local.pre_install_manifests
 
   yaml_body = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
 
 # ---- Install core workloads -----
 resource "helm_release" "core_charts" {
-  depends_on = [data.talos_cluster_health.this, kubectl_manifest.pre_apply_manifests]
-  for_each   = local.workload.core.charts
+  depends_on = [kubectl_manifest.pre_apply_manifests]
+  for_each   = local.workload.core
 
   name       = each.key
   namespace  = each.value.namespace
@@ -42,16 +48,16 @@ resource "helm_release" "core_charts" {
   ]
 }
 resource "kubectl_manifest" "core_manifests" {
-  depends_on = [data.talos_cluster_health.this, helm_release.core_charts]
-  for_each   = try(local.workload.core.manifests, {})
+  depends_on = [helm_release.core_charts]
+  for_each   = local.core_manifests
   yaml_body  = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
 
 
 # ---- Install ingress workloads -----
 resource "helm_release" "ingress_charts" {
-  depends_on = [data.talos_cluster_health.this, kubectl_manifest.core_manifests]
-  for_each   = local.workload.ingress.charts
+  depends_on = [kubectl_manifest.core_manifests]
+  for_each   = local.workload.ingress
 
   name       = each.key
   namespace  = each.value.namespace
@@ -63,16 +69,16 @@ resource "helm_release" "ingress_charts" {
   ]
 }
 resource "kubectl_manifest" "ingress_manifests" {
-  depends_on = [data.talos_cluster_health.this, helm_release.ingress_charts]
-  for_each   = try(local.workload.ingress.manifests, {})
+  depends_on = [helm_release.ingress_charts]
+  for_each   = local.ingress_manifests
   yaml_body  = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
 
 
 # ---- Install storage workloads -----
 resource "helm_release" "storage_charts" {
-  depends_on = [data.talos_cluster_health.this, kubectl_manifest.ingress_manifests]
-  for_each   = local.workload.storage.charts
+  depends_on = [kubectl_manifest.ingress_manifests]
+  for_each   = local.workload.storage
 
   name       = each.key
   namespace  = each.value.namespace
@@ -84,55 +90,40 @@ resource "helm_release" "storage_charts" {
   ]
 }
 resource "kubectl_manifest" "storage_manifests" {
-  depends_on = [data.talos_cluster_health.this, helm_release.storage_charts]
-  for_each   = try(local.workload.storage.manifests, {})
+  depends_on = [helm_release.storage_charts]
+  for_each   = local.storage_manifests
   yaml_body  = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
 
+# ---- workload-data.tf - init db/kv clusters -----
 
-# Create and init a database for any database dependent apps
-resource "helm_release" "cnpg-clusters" {
-  depends_on = [data.talos_cluster_health.this, kubectl_manifest.storage_manifests]
-  for_each   = { for k, v in local.workload.app.charts : k => v if can(v["db"]) }
+# ---- Install idp workloads -----
+resource "helm_release" "idp_charts" {
+  depends_on = [time_sleep.wait_120s_for_db_init, helm_release.kv_clusters]
+  for_each   = local.workload.idp
 
-  name       = "${each.key}-cnpg-cluster"
+  name       = each.key
   namespace  = each.value.namespace
-  repository = "https://cloudnative-pg.github.io/charts"
-  chart      = "cluster"
-  version    = "0.3.1"
+  repository = each.value.chart_repo
+  chart      = each.value.chart_name
+  version    = each.value.chart_version
+  set        = try(each.value.set, [])
   values = [
-    file("./helm/cnpg-cluster-values.yaml")
-  ]
-  set = [
-    {
-      name  = "cluster.initdb.database"
-      value = each.key
-    },
-    {
-      name  = "cluster.instances"
-      value = each.value.db.instances
-    },
-    {
-      name  = "cluster.storage.size"
-      value = each.value.db.size
-    },
-    {
-      name  = "cluster.walStorage.size"
-      value = each.value.db.wal
-    },
+    file("./helm/${each.key}-values.yaml")
   ]
 }
-resource "time_sleep" "wait_120s_for_db_init" {
-  depends_on = [helm_release.cnpg-clusters]
-
-  create_duration = "120s"
+resource "kubectl_manifest" "idp_manifests" {
+  depends_on = [helm_release.idp_charts]
+  for_each   = local.idp_manifests
+  yaml_body  = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
 
+# ---- workload-idp.tf - create idp oauth clients/proxies
 
 # ---- Install app workloads -----
 resource "helm_release" "app_charts" {
-  depends_on = [data.talos_cluster_health.this, time_sleep.wait_120s_for_db_init]
-  for_each   = local.workload.app.charts
+  depends_on = [time_sleep.wait_120s_for_db_init, helm_release.kv_clusters]
+  for_each   = local.workload.app
 
   name       = each.key
   namespace  = each.value.namespace
@@ -145,7 +136,7 @@ resource "helm_release" "app_charts" {
 }
 resource "kubectl_manifest" "app_manifests" {
   depends_on = [data.talos_cluster_health.this, helm_release.app_charts]
-  for_each   = try(local.workload.app.manifests, {})
+  for_each   = local.app_manifests
   yaml_body  = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
 

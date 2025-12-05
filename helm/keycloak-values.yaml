@@ -5,10 +5,7 @@ image:
   imagePullPolicy: IfNotPresent
 replicaCount: 2
 keycloak:
-  adminUser: admin
-  existingSecret: "keycloak-admin-password"
-  secretKeys:
-    adminPasswordKey: "password"
+  adminUser: bear-admin
   hostname: "auth.bear.fyi"
   hostnameStrict: true
   httpEnabled: false

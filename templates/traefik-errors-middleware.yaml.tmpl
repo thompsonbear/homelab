@@ -1,0 +1,16 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: ${name}
+  namespace: ${namespace}
+spec:
+  errors:
+    status:
+      - "401-403"
+    statusRewrites:
+      "401": 302
+    query: /oauth2/sign_in?rd={url}
+    service:
+      name: ${key}-oauth2-proxy
+      namespace: ${namespace}
+      port: 80

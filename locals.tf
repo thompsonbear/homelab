@@ -28,128 +28,168 @@ locals {
 
   kube_endpoint = "https://${local.cluster.vip}:6443"
 
-  # Workloads to run in the cluster
+  # These manifests are installed before any other applications
+  pre_install_manifests = {
+    cloudflare_token_secret = {
+      template_file = "cloudflare-token-secret.yaml.tmpl"
+      vars = {
+        cloudflare_token = var.cloudflare_token
+      }
+    }
+  }
+
   workload = {
-    # These manifests are installed before any other applications
-    pre_install_manifests = {
-      keycloak_admin_password = {
-        template_file = "keycloak-admin-password.yaml.tmpl"
-        vars = {
-          password = var.keycloak_admin_password
-        }
-      }
-      cloudflare_token_secret = {
-        template_file = "cloudflare-token-secret.yaml.tmpl"
-        vars = {
-          cloudflare_token = var.cloudflare_token
-        }
-      }
-    }
-    # Core charts and manifests installed first as they have no dependencies
     core = {
-      charts = {
-        cnpg-operator = {
-          namespace     = "cnpg"
-          chart_repo    = "https://cloudnative-pg.github.io/charts"
-          chart_name    = "cloudnative-pg"
-          chart_version = "0.26.1"
-        }
-        metallb = {
-          namespace     = "metallb",
-          chart_repo    = "https://metallb.github.io/metallb"
-          chart_name    = "metallb"
-          chart_version = "0.15.2"
-        }
-        cert-manager = {
-          namespace     = "cert-manager"
-          chart_repo    = "https://charts.jetstack.io"
-          chart_name    = "cert-manager"
-          chart_version = "1.19.1"
+      cnpg-operator = {
+        namespace     = "cnpg"
+        privileged    = true
+        chart_repo    = "https://cloudnative-pg.github.io/charts"
+        chart_name    = "cloudnative-pg"
+        chart_version = "0.26.1"
+
+      }
+      metallb = {
+        namespace     = "metallb",
+        privileged    = true
+        chart_repo    = "https://metallb.github.io/metallb"
+        chart_name    = "metallb"
+        chart_version = "0.15.2"
+        manifests = {
+          ipaddresspool = {
+            template_file = "ipaddresspool-metallb.yaml.tmpl"
+            vars = {
+              name       = "bear-pool"
+              pool_range = "172.21.8.100-172.21.8.199"
+            }
+          }
+          l2advertisement = {
+            template_file = "l2advertisement-metallb.yaml.tmpl"
+            vars = {
+              name       = "bear-pool"
+              pool_range = "172.21.8.100-172.21.8.199"
+            }
+          }
         }
       }
-      manifests = {
-        ipaddresspool = {
-          template_file = "ipaddresspool-metallb.yaml.tmpl"
-          vars = {
-            name       = "bear-pool"
-            pool_range = "172.21.8.100-172.21.8.199"
+      cert-manager = {
+        namespace     = "cert-manager"
+        privileged    = true
+        chart_repo    = "https://charts.jetstack.io"
+        chart_name    = "cert-manager"
+        chart_version = "1.19.1"
+        manifests = {
+          letsencrypt_staging = {
+            template_file = "letsencrypt-clusterissuer.yaml.tmpl"
+            vars = {
+              name               = "staging"
+              acme_email         = var.acme_email
+              base_public_domain = var.base_public_domain
+              server             = "https://acme-staging-v02.api.letsencrypt.org/directory"
+            }
           }
-        }
-        l2advertisement = {
-          template_file = "l2advertisement-metallb.yaml.tmpl"
-          vars = {
-            name       = "bear-pool"
-            pool_range = "172.21.8.100-172.21.8.199"
-          }
-        }
-        letsencrypt_staging = {
-          template_file = "letsencrypt-clusterissuer.yaml.tmpl"
-          vars = {
-            name               = "staging"
-            acme_email         = var.acme_email
-            base_public_domain = var.base_public_domain
-            server             = "https://acme-staging-v02.api.letsencrypt.org/directory"
-          }
-        }
-        letsencrypt_prod = {
-          template_file = "letsencrypt-clusterissuer.yaml.tmpl"
-          vars = {
-            name               = "prod"
-            acme_email         = var.acme_email
-            base_public_domain = var.base_public_domain
-            server             = "https://acme-v02.api.letsencrypt.org/directory"
+          letsencrypt_prod = {
+            template_file = "letsencrypt-clusterissuer.yaml.tmpl"
+            vars = {
+              name               = "prod"
+              acme_email         = var.acme_email
+              base_public_domain = var.base_public_domain
+              server             = "https://acme-v02.api.letsencrypt.org/directory"
+            }
           }
         }
       }
     }
-    # Ingress workload(s) that is/are dependant on core workloads
     ingress = {
-      charts = {
-        traefik = {
-          namespace     = "traefik"
-          chart_repo    = "https://traefik.github.io/charts"
-          chart_name    = "traefik"
-          chart_version = "37.3.0"
-        }
+      traefik = {
+        namespace     = "traefik"
+        privileged    = true
+        chart_repo    = "https://traefik.github.io/charts"
+        chart_name    = "traefik"
+        chart_version = "37.3.0"
       }
     }
-    # Storage workload(s) that is/are dependant on ingress and core workloads
     storage = {
-      charts = {
-        longhorn = {
-          namespace     = "longhorn-system"
-          chart_repo    = "https://charts.longhorn.io"
-          chart_name    = "longhorn"
-          chart_version = "1.10.1"
+      longhorn = {
+        namespace     = "longhorn-system"
+        privileged    = true
+        chart_repo    = "https://charts.longhorn.io"
+        chart_name    = "longhorn"
+        chart_version = "1.10.1"
+        oauth = {
+          proxy = true
+          fqdn  = "longhorn.bear.fyi"
         }
       }
     }
-    # Final deployed workloads with optional database init - the db key can be omitted if a database isn't required for the app
-    app = {
-      charts = {
-        keycloak = {
-          namespace     = "keycloak"
-          chart_repo    = "oci://registry-1.docker.io/cloudpirates"
-          chart_name    = "keycloak"
-          chart_version = "0.8.7"
-          db = {
-            size      = "5Gi"
-            wal       = "0.5Gi"
-            instances = 2
-          }
+    idp = {
+      keycloak = {
+        namespace     = "keycloak"
+        privileged    = false
+        chart_repo    = "oci://registry-1.docker.io/cloudpirates"
+        chart_name    = "keycloak"
+        chart_version = "0.8.7"
+        db = {
+          size      = "10Gi"
+          wal       = "5Gi"
+          instances = 2
         }
-        ejbca = {
-          namespace     = "ejbca"
-          chart_repo    = "oci://repo.keyfactor.com/charts"
-          chart_name    = "ejbca-ce"
-          chart_version = "9.1.1"
-          db = {
-            size      = "10Gi"
-            wal       = "1Gi"
-            instances = 2
-          }
+        set = [{
+          name  = "keycloak.adminPassword"
+          value = random_password.admin_password.result
+        }]
+      }
+    }
+    app = {
+      ejbca = {
+        namespace     = "ejbca"
+        privileged    = false
+        chart_repo    = "oci://repo.keyfactor.com/charts"
+        chart_name    = "ejbca-ce"
+        chart_version = "9.1.1"
+        db = {
+          size      = "10Gi"
+          wal       = "1Gi"
+          instances = 2
+        }
+        oauth = {
+          proxy = true
+          fqdn  = "ejbca.bear.fyi"
         }
       }
     }
   }
+
+  all_workloads = merge(local.workload.core, local.workload.ingress, local.workload.storage, local.workload.idp, local.workload.app)
+
+  manifests = merge([
+    for group, group_items in local.workload : merge([
+      for workload_key, workload_item in group_items :
+      (
+        can(workload_item.manifests)
+        ? {
+          for manifest_key, manifest in workload_item.manifests :
+          "${workload_key}.${manifest_key}" => merge(
+            manifest,
+            {
+              group         = group
+              template_file = manifest.template_file
+              vars          = manifest.vars
+            }
+          )
+        }
+        : {}
+      )
+    ]...)
+  ]...)
+  core_manifests    = { for k, v in local.manifests : k => v if v.group == "core" }
+  ingress_manifests = { for k, v in local.manifests : k => v if v.group == "ingress" }
+  storage_manifests = { for k, v in local.manifests : k => v if v.group == "storage" }
+  idp_manifests     = { for k, v in local.manifests : k => v if v.group == "idp" }
+  app_manifests     = { for k, v in local.manifests : k => v if v.group == "app" }
+
+  oauth_workloads       = { for k, v in local.all_workloads : k => v if can(v["oauth"]) }
+  oauth_proxy_workloads = { for k, v in local.oauth_workloads : k => v if v.oauth.proxy }
+
+  kv_apps = { for k, v in local.all_workloads : k => v if can(v["kv"]) }
+  db_apps = { for k, v in local.all_workloads : k => v if can(v["db"]) }
 }

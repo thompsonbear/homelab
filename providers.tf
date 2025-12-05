@@ -20,6 +20,14 @@ terraform {
       source  = "hashicorp/helm"
       version = "3.1.1"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "3.7.2"
+    }
+    keycloak = {
+      source  = "keycloak/keycloak"
+      version = "5.5.0"
+    }
   }
 }
 
@@ -53,4 +61,13 @@ provider "kubectl" {
   cluster_ca_certificate = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.ca_certificate)
   client_certificate     = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_certificate)
   client_key             = base64decode(talos_cluster_kubeconfig.this.kubernetes_client_configuration.client_key)
+}
+
+provider "keycloak" {
+  client_id                = "admin-cli"
+  username                 = "bear-admin"
+  password                 = random_password.admin_password.result
+  url                      = "https://auth.bear.fyi"
+  initial_login            = false
+  tls_insecure_skip_verify = var.insecure
 }

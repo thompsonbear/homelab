@@ -57,4 +57,5 @@ ingress:
   tlsSecret: longhorn-bear-fyi
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-staging
+    traefik.ingress.kubernetes.io/router.middlewares: longhorn-system-oauth2-proxy-errors@kubernetescrd,longhorn-system-oauth2-proxy-forwardauth@kubernetescrd
 

@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  oauth2_proxy.cfg: |
+    provider = "keycloak-oidc"
+    redirect_url = "${redirect_url}"
+    oidc_issuer_url = "https://auth.bear.fyi/realms/bear"
+    skip_provider_button = true
+    cookie_expire = "5m"
+    cookie_refresh = "2m30s"
+    reverse_proxy = true
+    email_domains = [ "*" ]
+    allowed_roles = ${allowed_roles}
+    ssl_insecure_skip_verify = ${insecure}
+kind: ConfigMap
+metadata:
+  name: ${name}
+  namespace: ${namespace}

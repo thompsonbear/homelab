@@ -1,0 +1,7 @@
+image:
+  registry: docker.io
+  repository: valkey/valkey
+  tag: "9.0.0-alpine3.22@sha256:b4ee67d73e00393e712accc72cfd7003b87d0fcd63f0eba798b23251bfc9c394"
+persistence:
+  enabled: true
+  storageClass: "longhorn"
