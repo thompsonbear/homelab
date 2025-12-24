@@ -200,6 +200,12 @@ locals {
           value = "smtps://apikey:${var.sendgrid_api_key}@smtp.sendgrid.net:465"
         }]
       }
+      home-assistant = {
+        namespace = "home-assistant"
+        chart_repo    = "https://pajikos.github.io/home-assistant-helm-chart/"
+        chart_name    = "home-assistant"
+        chart_version = "0.3.36"
+      }
     }
   }
 
