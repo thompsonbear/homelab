@@ -190,6 +190,16 @@ locals {
           instances = 2
         }
       }
+      bluesky-pds = {
+        namespace = "bluesky-pds"
+        chart_repo    = "https://charts.bear.fyi"
+        chart_name    = "bluesky-pds"
+        chart_version = "0.4.193"
+        set = [{
+          name = "pds.config.secrets.emailSmtpUrl"
+          value = "smtps://apikey:${var.sendgrid_api_key}@smtp.sendgrid.net:465"
+        }]
+      }
     }
   }
 

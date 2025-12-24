@@ -51,3 +51,9 @@ variable "entra_tenant_id" {
   description = "Microsoft Entra Tenant ID"
   type        = string
 }
+
+variable "sendgrid_api_key" {
+  description = "Sendgrid API Key for SMTP"
+  type        = string
+  sensitive   = true
+}

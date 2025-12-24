@@ -1,0 +1,27 @@
+pds:
+  config:
+    hostname: "pds.bear.fyi"
+    emailFromAddress: "pds@bear.fyi"
+  dataStorage:
+    size: 20Gi
+    mountPath: "/pds"
+    storageClass: "longhorn"
+serviceAccount:
+  create: true
+  annotations: {}
+  name: "bluesky-pds-svc"
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+  hosts:
+  - host: pds.bear.fyi
+    paths:
+      - path: /
+        pathType: ImplementationSpecific
+  tls:
+  - secretName: bluesky-pds-tls
+    hosts:
+    - pds.bear.fyi
+
