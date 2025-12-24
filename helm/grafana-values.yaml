@@ -1,0 +1,78 @@
+serviceAccount:
+  create: true
+  name: "grafana-svc"
+replicas: 2
+image:
+  registry: docker.io
+  repository: grafana/grafana
+  tag: "12.3.0"
+  pullPolicy: IfNotPresent
+testFramework:
+  enabled: false
+downloadDashboardsImage:
+  registry: docker.io
+  repository: curlimages/curl
+  tag: 8.9.1
+  pullPolicy: IfNotPresent
+service:
+  enabled: true
+  type: ClusterIP
+  annotations:
+    traefik.ingress.kubernetes.io/service.sticky.cookie: "true"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.name: "grafana_session_sticky"
+    traefik.ingress.kubernetes.io/service.sticky.cookie.maxAge: "600"
+serviceMonitor:
+  enabled: true
+  path: /metrics
+  interval: 30s
+  scheme: http
+  scrapeTimeout: 30s
+ingress:
+  enabled: true 
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+  path: /
+  pathType: Prefix
+  hosts:
+    - grafana.bear.fyi
+  tls:
+   - secretName: grafana-tls
+     hosts:
+       - grafana.bear.fyi
+initChownData:
+  enabled: false
+datasources:
+ datasources.yaml:
+   apiVersion: 1
+   datasources:
+   - name: Prometheus
+     type: prometheus
+     url: http://prometheus-server.mon
+     access: proxy
+     isDefault: true
+useStatefulSet: true
+admin:
+  existingSecret: "grafana-admin-creds"
+  userKey: username
+  passwordKey: password
+grafana.ini:
+  server:
+    root_url: "https://grafana.bear.fyi"
+  auth.generic_oauth:
+    enabled: true
+    name: "Keycloak"
+    allow_sign_up: true
+    client_id: "grafana"
+    scopes: "openid email profile offline_access roles"
+    email_attribute_path: "email"
+    login_attribute_path: "username"
+    name_attribute_path: "full_name"
+    auth_url: https://auth.bear.fyi/realms/bear/protocol/openid-connect/auth
+    token_url: https://auth.bear.fyi/realms/bear/protocol/openid-connect/token
+    api_url: https://auth.bear.fyi/realms/bear/protocol/openid-connect/userinto
+    signout_redirect_url: https://auth.bear.fyi/realms/bear/protocol/openid-connect/logout
+    role_attribute_path: "contains(realm_access.roles[*], 'bear-admin') && 'GrafanaAdmin' || contains(resource_access.grafana.roles[*], 'admin') && 'Admin' || contains(resource_access.grafana.roles[*], 'editor') && 'Editor' || 'Viewer'"
+    role_attribute_strict: true
+    allow_assign_grafana_admin: true
+    use_refresh_token: true
+assertNoLeakedSecrets: false

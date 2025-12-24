@@ -4,15 +4,28 @@ resource "random_password" "admin_password" {
   special = true
 }
 
-# Create privileged namespaces for all charts
-resource "kubectl_manifest" "create_namespaces" {
+# Create privileged namespaces for all privileged charts
+resource "kubectl_manifest" "create_privileged_namespaces" {
   depends_on = [data.talos_cluster_health.this]
-  for_each   = merge(local.workload.core, local.workload.ingress, local.workload.storage, local.workload.idp, local.workload.app)
+  for_each   = local.privileged_workloads
 
   yaml_body = templatefile("./templates/privileged-namespace.yaml.tmpl", {
     namespace = each.value.namespace
     name      = "${each.key}-system"
   })
+}
+
+# Create normal namespaces for all non privileged charts
+resource "kubectl_manifest" "create_non_privileged_namespaces" {
+  depends_on = [data.talos_cluster_health.this]
+  for_each   = local.non_privileged_workloads
+
+  yaml_body = <<YAML
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ${each.value.namespace}
+YAML
 }
 
 # Apply all crds located in ./crds
@@ -27,10 +40,9 @@ resource "kubectl_manifest" "pre_apply_crds" {
 # Apply manifests that are required before other resources are created
 # If a custom resource is used, the crd must be added to ./crds
 resource "kubectl_manifest" "pre_apply_manifests" {
-  depends_on = [kubectl_manifest.create_namespaces, kubectl_manifest.pre_apply_crds]
+  depends_on = [kubectl_manifest.create_privileged_namespaces, kubectl_manifest.create_non_privileged_namespaces, kubectl_manifest.pre_apply_crds]
   for_each   = local.pre_install_manifests
-
-  yaml_body = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
+  yaml_body  = templatefile("./templates/${each.value.template_file}", { vars = each.value.vars })
 }
 
 # ---- Install core workloads -----
@@ -43,9 +55,10 @@ resource "helm_release" "core_charts" {
   repository = each.value.chart_repo
   chart      = each.value.chart_name
   version    = each.value.chart_version
-  values = [
+  set        = try(each.value.set, [])
+  values = try([
     file("./helm/${each.key}-values.yaml")
-  ]
+  ], [])
 }
 resource "kubectl_manifest" "core_manifests" {
   depends_on = [helm_release.core_charts]
@@ -64,9 +77,10 @@ resource "helm_release" "ingress_charts" {
   repository = each.value.chart_repo
   chart      = each.value.chart_name
   version    = each.value.chart_version
-  values = [
+  set        = try(each.value.set, [])
+  values = try([
     file("./helm/${each.key}-values.yaml")
-  ]
+  ], [])
 }
 resource "kubectl_manifest" "ingress_manifests" {
   depends_on = [helm_release.ingress_charts]
@@ -85,9 +99,10 @@ resource "helm_release" "storage_charts" {
   repository = each.value.chart_repo
   chart      = each.value.chart_name
   version    = each.value.chart_version
-  values = [
+  set        = try(each.value.set, [])
+  values = try([
     file("./helm/${each.key}-values.yaml")
-  ]
+  ], [])
 }
 resource "kubectl_manifest" "storage_manifests" {
   depends_on = [helm_release.storage_charts]
@@ -102,15 +117,16 @@ resource "helm_release" "idp_charts" {
   depends_on = [time_sleep.wait_120s_for_db_init, helm_release.kv_clusters]
   for_each   = local.workload.idp
 
-  name       = each.key
-  namespace  = each.value.namespace
-  repository = each.value.chart_repo
-  chart      = each.value.chart_name
-  version    = each.value.chart_version
-  set        = try(each.value.set, [])
-  values = [
+  name            = each.key
+  namespace       = each.value.namespace
+  repository      = each.value.chart_repo
+  chart           = each.value.chart_name
+  version         = each.value.chart_version
+  upgrade_install = true
+  set             = try(each.value.set, [])
+  values = try([
     file("./helm/${each.key}-values.yaml")
-  ]
+  ], [])
 }
 resource "kubectl_manifest" "idp_manifests" {
   depends_on = [helm_release.idp_charts]
@@ -122,17 +138,19 @@ resource "kubectl_manifest" "idp_manifests" {
 
 # ---- Install app workloads -----
 resource "helm_release" "app_charts" {
-  depends_on = [time_sleep.wait_120s_for_db_init, helm_release.kv_clusters]
+  depends_on = [time_sleep.wait_120s_for_db_init, helm_release.kv_clusters, kubectl_manifest.idp_manifests]
   for_each   = local.workload.app
 
-  name       = each.key
-  namespace  = each.value.namespace
-  repository = each.value.chart_repo
-  chart      = each.value.chart_name
-  version    = each.value.chart_version
-  values = [
+  name            = each.key
+  namespace       = each.value.namespace
+  repository      = each.value.chart_repo
+  chart           = each.value.chart_name
+  version         = each.value.chart_version
+  upgrade_install = true
+  values = try([
     file("./helm/${each.key}-values.yaml")
-  ]
+  ], [])
+  set = try(each.value.set, [])
 }
 resource "kubectl_manifest" "app_manifests" {
   depends_on = [data.talos_cluster_health.this, helm_release.app_charts]

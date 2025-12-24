@@ -28,16 +28,6 @@ locals {
 
   kube_endpoint = "https://${local.cluster.vip}:6443"
 
-  # These manifests are installed before any other applications
-  pre_install_manifests = {
-    cloudflare_token_secret = {
-      template_file = "cloudflare-token-secret.yaml.tmpl"
-      vars = {
-        cloudflare_token = var.cloudflare_token
-      }
-    }
-  }
-
   workload = {
     core = {
       cnpg-operator = {
@@ -78,6 +68,13 @@ locals {
         chart_name    = "cert-manager"
         chart_version = "1.19.1"
         manifests = {
+          cloudflare_token_secret = {
+            pre_install   = true
+            template_file = "cloudflare-token-secret.yaml.tmpl"
+            vars = {
+              cloudflare_token = var.cloudflare_token
+            }
+          }
           letsencrypt_staging = {
             template_file = "letsencrypt-clusterissuer.yaml.tmpl"
             vars = {
@@ -98,6 +95,12 @@ locals {
           }
         }
       }
+      prometheus-operator-crds = {
+        namespace     = "mon"
+        chart_repo    = "oci://ghcr.io/prometheus-community/charts"
+        chart_name    = "prometheus-operator-crds"
+        chart_version = "25.0.0"
+      }
     }
     ingress = {
       traefik = {
@@ -115,16 +118,13 @@ locals {
         chart_repo    = "https://charts.longhorn.io"
         chart_name    = "longhorn"
         chart_version = "1.10.1"
-        oauth = {
-          proxy = true
-          fqdn  = "longhorn.bear.fyi"
-        }
+        auth_type     = "oauth_proxy"
+        fqdn          = "longhorn.bear.fyi"
       }
     }
     idp = {
       keycloak = {
         namespace     = "keycloak"
-        privileged    = false
         chart_repo    = "oci://registry-1.docker.io/cloudpirates"
         chart_name    = "keycloak"
         chart_version = "0.8.7"
@@ -140,26 +140,62 @@ locals {
       }
     }
     app = {
+      prometheus = {
+        namespace     = "mon"
+        privileged    = true
+        chart_repo    = "oci://ghcr.io/prometheus-community/charts"
+        chart_name    = "prometheus"
+        chart_version = "27.50.0"
+        auth_type     = "oauth_proxy"
+        fqdn          = "prom.bear.fyi"
+      }
+      grafana = {
+        namespace     = "mon"
+        chart_repo    = "https://grafana.github.io/helm-charts"
+        chart_name    = "grafana"
+        chart_version = "10.3.0"
+        auth_type     = "oauth"
+        oauth_config = {
+          redirect_uris = ["https://grafana.bear.fyi/login/generic_oauth"]
+          client_secret = random_password.grafana_client_secret.result
+        }
+        manifests = {
+          grafana_admin_creds = {
+            pre_install   = true
+            template_file = "basic-auth.yaml.tmpl"
+            vars = {
+              name      = "grafana-admin-creds"
+              namespace = "mon"
+              username  = "bear-admin"
+              password  = random_password.admin_password.result
+            }
+          }
+
+        }
+        set = [{
+          name  = "grafana\\.ini.auth\\.generic_oauth.client_secret"
+          value = random_password.grafana_client_secret.result
+        }]
+      }
       ejbca = {
         namespace     = "ejbca"
-        privileged    = false
         chart_repo    = "oci://repo.keyfactor.com/charts"
         chart_name    = "ejbca-ce"
         chart_version = "9.1.1"
+        auth_type     = "oauth_proxy"
+        fqdn          = "ejbca.bear.fyi"
         db = {
           size      = "10Gi"
           wal       = "1Gi"
           instances = 2
         }
-        oauth = {
-          proxy = true
-          fqdn  = "ejbca.bear.fyi"
-        }
       }
     }
   }
 
-  all_workloads = merge(local.workload.core, local.workload.ingress, local.workload.storage, local.workload.idp, local.workload.app)
+  all_workloads            = merge(local.workload.core, local.workload.ingress, local.workload.storage, local.workload.idp, local.workload.app)
+  privileged_workloads     = { for k, v in local.all_workloads : k => v if can(v["privileged"]) ? v.privileged : false }
+  non_privileged_workloads = { for k, v in local.all_workloads : k => v if can(v["privileged"]) ? !v.privileged : true }
 
   manifests = merge([
     for group, group_items in local.workload : merge([
@@ -172,6 +208,7 @@ locals {
             manifest,
             {
               group         = group
+              pre_install   = try(manifest.pre_install, false)
               template_file = manifest.template_file
               vars          = manifest.vars
             }
@@ -181,14 +218,16 @@ locals {
       )
     ]...)
   ]...)
-  core_manifests    = { for k, v in local.manifests : k => v if v.group == "core" }
-  ingress_manifests = { for k, v in local.manifests : k => v if v.group == "ingress" }
-  storage_manifests = { for k, v in local.manifests : k => v if v.group == "storage" }
-  idp_manifests     = { for k, v in local.manifests : k => v if v.group == "idp" }
-  app_manifests     = { for k, v in local.manifests : k => v if v.group == "app" }
 
-  oauth_workloads       = { for k, v in local.all_workloads : k => v if can(v["oauth"]) }
-  oauth_proxy_workloads = { for k, v in local.oauth_workloads : k => v if v.oauth.proxy }
+  pre_install_manifests = { for k, v in local.manifests : k => v if v.pre_install == true }
+  core_manifests        = { for k, v in local.manifests : k => v if v.group == "core" && v.pre_install == false }
+  ingress_manifests     = { for k, v in local.manifests : k => v if v.group == "ingress" && v.pre_install == false }
+  storage_manifests     = { for k, v in local.manifests : k => v if v.group == "storage" && v.pre_install == false }
+  idp_manifests         = { for k, v in local.manifests : k => v if v.group == "idp" && v.pre_install == false }
+  app_manifests         = { for k, v in local.manifests : k => v if v.group == "app" && v.pre_install == false }
+
+  oauth_workloads       = { for k, v in local.all_workloads : k => v if can(v["auth_type"]) && v.auth_type == "oauth" }
+  oauth_proxy_workloads = { for k, v in local.all_workloads : k => v if can(v["auth_type"]) && v.auth_type == "oauth_proxy" }
 
   kv_apps = { for k, v in local.all_workloads : k => v if can(v["kv"]) }
   db_apps = { for k, v in local.all_workloads : k => v if can(v["db"]) }

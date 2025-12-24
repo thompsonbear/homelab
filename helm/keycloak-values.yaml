@@ -15,7 +15,7 @@ tls:
   certManager:
     enabled: true
     issuerRef:
-      name: "letsencrypt-staging"
+      name: "letsencrypt-prod"
       kind: ClusterIssuer
       group: cert-manager.io
     secretName: "auth-bear-fyi"
