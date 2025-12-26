@@ -1,0 +1,70 @@
+internalDatabase:
+  enabled: false
+externalDatabase:
+  enabled: true
+  type: postgresql
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-cnpg-cluster-app
+    usernameKey: username
+    passwordKey: password
+    hostKey: host
+    databaseKey: dbname
+externalRedis:
+  enabled: true
+  host: "nextcloud-kv-cluster-valkey"
+  port: "6379"
+  existingSecret:
+    enabled: true
+    secretName: nextcloud-kv-cluster-valkey
+    passwordKey: password
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+  tls:
+    - secretName: nextcloud-tls
+      hosts:
+        - cloud.bear.fyi
+  path: /
+  pathType: Prefix
+image:
+  flavor: apache
+  pullPolicy: IfNotPresent
+  repository: nextcloud
+  tag: 32.0.3
+livenessProbe:
+  enabled: false
+nextcloud:
+  containerPort: 80
+  datadir: /var/www/html/data
+  defaultConfigs:
+    .htaccess: true
+    apache-pretty-urls.config.php: true
+    apcu.config.php: true
+    apps.config.php: true
+    autoconfig.php: true
+    redis.config.php: true
+    smtp.config.php: true
+  extraEnv:
+  - name: TRUSTED_PROXIES
+    value: 10.244.0.0/16
+  host: cloud.bear.fyi
+  trustedDomains: cloud.bear.fyi
+  username: bear-admin
+persistence:
+  accessMode: ReadWriteOnce
+  enabled: true
+  size: 200Gi
+rbac:
+  enabled: true
+  serviceaccount:
+    create: true
+    name: nextcloud-svc
+readinessProbe:
+  enabled: false
+replicaCount: 1
+service:
+  port: 8080
+  type: ClusterIP

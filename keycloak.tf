@@ -31,12 +31,12 @@ resource "keycloak_role" "bear_admin_realm_role" {
   description = "Bear Realm Admin"
 }
 
-# Create an admin role for each client
+# Create oauth workload roles for each client (a default admin role is always created)
 resource "keycloak_role" "workload_client_roles" {
-  for_each  = merge(local.oauth_workloads, local.oauth_proxy_workloads)
+  for_each  = local.oauth_client_roles
   realm_id  = keycloak_realm.bear.id
-  client_id = keycloak_openid_client.workload_clients[each.key].id
-  name      = "admin"
+  client_id = keycloak_openid_client.workload_clients[each.value.client].id
+  name      = each.value.role
 }
 
 # Connect external idp - Entra

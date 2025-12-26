@@ -158,6 +158,7 @@ locals {
         oauth_config = {
           redirect_uris = ["https://grafana.bear.fyi/login/generic_oauth"]
           client_secret = random_password.grafana_client_secret.result
+          client_roles = ["admin", "editor", "viewer"]
         }
         manifests = {
           grafana_admin_creds = {
@@ -206,6 +207,30 @@ locals {
         chart_name    = "home-assistant"
         chart_version = "0.3.36"
       }
+      nextcloud = {
+        namespace = "nextcloud"
+        chart_repo = "https://nextcloud.github.io/helm"
+        chart_name = "nextcloud"
+        chart_version = "8.7.0"
+        auth_type = "oauth"
+        oauth_config = {
+          redirect_uris = ["https://cloud.bear.fyi/apps/sociallogin/custom_oidc/keycloak"]
+          client_roles = ["admin", "user"]
+        }
+        set = [{
+          name = "nextcloud.password"
+          value = random_password.admin_password.result
+        }]
+        db = {
+          size = "50Gi"
+          wal = "10Gi"
+          instances = 1
+        }
+        kv = {
+          instances = 1
+          size = "10Gi"
+        }
+      }
     }
   }
 
@@ -244,6 +269,23 @@ locals {
 
   oauth_workloads       = { for k, v in local.all_workloads : k => v if can(v["auth_type"]) && v.auth_type == "oauth" }
   oauth_proxy_workloads = { for k, v in local.all_workloads : k => v if can(v["auth_type"]) && v.auth_type == "oauth_proxy" }
+
+  oauth_client_roles = merge([
+    for k, v in merge(local.oauth_workloads, local.oauth_proxy_workloads) : (
+      can(v.oauth_config.client_roles) && try(v.auth_type == "oauth", false) ? {
+      for role in v.oauth_config.client_roles :
+        "${k}:${role}" => {
+            client = k
+            role = role
+        }
+    } : {
+      "${k}:admin" = {
+          client = k
+          role = "admin"
+      }
+    }
+  )
+  ]...)
 
   kv_apps = { for k, v in local.all_workloads : k => v if can(v["kv"]) }
   db_apps = { for k, v in local.all_workloads : k => v if can(v["db"]) }
