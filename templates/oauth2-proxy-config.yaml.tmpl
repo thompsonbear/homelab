@@ -9,7 +9,9 @@ data:
     cookie_refresh = "2m30s"
     reverse_proxy = true
     email_domains = [ "*" ]
-    allowed_roles = ${allowed_roles}
+    allowed_groups = [ "${allowed_role}" ]
+    scope = "openid app-roles"
+    oidc_groups_claim = "roles"
     ssl_insecure_skip_verify = ${insecure}
 kind: ConfigMap
 metadata:

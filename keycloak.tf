@@ -24,11 +24,27 @@ resource "keycloak_openid_client" "workload_clients" {
   valid_redirect_uris   = can(each.value.fqdn) ? ["https://${each.value.fqdn}/oauth2/callback"] : try(each.value.oauth_config.redirect_uris, [])
 }
 
-# Create a global admin role for administration
-resource "keycloak_role" "bear_admin_realm_role" {
-  realm_id    = keycloak_realm.bear.id
-  name        = "bear-admin"
-  description = "Bear Realm Admin"
+resource "keycloak_openid_client_scope" "app_roles_scope" {
+  realm_id = keycloak_realm.bear.id
+  name = "app-roles"
+}
+
+resource "keycloak_openid_client_default_scopes" "client_default_scopes" {
+  for_each = merge(local.oauth_workloads, local.oauth_proxy_workloads)
+  realm_id = keycloak_realm.bear.id
+  client_id = keycloak_openid_client.workload_clients[each.key].id
+  default_scopes = [ "profile", "email", "offline_access", keycloak_openid_client_scope.app_roles_scope.name ]
+}
+
+resource "keycloak_openid_user_client_role_protocol_mapper" "client_app_role_mappers" {
+  for_each = merge(local.oauth_workloads, local.oauth_proxy_workloads)
+  realm_id = keycloak_realm.bear.id
+  client_scope_id = keycloak_openid_client_scope.app_roles_scope.id
+  name = "${each.key} client app roles"
+  client_id_for_role_mappings = each.key
+  client_role_prefix = "${each.key}:"
+  claim_name = "roles"
+  multivalued = true
 }
 
 # Create oauth workload roles for each client (a default admin role is always created)

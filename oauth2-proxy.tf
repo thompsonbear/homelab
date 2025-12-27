@@ -38,7 +38,7 @@ resource "kubectl_manifest" "oauth2_proxy_configs" {
     name          = "${each.key}-oauth2-proxy"
     namespace     = each.value.namespace
     redirect_url  = "https://${each.value.fqdn}/oauth2/callback"
-    allowed_roles = "[\"bear-admin\", \"${each.key}:admin\"]"
+    allowed_role = "${each.key}:admin"
     insecure      = var.insecure
   })
 }

@@ -71,7 +71,7 @@ grafana.ini:
     token_url: https://auth.bear.fyi/realms/bear/protocol/openid-connect/token
     api_url: https://auth.bear.fyi/realms/bear/protocol/openid-connect/userinto
     signout_redirect_url: https://auth.bear.fyi/realms/bear/protocol/openid-connect/logout
-    role_attribute_path: "contains(realm_access.roles[*], 'bear-admin') && 'GrafanaAdmin' || contains(resource_access.grafana.roles[*], 'admin') && 'Admin' || contains(resource_access.grafana.roles[*], 'editor') && 'Editor' || 'Viewer'"
+    role_attribute_path: "contains(roles[*], 'grafana:admin') && 'Admin' || contains(roles[*], 'grafana:editor') && 'Editor' || contains(roles[*], 'grafana:viewer') && 'Viewer'"
     role_attribute_strict: true
     allow_assign_grafana_admin: true
     use_refresh_token: true
