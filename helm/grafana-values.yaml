@@ -63,7 +63,7 @@ grafana.ini:
     name: "Keycloak"
     allow_sign_up: true
     client_id: "grafana"
-    scopes: "openid email profile offline_access roles"
+    scopes: "openid email profile offline_access app-roles"
     email_attribute_path: "email"
     login_attribute_path: "username"
     name_attribute_path: "full_name"
