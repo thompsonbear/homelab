@@ -157,8 +157,9 @@ locals {
         auth_type     = "oauth"
         oauth_config = {
           redirect_uris = ["https://grafana.bear.fyi/login/generic_oauth"]
+          logout_uris   = ["https://grafana.bear.fyi/*"]
           client_secret = random_password.grafana_client_secret.result
-          client_roles = ["admin", "editor", "viewer"]
+          client_roles  = ["admin", "editor", "viewer"]
         }
         manifests = {
           grafana_admin_creds = {
@@ -192,43 +193,67 @@ locals {
         }
       }
       bluesky-pds = {
-        namespace = "bluesky-pds"
+        namespace     = "bluesky-pds"
         chart_repo    = "https://charts.bear.fyi"
         chart_name    = "bluesky-pds"
         chart_version = "0.4.193"
         set = [{
-          name = "pds.config.secrets.emailSmtpUrl"
+          name  = "pds.config.secrets.emailSmtpUrl"
           value = "smtps://apikey:${var.sendgrid_api_key}@smtp.sendgrid.net:465"
         }]
       }
       home-assistant = {
-        namespace = "home-assistant"
+        namespace     = "home-assistant"
         chart_repo    = "https://pajikos.github.io/home-assistant-helm-chart/"
         chart_name    = "home-assistant"
         chart_version = "0.3.36"
       }
       nextcloud = {
-        namespace = "nextcloud"
-        chart_repo = "https://nextcloud.github.io/helm"
-        chart_name = "nextcloud"
+        namespace     = "nextcloud"
+        chart_repo    = "https://nextcloud.github.io/helm"
+        chart_name    = "nextcloud"
         chart_version = "8.7.0"
-        auth_type = "oauth"
+        auth_type     = "oauth"
         oauth_config = {
           redirect_uris = ["https://cloud.bear.fyi/apps/sociallogin/custom_oidc/keycloak"]
-          client_roles = ["admin", "user"]
+          logout_uris   = ["https://cloud.bear.fyi/*"]
+          client_roles  = ["admin", "user"]
         }
         set = [{
-          name = "nextcloud.password"
+          name  = "nextcloud.password"
           value = random_password.admin_password.result
         }]
         db = {
-          size = "50Gi"
-          wal = "10Gi"
+          size      = "50Gi"
+          wal       = "10Gi"
           instances = 1
         }
         kv = {
           instances = 1
-          size = "10Gi"
+          size      = "10Gi"
+        }
+      }
+      immich = {
+        namespace     = "immich"
+        chart_repo    = "https://secustor.dev/helm-charts"
+        chart_name    = "immich"
+        chart_version = "1.0.9"
+        auth_type     = "oauth"
+        oauth_config = {
+          redirect_uris          = ["https://immich.bear.fyi/auth/login", "https://immich.bear.fyi/user-settings", "app.immich:///oauth-callback"]
+          logout_uris            = ["https://immich.bear.fyi/*"]
+          client_roles           = ["admin", "user"]
+          prefix_role_claim      = false
+          multivalued_role_claim = false
+        }
+        db = {
+          size      = "20Gi"
+          wal       = "2Gi"
+          instances = 1
+        }
+        kv = {
+          instances = 1
+          size      = "10Gi"
         }
       }
     }
@@ -273,18 +298,18 @@ locals {
   oauth_client_roles = merge([
     for k, v in merge(local.oauth_workloads, local.oauth_proxy_workloads) : (
       can(v.oauth_config.client_roles) && try(v.auth_type == "oauth", false) ? {
-      for role in v.oauth_config.client_roles :
+        for role in v.oauth_config.client_roles :
         "${k}:${role}" => {
-            client = k
-            role = role
-        }
-    } : {
-      "${k}:admin" = {
           client = k
-          role = "admin"
+          role   = role
+        }
+        } : {
+        "${k}:admin" = {
+          client = k
+          role   = "admin"
+        }
       }
-    }
-  )
+    )
   ]...)
 
   kv_apps = { for k, v in local.all_workloads : k => v if can(v["kv"]) }

@@ -1,0 +1,66 @@
+common:
+  config:
+    vectorExtension: pgvector
+  postgres:
+    host: immich-cnpg-cluster-rw
+    existingSecret:
+      enabled: true
+      secretName: "immich-cnpg-cluster-app"
+      usernameKey: username
+      passwordKey: password
+  redis:
+    host: immich-kv-cluster-valkey
+    existingSecret:
+      enabled: true
+      secretName: "immich-kv-cluster-valkey"
+      passwordKey: password
+server:
+  replicaCount: 1
+  image:
+    repository: ghcr.io/immich-app/immich-server
+    pullPolicy: IfNotPresent
+    tag: "v2.4.1"
+  service:
+    type: ClusterIP
+    port: 2283
+  pvcVolumes:
+    - name: upload
+      path: /usr/src/app/upload
+      size: 100Gi
+      storageClass: longhorn
+      accessModes:
+        - ReadWriteMany
+  livenessProbe:
+    initialDelaySeconds: 30
+machineLearning:
+  enabled: true
+  cache:
+    enabled: true
+    useMemory: false
+    sizeLimit: 10Gi
+  replicaCount: 1
+  image:
+    repository: ghcr.io/immich-app/immich-machine-learning
+    pullPolicy: IfNotPresent
+    tag: "v2.4.1"
+  service:
+    type: ClusterIP
+    port: 3003
+serviceAccount:
+  create: true
+  automount: true
+  name: "immich-svc"
+ingress:
+  enabled: true
+  className: "traefik"
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-staging
+  hosts:
+    - host: immich.bear.fyi
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+   - secretName: immich-tls
+     hosts:
+       - immich.bear.fyi

@@ -17,6 +17,26 @@ resource "helm_release" "cnpg_clusters" {
       value = each.key
     },
     {
+      name  = "cluster.initdb.owner"
+      value = each.key
+    },
+    {
+      name  = "cluster.roles[0].name"
+      value = each.key
+    },
+    {
+      name  = "cluster.roles[0].createddb"
+      value = true
+    },
+    {
+      name  = "cluster.roles[0].login"
+      value = true
+    },
+    {
+      name  = "cluster.roles[0].superuser"
+      value = true
+    },
+    {
       name  = "cluster.instances"
       value = each.value.db.instances
     },
@@ -27,9 +47,10 @@ resource "helm_release" "cnpg_clusters" {
     {
       name  = "cluster.walStorage.size"
       value = each.value.db.wal
-    },
+    }
   ]
 }
+
 resource "time_sleep" "wait_120s_for_db_init" {
   depends_on = [helm_release.cnpg_clusters]
 
