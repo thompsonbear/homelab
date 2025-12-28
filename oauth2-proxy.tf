@@ -35,11 +35,11 @@ resource "kubectl_manifest" "oauth2_proxy_configs" {
   for_each   = local.oauth_proxy_workloads
 
   yaml_body = templatefile("./templates/oauth2-proxy-config.yaml.tmpl", {
-    name          = "${each.key}-oauth2-proxy"
-    namespace     = each.value.namespace
-    redirect_url  = "https://${each.value.fqdn}/oauth2/callback"
+    name         = "${each.key}-oauth2-proxy"
+    namespace    = each.value.namespace
+    redirect_url = "https://${each.value.fqdn}/oauth2/callback"
     allowed_role = "${each.key}:admin"
-    insecure      = var.insecure
+    insecure     = var.insecure
   })
 }
 
