@@ -208,31 +208,31 @@ locals {
         chart_name    = "home-assistant"
         chart_version = "0.3.36"
       }
-      nextcloud = {
-        namespace     = "nextcloud"
-        chart_repo    = "https://nextcloud.github.io/helm"
-        chart_name    = "nextcloud"
-        chart_version = "8.7.0"
-        auth_type     = "oauth"
-        oauth_config = {
-          redirect_uris = ["https://cloud.bear.fyi/apps/sociallogin/custom_oidc/keycloak"]
-          logout_uris   = ["https://cloud.bear.fyi/*"]
-          client_roles  = ["admin", "user"]
-        }
-        set = [{
-          name  = "nextcloud.password"
-          value = random_password.admin_password.result
-        }]
-        db = {
-          size      = "50Gi"
-          wal       = "10Gi"
-          instances = 1
-        }
-        kv = {
-          instances = 1
-          size      = "10Gi"
-        }
-      }
+      # nextcloud = {
+      #   namespace     = "nextcloud"
+      #   chart_repo    = "https://nextcloud.github.io/helm"
+      #   chart_name    = "nextcloud"
+      #   chart_version = "8.7.0"
+      #   auth_type     = "oauth"
+      #   oauth_config = {
+      #     redirect_uris = ["https://cloud.bear.fyi/apps/sociallogin/custom_oidc/keycloak"]
+      #     logout_uris   = ["https://cloud.bear.fyi/*"]
+      #     client_roles  = ["admin", "user"]
+      #   }
+      #   set = [{
+      #     name  = "nextcloud.password"
+      #     value = random_password.admin_password.result
+      #   }]
+      #   db = {
+      #     size      = "50Gi"
+      #     wal       = "10Gi"
+      #     instances = 1
+      #   }
+      #   kv = {
+      #     instances = 1
+      #     size      = "10Gi"
+      #   }
+      # }
       immich = {
         namespace     = "immich"
         chart_repo    = "https://secustor.dev/helm-charts"
@@ -240,11 +240,27 @@ locals {
         chart_version = "1.0.9"
         auth_type     = "oauth"
         oauth_config = {
-          redirect_uris          = ["https://immich.bear.fyi/auth/login", "https://immich.bear.fyi/user-settings", "app.immich:///oauth-callback"]
+          redirect_uris          = [
+            "https://immich.bear.fyi/auth/login",
+            "https://immich.bear.fyi/user-settings",
+            "app.immich:///oauth-callback"
+          ]
           logout_uris            = ["https://immich.bear.fyi/*"]
           client_roles           = ["admin", "user"]
           prefix_role_claim      = false
           multivalued_role_claim = false
+          client_secret  = random_password.immich_client_secret.result
+        }
+        manifests = {
+          immich-config = {
+            pre_install   = true
+            template_file = "immich-config.yaml.tmpl"
+            vars = {
+              client_secret  = random_password.immich_client_secret.result
+              namespace = "immich"
+              smtp_apikey = var.sendgrid_api_key
+            }
+          }
         }
         db = {
           size      = "20Gi"
@@ -258,60 +274,4 @@ locals {
       }
     }
   }
-
-  all_workloads            = merge(local.workload.core, local.workload.ingress, local.workload.storage, local.workload.idp, local.workload.app)
-  privileged_workloads     = { for k, v in local.all_workloads : k => v if can(v["privileged"]) ? v.privileged : false }
-  non_privileged_workloads = { for k, v in local.all_workloads : k => v if can(v["privileged"]) ? !v.privileged : true }
-
-  manifests = merge([
-    for group, group_items in local.workload : merge([
-      for workload_key, workload_item in group_items :
-      (
-        can(workload_item.manifests)
-        ? {
-          for manifest_key, manifest in workload_item.manifests :
-          "${workload_key}.${manifest_key}" => merge(
-            manifest,
-            {
-              group         = group
-              pre_install   = try(manifest.pre_install, false)
-              template_file = manifest.template_file
-              vars          = manifest.vars
-            }
-          )
-        }
-        : {}
-      )
-    ]...)
-  ]...)
-
-  pre_install_manifests = { for k, v in local.manifests : k => v if v.pre_install == true }
-  core_manifests        = { for k, v in local.manifests : k => v if v.group == "core" && v.pre_install == false }
-  ingress_manifests     = { for k, v in local.manifests : k => v if v.group == "ingress" && v.pre_install == false }
-  storage_manifests     = { for k, v in local.manifests : k => v if v.group == "storage" && v.pre_install == false }
-  idp_manifests         = { for k, v in local.manifests : k => v if v.group == "idp" && v.pre_install == false }
-  app_manifests         = { for k, v in local.manifests : k => v if v.group == "app" && v.pre_install == false }
-
-  oauth_workloads       = { for k, v in local.all_workloads : k => v if can(v["auth_type"]) && v.auth_type == "oauth" }
-  oauth_proxy_workloads = { for k, v in local.all_workloads : k => v if can(v["auth_type"]) && v.auth_type == "oauth_proxy" }
-
-  oauth_client_roles = merge([
-    for k, v in merge(local.oauth_workloads, local.oauth_proxy_workloads) : (
-      can(v.oauth_config.client_roles) && try(v.auth_type == "oauth", false) ? {
-        for role in v.oauth_config.client_roles :
-        "${k}:${role}" => {
-          client = k
-          role   = role
-        }
-        } : {
-        "${k}:admin" = {
-          client = k
-          role   = "admin"
-        }
-      }
-    )
-  ]...)
-
-  kv_apps = { for k, v in local.all_workloads : k => v if can(v["kv"]) }
-  db_apps = { for k, v in local.all_workloads : k => v if can(v["db"]) }
 }

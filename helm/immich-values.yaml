@@ -23,6 +23,8 @@ server:
   service:
     type: ClusterIP
     port: 2283
+  livenessProbe:
+    initialDelaySeconds: 30
   pvcVolumes:
     - name: upload
       path: /usr/src/app/upload
@@ -30,8 +32,17 @@ server:
       storageClass: longhorn
       accessModes:
         - ReadWriteMany
-  livenessProbe:
-    initialDelaySeconds: 30
+  volumes:
+    - name: config
+      secret:
+        secretName: immich-config
+  volumeMounts:
+    - name: config
+      mountPath: /usr/src/app/config
+      readOnly: true
+  env:
+    - name: IMMICH_CONFIG_FILE
+      value: /usr/src/app/config/immich-config.yaml
 machineLearning:
   enabled: true
   cache:

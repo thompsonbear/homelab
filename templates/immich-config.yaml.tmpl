@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: immich-config
+  namespace: ${vars.namespace}
+type: Opaque
+stringData:
+  immich-config.yaml: |
+    oauth:
+      autoLaunch: true
+      clientId: immich
+      clientSecret: ${vars.client_secret}
+      defaultStorageQuota: 10
+      enabled: true
+      issuerUrl: https://auth.bear.fyi/realms/bear
+      roleClaim: role
+      storageLabelClaim: sub
+    trash:
+      days: 180
+    notifications:
+      smtp:
+        enabled: true
+        from: immich@bear.fyi
+        transport:
+          host: smtp.sendgrid.net
+          port: 465
+          username: apikey
+          password: ${vars.smtp_apikey}
+          secure: true
+
