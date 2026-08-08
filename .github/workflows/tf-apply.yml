@@ -1,0 +1,58 @@
+name: Terraform Apply
+on:
+  pull_request:
+    types:
+      - closed
+
+jobs:
+  terraform-apply:
+    if: github.event.pull_request.merged == true
+    environment: ${{ github.base_ref }}
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+    runs-on: self-hosted
+    env:
+      ARM_USE_AZUREAD: "true"
+      TF_VAR_environment: ${{ github.base_ref }}
+      TF_VAR_az_key_vault_name: ${{ secrets.TF_VAR_AZ_KEY_VAULT_NAME }}
+      TF_VAR_az_key_vault_rg: ${{ secrets.TF_VAR_AZ_KEY_VAULT_RG }}
+      TF_VAR_network: ${{ secrets.TF_VAR_NETWORK }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.15.8
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.ARM_CLIENT_ID }}
+          tenant-id: ${{ secrets.ARM_TENANT_ID }}
+          subscription-id: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init
+        shell: bash
+        run: |
+          terraform init \
+            -backend-config="storage_account_name=${{ secrets.AZ_STORAGE_ACCOUNT_NAME }}" \
+            -backend-config="container_name=platform-tfstate" \
+            -backend-config="key=${{ github.ref_name }}.terraform.tfstate"
+
+      - name: Download Plan
+        shell: bash
+        run: |
+            az storage blob download \
+              --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
+              --container-name platform-tfstate \
+              --name tfplan-${{ github.sha }} \
+              --file tfplan-${{ github.sha }} \
+              --auth-mode login
+
+      - name: Terraform Apply
+        shell: bash
+        run: |
+          terraform apply -auto-approve tfplan-${{ github.sha }}
