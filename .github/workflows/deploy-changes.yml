@@ -1,17 +1,20 @@
-name: Handle PR
+name: Deploy Changes
 on:
   pull_request:
     branches:
       - prod
       - staging
+    types:
+      - closed
 
 jobs:
-  plan-platform:
+  platform:
+    if: github.event.pull_request.merged == true
     permissions:
       contents: read
       packages: read
       id-token: write
-    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@prod
+    uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@prod
     with:
       environment: ${{ github.base_ref }}
       storage_account_container_name: platform
@@ -19,9 +22,9 @@ jobs:
       working_dir: "./platform"
     secrets: inherit
 
-  # plan-workload:
-  #   if: github.event.pull_request.merged == false
-  #   uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@prod
+  # workload:
+  #   if: github.event.pull_request.merged == true
+  #   uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@prod
   #   with:
   #     environment: ${{ github.base_ref }}
   #     storage_account_container_name: workload
