@@ -18,6 +18,7 @@ jobs:
       storage_account_container_name: platform
       sha: ${{ github.sha }}
       working_dir: "./platform"
+    secrets: inherit
 
   # plan-workload:
   #   if: github.event.pull_request.merged == false
@@ -40,6 +41,7 @@ jobs:
       storage_account_container_name: platform
       sha: ${{ github.sha }}
       working_dir: "./platform"
+    secrets: inherit
 
   # apply-workload:
   #   if: github.event.pull_request.merged == true
