@@ -1,18 +1,31 @@
 name: Terraform Plan
 on:
-  pull_request:
-    branches:
-      - prod
-      - staging
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      storage_account_container_name:
+        required: true
+        type: string
+      sha:
+        required: true
+        type: string
+      working_dir:
+        required: true
+        type: string
 
 jobs:
   terraform-plan:
-    environment: ${{ github.base_ref }}
+    environment: ${{ inputs.environment }}
     permissions:
       contents: read
       packages: read
       id-token: write
     runs-on: self-hosted
+    defaults:
+      run:
+        working-directory: ${{ inputs.working_dir }}
     env:
       ARM_USE_AZUREAD: "true"
       TF_VAR_environment: ${{ github.base_ref }}
@@ -39,20 +52,20 @@ jobs:
         run: |
           terraform init \
             -backend-config="storage_account_name=${{ secrets.AZ_STORAGE_ACCOUNT_NAME }}" \
-            -backend-config="container_name=platform-tfstate" \
-            -backend-config="key=${{ github.base_ref }}.terraform.tfstate"
+            -backend-config="container_name=${{ inputs.storage_account_container_name }}" \
+            -backend-config="key=${{ inputs.environment }}.terraform.tfstate"
 
       - name: Terraform Plan
         shell: bash
         run: |
-          terraform plan -out=tfplan-${{ github.sha }}
+          terraform plan -out=tfplan-${{ inputs.sha }}
 
       - name: Upload Plan
         shell: bash
         run: |
             az storage blob upload \
               --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
-              --container-name platform-tfstate \
-              --name tfplan-${{ github.sha }} \
-              --file tfplan-${{ github.sha }} \
+              --container-name ${{ inputs.storage_account_container_name }} \
+              --name tfplan-${{ inputs.sha }} \
+              --file tfplan-${{ inputs.sha }} \
               --auth-mode login

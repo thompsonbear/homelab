@@ -1,0 +1,43 @@
+name: Handle PR
+on:
+  pull_request:
+    branches:
+      - prod
+      - staging
+
+jobs:
+  plan-platform:
+    if: github.event.pull_request.merged == false
+    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@prod
+    with:
+      environment: ${{ github.base_ref }}
+      storage_account_container_name: platform
+      sha: ${{ github.sha }}
+      working_dir: "./platform"
+
+  # plan-workload:
+  #   if: github.event.pull_request.merged == false
+  #   uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@prod
+  #   with:
+  #     environment: ${{ github.base_ref }}
+  #     storage_account_container_name: workload
+  #     sha: ${{ github.sha }}
+  #     working_dir: "./workload"
+
+  apply-platform:
+    if: github.event.pull_request.merged == true
+    uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@prod
+    with:
+      environment: ${{ github.base_ref }}
+      storage_account_container_name: platform
+      sha: ${{ github.sha }}
+      working_dir: "./platform"
+
+  # apply-workload:
+  #   if: github.event.pull_request.merged == true
+  #   uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@prod
+  #   with:
+  #     environment: ${{ github.base_ref }}
+  #     storage_account_container_name: workload
+  #     sha: ${{ github.sha }}
+  #     working_dir: "./workload"
