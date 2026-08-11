@@ -74,11 +74,13 @@ module "talos" {
 resource "azurerm_key_vault_secret" "talosconfig" {
   name         = "${var.environment}-talosconfig"
   value        = module.talos.cluster.talosconfig
+  content_type = "application/yaml"
   key_vault_id = module.akv.id
 }
 
 resource "azurerm_key_vault_secret" "kubeconfig" {
   name         = "${var.environment}-kubeconfig"
   value        = module.talos.cluster.kubeconfig
+  content_type = "application/yaml"
   key_vault_id = module.akv.id
 }
