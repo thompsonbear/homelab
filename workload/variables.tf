@@ -16,12 +16,12 @@ variable "environment" {
 }
 
 variable "apps" {
-  type        = map(object({
+  type = map(object({
     namespace = string
-    version = string
+    version   = string
     chart = object({
-      name = optional(string)
-      repo = string
+      name    = optional(string)
+      repo    = string
       version = optional(string)
     })
     dns = object({
@@ -30,20 +30,20 @@ variable "apps" {
     })
     backend = optional(object({
       service = optional(string)
-      port = optional(number)
+      port    = optional(number)
     }))
     keycloak = optional(object({
       redirect_uris = optional(list(string))
-      logout_uris = optional(list(string))
-      client_roles = optional(list(string))
+      logout_uris   = optional(list(string))
+      client_roles  = optional(list(string))
     }))
     postgres = optional(object({
-      base_gb = optional(number)
-      wal_gb = optional(number)
+      base_gb  = optional(number)
+      wal_gb   = optional(number)
       replicas = optional(number)
     }))
     valkey = optional(object({
-      size_gb = optional(number)
+      size_gb  = optional(number)
       replicas = optional(number)
     }))
   }))

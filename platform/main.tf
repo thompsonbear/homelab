@@ -38,8 +38,8 @@ module "subnets" {
 }
 
 module "akv" {
-  source = "../modules/akv"
-  name = var.az_key_vault_name
+  source         = "../modules/akv"
+  name           = var.az_key_vault_name
   resource_group = var.az_key_vault_rg
 }
 

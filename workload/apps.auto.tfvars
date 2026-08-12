@@ -1,10 +1,10 @@
 apps = {
   home-assistant = {
     namespace = "home-assistant"
-    version = "2025.12.4"
+    version   = "2025.12.4"
     chart = {
-      name = "home-assistant"
-      repo = "https://pajikos.github.io/home-assistant-helm-chart/"
+      name    = "home-assistant"
+      repo    = "https://pajikos.github.io/home-assistant-helm-chart/"
       version = "0.3.36"
     }
     dns = {
@@ -13,7 +13,7 @@ apps = {
     }
     backend = {
       service = "home-assistant"
-      port = 8080
+      port    = 8080
     }
     # keycloak = {
     #   redirect_uris = [""]

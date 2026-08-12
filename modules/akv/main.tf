@@ -12,7 +12,7 @@ data "azurerm_key_vault_secret" "akv_secret_values" {
   name         = each.key
   key_vault_id = data.azurerm_key_vault.akv.id
 }
-  
+
 locals {
   secrets_raw = data.azurerm_key_vault_secret.akv_secret_values
 
@@ -26,10 +26,10 @@ locals {
 
   secrets = {
     for key, value in local.secrets_decoded : key =>
-      value.json != null ? value.json :
-      value.yaml != null ? value.yaml :
-      value.csv  != null ? value.csv :
-      local.secrets_raw[key].value
+    value.json != null ? value.json :
+    value.yaml != null ? value.yaml :
+    value.csv != null ? value.csv :
+    local.secrets_raw[key].value
   }
 }
 
