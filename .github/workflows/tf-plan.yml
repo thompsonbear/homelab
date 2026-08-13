@@ -58,7 +58,7 @@ jobs:
       - name: Terraform Plan
         shell: bash
         run: |
-          terraform plan -out=tfplan-${{ inputs.sha }}
+          terraform plan -out=tfplan-${{ inputs.environment }}-${{ inputs.sha }}
 
       - name: Upload Plan
         shell: bash
@@ -66,6 +66,6 @@ jobs:
             az storage blob upload \
               --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
               --container-name ${{ inputs.storage_account_container_name }} \
-              --name tfplan-${{ inputs.sha }} \
-              --file tfplan-${{ inputs.sha }} \
+              --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
+              --file tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
               --auth-mode login

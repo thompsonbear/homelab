@@ -61,11 +61,11 @@ jobs:
             az storage blob download \
               --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
               --container-name ${{ inputs.storage_account_container_name }} \
-              --name tfplan-${{ inputs.sha }} \
-              --file tfplan-${{ inputs.sha }} \
+              --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
+              --file tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
               --auth-mode login
 
       - name: Terraform Apply
         shell: bash
         run: |
-          terraform apply -auto-approve tfplan-${{ inputs.sha }}
+          terraform apply -auto-approve tfplan-${{ inputs.environment }}-${{ inputs.sha }}

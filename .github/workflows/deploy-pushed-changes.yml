@@ -1,0 +1,53 @@
+name: Deploy Pushed Changes
+
+on:
+  push:
+    branches:
+      - 'deployment/**'
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+
+jobs:
+  get-branch-suffix:
+    runs-on: self-hosted
+    outputs:
+      branch_suffix: ${{ steps.get-branch-suffix.outputs.branch_suffix }}
+    steps:
+      - name: Extract branch suffix
+        id: get-branch-suffix
+        run: echo "branch_suffix=${GITHUB_REF#refs/heads/deployment/}" >> $GITHUB_OUTPUT
+  platform-plan:
+    uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
+    with:
+      environment: ${{ needs.get-branch-suffix.outputs.branch_suffix }}
+      storage_account_container_name: platform
+      sha: ${{ github.sha }}
+      working_dir: "./platform"
+    secrets: inherit
+  platform-apply:
+    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
+    with:
+      environment: ${{ github.base_ref }}
+      storage_account_container_name: platform
+      sha: ${{ github.event.pull_request.head.sha }}
+      working_dir: "./platform"
+    secrets: inherit
+  workload-plan:
+    uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
+    with:
+      environment: ${{ github.base_ref }}
+      storage_account_container_name: workload
+      sha: ${{ github.sha }}
+      working_dir: "./workload"
+    secrets: inherit
+  workload-apply:
+    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
+    with:
+      environment: ${{ github.base_ref }}
+      storage_account_container_name: workload
+      sha: ${{ github.event.pull_request.head.sha }}
+      working_dir: "./workload"
+    secrets: inherit
