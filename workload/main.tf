@@ -13,7 +13,7 @@ module "app_namespaces" {
 module "apps" {
   depends_on = [ module.app_namespaces ]
   source   = "./modules/app"
-  for_each = vars.apps
+  for_each = var.apps
 
   namespace = try(each.value.namespace, each.key)
 
