@@ -1,7 +1,7 @@
 apps = {
   home-assistant = {
     namespace = "home-assistant"
-    version   = "2025.12.4"
+    image_version   = "2025.12.4"
     chart = {
       name    = "home-assistant"
       repo    = "https://pajikos.github.io/home-assistant-helm-chart/"

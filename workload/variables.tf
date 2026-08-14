@@ -18,7 +18,7 @@ variable "environment" {
 variable "apps" {
   type = map(object({
     namespace = string
-    version   = string
+    image_version   = string
     chart = object({
       name    = optional(string)
       repo    = string

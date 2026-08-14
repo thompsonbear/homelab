@@ -3,7 +3,7 @@ variable "namespace" {
   description = "The namespace of the app"
 }
 
-variable "version" {
+variable "image_version" {
   type        = string
   description = "The image version of the app"
   default     = "latest"
