@@ -14,7 +14,7 @@ jobs:
   get-environment:
     uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
     with:
-      branch: ${{ github.ref }}
+      branch: ${{ github.ref_name }}
   platform:
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
     needs: get-environment
