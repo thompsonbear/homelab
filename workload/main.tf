@@ -30,6 +30,7 @@ module "apps" {
     public = try(each.value.dns.public, false)
     } : {
     labels = [each.key]
+    public = false
   }
 
   backend = can(each.value.backend) ? {
@@ -37,6 +38,7 @@ module "apps" {
     port    = try(each.value.backend.port, 80)
     } : {
     service = each.key
+    port = 80
   }
 
   keycloak = can(each.value.keycloak) ? each.value.keycloak : null
