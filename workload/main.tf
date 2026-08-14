@@ -17,7 +17,7 @@ module "apps" {
 
   namespace = try(each.value.namespace, each.key)
 
-  version = each.value.version
+  image_version = each.value.image_version
 
   chart = {
     name    = try(each.value.chart.name, each.key)
