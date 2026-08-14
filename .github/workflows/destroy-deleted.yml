@@ -25,7 +25,7 @@ jobs:
   platform:
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
-    needs: workload
+    needs: [get-environment, workload]
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: platform
