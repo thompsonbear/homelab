@@ -26,10 +26,10 @@ provider "azurerm" {
 }
 
 locals {
-  k8s_host        = module.akv.secrets["${var.environment}-kubeconfig"].clusters[0].server
-  k8s_client_cert = base64decode(module.akv.secrets["${var.environment}-kubeconfig"].users[0].client_certificate_data)
-  k8s_client_key  = base64decode(module.akv.secrets["${var.environment}-kubeconfig"].users[0].client_key_data)
-  k8s_ca_cert     = base64decode(module.akv.secrets["${var.environment}-kubeconfig"].clusters[0].certificate_authority_data)
+  k8s_host        = module.akv.secrets["${var.environment}-kubeconfig"].clusters[0].cluster["server"]
+  k8s_client_cert = base64decode(module.akv.secrets["${var.environment}-kubeconfig"].users[0].user["client_certificate_data"])
+  k8s_client_key  = base64decode(module.akv.secrets["${var.environment}-kubeconfig"].users[0].user["client_key_data"])
+  k8s_ca_cert     = base64decode(module.akv.secrets["${var.environment}-kubeconfig"].clusters[0].cluster["certificate_authority_data"])
 }
 
 provider "helm" {
