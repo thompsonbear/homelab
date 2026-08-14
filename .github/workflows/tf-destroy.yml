@@ -1,4 +1,4 @@
-name: Terraform Apply
+name: Terraform Destroy
 on:
   workflow_call:
     inputs:
@@ -6,9 +6,6 @@ on:
         required: true
         type: string
       storage_account_container_name:
-        required: true
-        type: string
-      sha:
         required: true
         type: string
       working_dir:
@@ -21,7 +18,7 @@ permissions:
   id-token: write
 
 jobs:
-  terraform-apply:
+  terraform-destroy:
     environment: ${{ inputs.environment }}
     runs-on: self-hosted
     defaults:
@@ -56,34 +53,19 @@ jobs:
             -backend-config="container_name=${{ inputs.storage_account_container_name }}" \
             -backend-config="key=${{ inputs.environment }}.terraform.tfstate"
 
-      - name: Check Plan Exists
+      - name: Terraform Destroy
         shell: bash
         run: |
-          export PLAN_EXISTS=$(az storage blob exists \
+          terraform destroy -auto-approve
+
+      - name: Cleanup State/Plan Blobs
+        shell: bash
+        run: |
+          az storage blob delete-batch \
             --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
             --container-name ${{ inputs.storage_account_container_name }} \
-            --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} | jq -r '.exists')
-          echo "PLAN_EXISTS=$PLAN_EXISTS" >> $GITHUB_ENV
-
-      - name: Download Plan
-        if: env.PLAN_EXISTS == 'true'
-        shell: bash
-        run: |
-            az storage blob download \
-              --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
-              --container-name ${{ inputs.storage_account_container_name }} \
-              --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
-              --file tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
-              --auth-mode login
-
-      - name: Terraform Apply - Existing Plan
-        if: env.PLAN_EXISTS == 'true'
-        shell: bash
-        run: |
-          terraform apply -auto-approve tfplan-${{ inputs.environment }}-${{ inputs.sha }}
-
-      - name: Terraform Apply - New Plan
-        if: env.PLAN_EXISTS == 'false'
-        shell: bash
-        run: |
-          terraform apply -auto-approve
+            --pattern "tfplan-${{ inputs.environment }}*"
+          az storage blob delete \
+            --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
+            --container-name ${{ inputs.storage_account_container_name }} \
+            --name ${{ inputs.environment }}.terraform.tfstate

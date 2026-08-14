@@ -1,8 +1,5 @@
-name: Plan PR Changes
 on:
-  pull_request:
-    branches:
-      - 'deployment/**'
+  delete:
 
 permissions:
   contents: read
@@ -18,21 +15,21 @@ jobs:
       - name: Extract branch suffix
         id: get-branch-suffix
         run: echo "branch_suffix=${GITHUB_REF#refs/heads/deployment/}" >> $GITHUB_OUTPUT
-
-  platform:
-    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
-    with:
-      environment: ${{ needs.get-branch-suffix.outputs.branch_suffix }}
-      storage_account_container_name: platform
-      sha: ${{ github.event.pull_request.head.sha }}
-      working_dir: "./platform"
-    secrets: inherit
-
-  workload:
-    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
+  destroy-workload:
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
+    uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
     with:
       environment: ${{ needs.get-branch-suffix.outputs.branch_suffix }}
       storage_account_container_name: workload
       sha: ${{ github.event.pull_request.head.sha }}
       working_dir: "./workload"
+    secrets: inherit
+  destroy-platform:
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
+    uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
+    with:
+      environment: ${{ needs.get-branch-suffix.outputs.branch_suffix }}
+      storage_account_container_name: platform
+      sha: ${{ github.event.pull_request.head.sha }}
+      working_dir: "./platform"
     secrets: inherit
