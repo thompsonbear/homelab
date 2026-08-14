@@ -26,7 +26,7 @@ jobs:
     secrets: inherit
   workload:
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
-    needs: platform
+    needs: [get-environment, platform]
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: workload
