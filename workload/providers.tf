@@ -34,7 +34,6 @@ locals {
 
 provider "helm" {
   kubernetes = {
-    insecure = true
     host                   = local.k8s_host
     client_certificate     = local.k8s_client_cert
     client_key             = local.k8s_client_key
@@ -43,7 +42,6 @@ provider "helm" {
 }
 
 provider "kubernetes" {
-  insecure = true
   host                   = local.k8s_host
   client_certificate     = local.k8s_client_cert
   client_key             = local.k8s_client_key
