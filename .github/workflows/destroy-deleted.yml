@@ -12,18 +12,20 @@ jobs:
     uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
     with:
       branch: ${{ github.event.ref }}
-  destroy-workload:
+  workload:
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
+    needs: get-environment
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: workload
       sha: ${{ github.event.pull_request.head.sha }}
       working_dir: "./workload"
     secrets: inherit
-  destroy-platform:
+  platform:
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
+    needs: workload
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: platform

@@ -15,16 +15,18 @@ jobs:
     uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
     with:
       branch: ${{ github.ref }}
-  platform-apply:
-    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
+  platform:
+    uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
+    needs: get-environment
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: platform
       sha: ${{ github.event.pull_request.head.sha }}
       working_dir: "./platform"
     secrets: inherit
-  workload-apply:
+  workload:
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
+    needs: platform
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: workload
