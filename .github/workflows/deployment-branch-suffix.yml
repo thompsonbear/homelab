@@ -16,4 +16,6 @@ jobs:
     steps:
       - name: Extract branch suffix
         id: get-branch-suffix
-        run: echo "branch_suffix=${${{inputs.branch}}#deployment/}" >> $GITHUB_OUTPUT
+        run: |
+          branch="${{inputs.branch}}"
+          echo "branch_suffix=${branch#deployment/}" >> $GITHUB_OUTPUT
