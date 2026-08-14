@@ -5,6 +5,9 @@ on:
       branch:
         required: true
         type: string
+    outputs:
+      branch_suffix:
+        value: ${{ steps.get-branch-suffix.outputs.branch_suffix }}
 jobs:
   get-branch-suffix:
     runs-on: self-hosted
