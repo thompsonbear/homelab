@@ -7,19 +7,16 @@ permissions:
   id-token: write
 
 jobs:
-  get-branch-suffix:
-    runs-on: self-hosted
-    outputs:
-      branch_suffix: ${{ steps.get-branch-suffix.outputs.branch_suffix }}
-    steps:
-      - name: Extract branch suffix
-        id: get-branch-suffix
-        run: echo "branch_suffix=${GITHUB_REF#refs/heads/deployment/}" >> $GITHUB_OUTPUT
+  get-environment:
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
+    uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
+    with:
+      branch: ${{ github.event.ref }}
   destroy-workload:
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
     with:
-      environment: ${{ needs.get-branch-suffix.outputs.branch_suffix }}
+      environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: workload
       sha: ${{ github.event.pull_request.head.sha }}
       working_dir: "./workload"
@@ -28,7 +25,7 @@ jobs:
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
     with:
-      environment: ${{ needs.get-branch-suffix.outputs.branch_suffix }}
+      environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: platform
       sha: ${{ github.event.pull_request.head.sha }}
       working_dir: "./platform"
