@@ -62,7 +62,8 @@ jobs:
           export PLAN_EXISTS=$(az storage blob exists \
             --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
             --container-name ${{ inputs.storage_account_container_name }} \
-            --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} | jq -r '.exists')
+            --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
+            --auth-mode login | jq -r '.exists')
           echo "PLAN_EXISTS=$PLAN_EXISTS" >> $GITHUB_ENV
 
       - name: Download Plan
