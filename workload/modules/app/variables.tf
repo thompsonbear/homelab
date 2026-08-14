@@ -33,24 +33,27 @@ variable "backend" {
 }
 
 variable "keycloak" {
-  type = optional(object({
+  type = object({
     redirect_uris = optional(list(string), [])
     logout_uris   = optional(list(string), [])
     client_roles  = optional(list(string), ["admin"])
-  }))
+  })
+  default = null
 }
 
 variable "postgres" {
-  type = optional(object({
+  type = object({
     base_gb  = optional(number, 20)
     wal_gb   = optional(number, 5)
     replicas = optional(number, 2)
-  }))
+  })
+  default = null
 }
 
 variable "valkey" {
-  type = optional(object({
+  type = object({
     size_gb  = optional(number, 10)
     replicas = optional(number, 2)
-  }))
+  })
+  default = null
 }
