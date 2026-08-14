@@ -1,4 +1,4 @@
-name: Terraform Apply
+name: Get Deployment Branch Suffix
 on:
   workflow_call:
     inputs:
@@ -7,7 +7,7 @@ on:
         type: string
     outputs:
       branch_suffix:
-        value: ${{ steps.get-branch-suffix.outputs.branch_suffix }}
+        value: ${{ jobs.get-branch-suffix.outputs.branch_suffix }}
 jobs:
   get-branch-suffix:
     runs-on: self-hosted
