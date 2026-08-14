@@ -1,3 +1,4 @@
+name: Destroy Deleted Deployment
 on:
   delete:
 

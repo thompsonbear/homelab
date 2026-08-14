@@ -63,7 +63,7 @@ jobs:
         run: |
           az storage blob delete-batch \
             --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
-            --container-name ${{ inputs.storage_account_container_name }} \
+            --source ${{ inputs.storage_account_container_name }} \
             --pattern "tfplan-${{ inputs.environment }}*"
           az storage blob delete \
             --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
