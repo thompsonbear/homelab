@@ -11,32 +11,36 @@ permissions:
   id-token: write
 
 jobs:
-  dump-context:
-    runs-on: self-hosted
-    steps:
-      - name: dump context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
   get-environment:
     uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
     with:
       branch: ${{ github.ref_name }}
+  get-pre-merge-sha:
+    runs-on: self-hosted
+    outputs:
+      sha: ${{ steps.get-sha.outputs.sha }}
+    steps:
+      - name: Get SHA
+        id: get-sha
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: |
+          echo sha=$("$GITHUB_CONTEXT"| jq '.event.commits[].id' | tail -2 | head -1 |sed 's/\"//g') >> $GITHUB_OUTPUT
   platform:
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
-    needs: get-environment
+    needs: [get-environment, get-pre-merge-sha]
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: platform
-      sha: ${{ github.event.before }}
+      sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
       working_dir: "./platform"
     secrets: inherit
   workload:
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
-    needs: [get-environment, platform]
+    needs: [get-environment, get-pre-merge-sha, platform]
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: workload
-      sha: ${{ github.event.before }}
+      sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
       working_dir: "./workload"
     secrets: inherit
