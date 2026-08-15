@@ -21,7 +21,8 @@ permissions:
   id-token: write
 
 jobs:
-  terraform-apply:
+  apply:
+    name: Apply
     environment: ${{ inputs.environment }}
     runs-on: self-hosted
     defaults:

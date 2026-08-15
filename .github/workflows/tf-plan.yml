@@ -21,7 +21,8 @@ permissions:
   id-token: write
 
 jobs:
-  terraform-plan:
+  plan:
+    name: Plan
     environment: ${{ inputs.environment }}
     runs-on: self-hosted
     defaults:

@@ -1,4 +1,4 @@
-name: Destroy Deleted Deployment
+name: Destroy Deployment
 on:
   delete:
 
@@ -8,26 +8,35 @@ permissions:
   id-token: write
 
 jobs:
-  get-environment:
+  parse-environment:
+    name: Parse Environment
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
-    uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
-    with:
-      branch: ${{ github.event.ref }}
-  workload:
+    runs-on: self-hosted
+    outputs:
+      environment: ${{ steps.get-branch-suffix.outputs.environment }}
+    steps:
+      - name: Extract deployment branch suffix
+        id: get-branch-suffix
+        run: |
+          branch=${{ github.event.ref }}
+          echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
+  destroy-workload:
+    name: Destroy Workload
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
-    needs: get-environment
+    needs: parse-environment
     with:
-      environment: ${{ needs.get-environment.outputs.branch_suffix }}
+      environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: workload
       working_dir: "./workload"
     secrets: inherit
-  platform:
+  destroy-platform:
+    name: Destroy Platform
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
-    needs: [get-environment, workload]
+    needs: [parse-environment, workload]
     with:
-      environment: ${{ needs.get-environment.outputs.branch_suffix }}
+      environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: platform
       working_dir: "./platform"
     secrets: inherit

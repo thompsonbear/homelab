@@ -18,7 +18,8 @@ permissions:
   id-token: write
 
 jobs:
-  terraform-destroy:
+  destroy:
+    name: Destroy
     environment: ${{ inputs.environment }}
     runs-on: self-hosted
     defaults:

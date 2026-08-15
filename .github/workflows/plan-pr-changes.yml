@@ -1,4 +1,4 @@
-name: Plan PR Changes
+name: Plan Deployment
 on:
   pull_request:
     branches:
@@ -10,24 +10,33 @@ permissions:
   id-token: write
 
 jobs:
-  get-environment:
-    uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
-    with:
-      branch: ${{ github.base_ref }}
-  platform:
+  parse-environment:
+    name: Parse Environment
+    runs-on: self-hosted
+    outputs:
+      environment: ${{ steps.get-branch-suffix.outputs.environment }}
+    steps:
+      - name: Extract deployment branch suffix
+        id: get-branch-suffix
+        run: |
+          branch=${{ github.base_ref }}
+          echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
+  plan-platform:
+    name: Plan Platform
     uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
-    needs: get-environment
+    needs: parse-environment
     with:
-      environment: ${{ needs.get-environment.outputs.branch_suffix }}
+      environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: platform
       sha: ${{ github.event.pull_request.head.sha }}
       working_dir: "./platform"
     secrets: inherit
-  workload:
+  plan-workload:
+    name: Plan Workload
     uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
     needs: [get-environment, platform]
     with:
-      environment: ${{ needs.get-environment.outputs.branch_suffix }}
+      environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: workload
       sha: ${{ github.event.pull_request.head.sha }}
       working_dir: "./workload"

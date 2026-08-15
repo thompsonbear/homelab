@@ -11,11 +11,19 @@ permissions:
   id-token: write
 
 jobs:
-  get-environment:
-    uses: thompsonbear/homelab/.github/workflows/deployment-branch-suffix.yml@main
-    with:
-      branch: ${{ github.ref_name }}
+  parse-environment:
+    name: Parse Environment
+    runs-on: self-hosted
+    outputs:
+      environment: ${{ steps.get-branch-suffix.outputs.environment }}
+    steps:
+      - name: Extract deployment branch suffix
+        id: get-branch-suffix
+        run: |
+          branch=${{ github.ref_name }}
+          echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
   get-pre-merge-sha:
+    name: Get Pre-merge SHA
     runs-on: self-hosted
     outputs:
       sha: ${{ steps.get-sha.outputs.sha }}
@@ -27,19 +35,21 @@ jobs:
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "Pre-merge SHA: $sha"
   platform:
+    name: Platform
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
-    needs: [get-environment, get-pre-merge-sha]
+    needs: [parse-environment, get-pre-merge-sha]
     with:
-      environment: ${{ needs.get-environment.outputs.branch_suffix }}
+      environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: platform
       sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
       working_dir: "./platform"
     secrets: inherit
   workload:
+    name: Workload
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
-    needs: [get-environment, get-pre-merge-sha, platform]
+    needs: [parse-environment, get-pre-merge-sha, platform]
     with:
-      environment: ${{ needs.get-environment.outputs.branch_suffix }}
+      environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: workload
       sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
       working_dir: "./workload"
