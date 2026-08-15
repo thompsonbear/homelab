@@ -20,8 +20,8 @@ jobs:
         run: |
           branch=${{ github.event.ref }}
           echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
-  destroy-workload:
-    name: Destroy Workload
+  workload:
+    name: Workload
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
     needs: parse-environment
@@ -30,8 +30,8 @@ jobs:
       storage_account_container_name: workload
       working_dir: "./workload"
     secrets: inherit
-  destroy-platform:
-    name: Destroy Platform
+  platform:
+    name: Platform
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
     needs: [parse-environment, workload]
