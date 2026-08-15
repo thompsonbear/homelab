@@ -31,7 +31,7 @@ apps = {
     # }
   }
   bluesky-pds = {
-    namespace = "bluesky-pds"
+    namespace = "bluesky"
     image_version = "0.4.208"
     chart = {
       name = "bluesky-pds"
