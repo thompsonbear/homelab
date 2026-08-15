@@ -59,12 +59,14 @@ jobs:
       - name: Check Plan Exists
         shell: bash
         run: |
-          export PLAN_EXISTS=$(az storage blob exists \
+          PLAN_EXISTS=$(az storage blob exists \
             --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
             --container-name ${{ inputs.storage_account_container_name }} \
             --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
-            --auth-mode login | jq -r '.exists')
-          echo "PLAN_EXISTS=$PLAN_EXISTS" >> $GITHUB_ENV
+            --auth-mode login \
+            --query exists \
+            -o tsv)
+          echo "PLAN_EXISTS=$PLAN_EXISTS" >> "$GITHUB_ENV"
 
       - name: Download Plan
         if: env.PLAN_EXISTS == 'true'
@@ -88,3 +90,13 @@ jobs:
         shell: bash
         run: |
           terraform apply -auto-approve
+
+      - name: Cleanup Plan Blob
+        if: success() && env.PLAN_EXISTS == 'true'
+        shell: bash
+        run: |
+          az storage blob delete \
+            --account-name ${{ secrets.AZ_STORAGE_ACCOUNT_NAME }} \
+            --container-name ${{ inputs.storage_account_container_name }} \
+            --name tfplan-${{ inputs.environment }}-${{ inputs.sha }} \
+            --auth-mode login
