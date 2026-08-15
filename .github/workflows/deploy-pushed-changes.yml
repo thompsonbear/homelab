@@ -21,7 +21,7 @@ jobs:
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: platform
-      sha: ${{ github.event.pull_request.head.sha }}
+      sha: ${{ github.sha }}
       working_dir: "./platform"
     secrets: inherit
   workload:
@@ -30,6 +30,6 @@ jobs:
     with:
       environment: ${{ needs.get-environment.outputs.branch_suffix }}
       storage_account_container_name: workload
-      sha: ${{ github.event.pull_request.head.sha }}
+      sha: ${{ github.sha }}
       working_dir: "./workload"
     secrets: inherit
