@@ -29,7 +29,7 @@ jobs:
         working-directory: ${{ inputs.working_dir }}
     env:
       ARM_USE_AZUREAD: "true"
-      TF_VAR_environment: ${{ github.base_ref }}
+      TF_VAR_environment: ${{ inputs.environment }}
       TF_VAR_az_key_vault_name: ${{ secrets.TF_VAR_AZ_KEY_VAULT_NAME }}
       TF_VAR_az_key_vault_rg: ${{ secrets.TF_VAR_AZ_KEY_VAULT_RG }}
       TF_VAR_network: ${{ secrets.TF_VAR_NETWORK }}
