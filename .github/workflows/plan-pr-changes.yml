@@ -34,7 +34,7 @@ jobs:
   workload:
     name: Workload
     uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
-    needs: [get-environment, platform]
+    needs: [parse-environment, platform]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: workload
