@@ -22,10 +22,10 @@ jobs:
     steps:
       - name: Get SHA
         id: get-sha
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
         run: |
-          echo sha=$("$GITHUB_CONTEXT"| jq '.event.commits[].id' | tail -2 | head -1 |sed 's/\"//g') >> $GITHUB_OUTPUT
+          sha=$(jq -r '.commits[-2].id' "$GITHUB_EVENT_PATH")
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Pre-merge SHA: $sha"
   platform:
     uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
     needs: [get-environment, get-pre-merge-sha]
