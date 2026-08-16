@@ -11,5 +11,5 @@ resource "helm_release" "cert_manager" {
   namespace = module.namespace.name
   version = var.tag
 
-  values = templatefile("${path.module}/resources/values.tftpl", { replicas = var.replicas })
+  values = [templatefile("${path.module}/resources/values.tftpl", { replicas = var.replicas })]
 }
