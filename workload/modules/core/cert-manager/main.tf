@@ -10,4 +10,6 @@ resource "helm_release" "cert_manager" {
   repository = "https://charts.jetstack.io"
   namespace = module.namespace.name
   version = var.tag
+
+  values = [templatefile("${path.module}/resources/values.tftpl", { replicas = var.replicas })]
 }
