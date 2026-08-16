@@ -1,0 +1,11 @@
+replicaCount: ${ replicas }
+webhook:
+  replicaCount: ${ replicas }
+cainjector:
+  replicaCount: ${ replicas }
+
+approveSignerNames:
+- issuers.cert-manager.io/*
+- clusterissuers.cert-manager.io/*
+- issuers.ejbca-issuer.keyfactor.com/*
+- clusterissuers.ejbca-issuer.keyfactor.com/*
