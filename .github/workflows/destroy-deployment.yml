@@ -23,7 +23,7 @@ jobs:
   workload:
     name: Workload
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
-    uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
+    uses: $/.github/workflows/tf-destroy.yml
     needs: parse-environment
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
@@ -33,7 +33,7 @@ jobs:
   platform:
     name: Platform
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
-    uses: thompsonbear/homelab/.github/workflows/tf-destroy.yml@main
+    uses: $/.github/workflows/tf-destroy.yml
     needs: [parse-environment, workload]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
