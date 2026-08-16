@@ -36,7 +36,7 @@ jobs:
           echo "Pre-merge SHA: $sha"
   platform:
     name: Platform
-    uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
+    uses: $/.github/workflows/tf-apply.yml
     needs: [parse-environment, get-pre-merge-sha]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
@@ -46,7 +46,7 @@ jobs:
     secrets: inherit
   workload:
     name: Workload
-    uses: thompsonbear/homelab/.github/workflows/tf-apply.yml@main
+    uses: $/.github/workflows/tf-apply.yml
     needs: [parse-environment, get-pre-merge-sha, platform]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}

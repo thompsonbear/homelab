@@ -23,7 +23,7 @@ jobs:
           echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
   platform:
     name: Platform
-    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
+    uses: $/.github/workflows/tf-plan.yml
     needs: parse-environment
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
@@ -33,7 +33,7 @@ jobs:
     secrets: inherit
   workload:
     name: Workload
-    uses: thompsonbear/homelab/.github/workflows/tf-plan.yml@main
+    uses: $/.github/workflows/tf-plan.yml
     needs: [parse-environment, platform]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
