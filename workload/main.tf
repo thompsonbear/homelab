@@ -10,7 +10,7 @@ module "cert_manager" {
 }
 
 module "app_namespaces" {
-  source   = "./modules/namespace"
+  source   = "./modules/core/namespace"
   for_each = toset(distinct([ for k, v in var.apps : try(v.namespace, k) ]))
   name     = each.key
 }
