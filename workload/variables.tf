@@ -15,6 +15,11 @@ variable "environment" {
   description = "The environment type (prod/staging/dev/etc.)"
 }
 
+variable "cert_manager_tag" {
+  type = string
+  description = "cert manager chart version tag"
+}
+
 variable "apps" {
   type = map(object({
     namespace = string
