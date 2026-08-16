@@ -4,6 +4,11 @@ module "akv" {
   resource_group = var.az_key_vault_rg
 }
 
+module "cert_manager" {
+  source = "./modules/core/cert-manager"
+  tag = var.cert_manager_tag
+}
+
 module "app_namespaces" {
   source   = "./modules/namespace"
   for_each = toset(distinct([ for k, v in var.apps : try(v.namespace, k) ]))
@@ -11,7 +16,7 @@ module "app_namespaces" {
 }
 
 module "apps" {
-  depends_on = [ module.app_namespaces ]
+  depends_on = [ module.cert_manager, module.app_namespaces ]
   source   = "./modules/app"
   for_each = var.apps
 
