@@ -16,7 +16,7 @@ resource "helm_release" "cert_manager" {
 
 resource "kubectl_manifest" "public_acme_issuer" {
   depends_on = [ helm_release.cert_manager ]
-  manifest = yamldecode({
+  yaml_body = yamldecode({
     "apiVersion" = "cert-manager.io/v1"
     "kind" =  "ClusterIssuer"
     "metadata" = {
