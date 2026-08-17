@@ -21,7 +21,7 @@ resource "kubernetes_secret_v1" "cloudflare_token" {
   }
   type = "Opaque"
   data = {
-    "cloudflare-token" = module.akv.secrets.cloudflare-token
+    "cloudflare-token" = var.cloudflare_token
   }
 }
 

@@ -10,6 +10,7 @@ module "cert_manager" {
   environment = "non-prod" # var.environment
   base_public_domain = module.akv.secrets.base-public-domain
   acme_email = module.akv.secrets.acme-email
+  cloudflare_token = module.akv.secrets.cloudflare-token
 }
 
 module "app_namespaces" {

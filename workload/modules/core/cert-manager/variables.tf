@@ -22,3 +22,9 @@ variable "environment" {
   type = string
   description = "environment"
 }
+
+variable "cloudflare_token" {
+  type = string
+  description = "Cloudflare DNS API token"
+  sensitive = true
+}
