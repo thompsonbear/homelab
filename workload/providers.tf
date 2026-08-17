@@ -57,4 +57,5 @@ provider "kubectl" {
   client_certificate     = local.k8s_client_cert
   client_key             = local.k8s_client_key
   cluster_ca_certificate = local.k8s_ca_cert
+  load_config_file       = false
 }
