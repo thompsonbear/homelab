@@ -13,6 +13,10 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = "3.2.1"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "3.0.0-beta3"
+    }
   }
 }
 
@@ -46,4 +50,12 @@ provider "kubernetes" {
   client_certificate     = local.k8s_client_cert
   client_key             = local.k8s_client_key
   cluster_ca_certificate = local.k8s_ca_cert
+}
+
+provider "kubectl" {
+  host                   = local.k8s_host
+  client_certificate     = local.k8s_client_cert
+  client_key             = local.k8s_client_key
+  cluster_ca_certificate = local.k8s_ca_cert
+  load_config_file       = false
 }
