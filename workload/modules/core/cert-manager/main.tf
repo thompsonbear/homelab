@@ -14,9 +14,20 @@ resource "helm_release" "cert_manager" {
   values = [templatefile("${path.module}/resources/values.tftpl", { replicas = var.replicas })]
 }
 
+resource "kubernetes_secret_v1" "cloudflare_token" {
+  metadata {
+    name = "cloudflare-token"
+    namespace = module.namespace.name
+  }
+  type = "Opaque"
+  data = {
+    "cloudflare-token" = module.akv.secrets.cloudflare-token
+  }
+}
+
 resource "kubectl_manifest" "public_acme_issuer" {
-  depends_on = [ helm_release.cert_manager ]
-  yaml_body = yamldecode({
+  depends_on = [ helm_release.cert_manager, kubernetes_secret_v1.cloudflare_token ]
+  yaml_body = yamlencode({
     "apiVersion" = "cert-manager.io/v1"
     "kind" =  "ClusterIssuer"
     "metadata" = {
