@@ -12,7 +12,7 @@ locals {
 
   all_nodes = merge(local.control_plane_nodes, local.worker_nodes)
 
-  network = module.akv.secrets["${var.environment}-network"]
+  network           = module.akv.secrets["${var.environment}-network"]
   network_mask_bits = split("/", local.network.subnet)[1]
 }
 

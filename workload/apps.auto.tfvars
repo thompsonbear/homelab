@@ -1,7 +1,7 @@
 apps = {
   home-assistant = {
-    namespace = "home-assistant"
-    image_version   = "2025.12.4"
+    namespace     = "home-assistant"
+    image_version = "2025.12.4"
     chart = {
       name    = "home-assistant"
       repo    = "https://pajikos.github.io/home-assistant-helm-chart/"
@@ -31,11 +31,11 @@ apps = {
     # }
   }
   bluesky-pds = {
-    namespace = "bluesky-pds"
+    namespace     = "bluesky-pds"
     image_version = "0.4.208"
     chart = {
-      name = "bluesky-pds"
-      repo = "https://charts.bear.fyi"
+      name    = "bluesky-pds"
+      repo    = "https://charts.bear.fyi"
       version = "0.4.208"
     }
     dns = {
@@ -44,7 +44,7 @@ apps = {
     }
     backend = {
       service = "bluesky-pds"
-      port = 80
+      port    = 80
     }
   }
 }
