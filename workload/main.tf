@@ -5,24 +5,30 @@ module "akv" {
 }
 
 module "cert_manager" {
-  source = "./modules/core/cert-manager"
-  tag = var.cert_manager_tag
-  environment = "non-prod" # var.environment
+  source             = "./modules/core/cert-manager"
+  tag                = var.cert_manager_tag
+  environment        = "non-prod" # var.environment
   base_public_domain = module.akv.secrets.base-public-domain
-  acme_email = module.akv.secrets.acme-email
-  cloudflare_token = module.akv.secrets.cloudflare-token
+  acme_email         = module.akv.secrets.acme-email
+  cloudflare_token   = module.akv.secrets.cloudflare-token
+}
+
+module "metallb" {
+  source  = "./modules/core/metallb"
+  tag     = var.metallb_tag
+  ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "app_namespaces" {
   source   = "./modules/core/namespace"
-  for_each = toset(distinct([ for k, v in var.apps : try(v.namespace, k) ]))
+  for_each = toset(distinct([for k, v in var.apps : try(v.namespace, k)]))
   name     = each.key
 }
 
 module "apps" {
-  depends_on = [ module.cert_manager, module.app_namespaces ]
-  source   = "./modules/app"
-  for_each = var.apps
+  depends_on = [module.cert_manager, module.app_namespaces]
+  source     = "./modules/app"
+  for_each   = var.apps
 
   namespace = try(each.value.namespace, each.key)
 
@@ -47,7 +53,7 @@ module "apps" {
     port    = try(each.value.backend.port, 80)
     } : {
     service = each.key
-    port = 80
+    port    = 80
   }
 
   keycloak = can(each.value.keycloak) ? each.value.keycloak : null
