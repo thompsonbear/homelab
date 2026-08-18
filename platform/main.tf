@@ -13,6 +13,7 @@ locals {
   all_nodes = merge(local.control_plane_nodes, local.worker_nodes)
 
   network = module.akv.secrets["${var.environment}-network"]
+  network_mask_bits = split("/", local.network.subnet)[1]
 }
 
 module "subnets" {
@@ -22,19 +23,19 @@ module "subnets" {
   networks = [
     {
       name     = null
-      new_bits = try(local.network.reserved_mask_bits, 29) - local.network.mask_bits
+      new_bits = try(local.network.reserved_mask_bits, 29) - local.network_mask_bits
     },
     {
       name     = "kube-vip"
-      new_bits = try(local.network.kube_vip_mask_bits, 31) - local.network.mask_bits
+      new_bits = try(local.network.kube_vip_mask_bits, 31) - local.network_mask_bits
     },
     {
       name     = "control-plane"
-      new_bits = try(local.network.control_plane_mask_bits, 29) - local.network.mask_bits
+      new_bits = try(local.network.control_plane_mask_bits, 29) - local.network_mask_bits
     },
     {
       name     = "workers"
-      new_bits = try(local.network.worker_mask_bits, 27) - local.network.mask_bits
+      new_bits = try(local.network.worker_mask_bits, 27) - local.network_mask_bits
     }
   ]
 }
