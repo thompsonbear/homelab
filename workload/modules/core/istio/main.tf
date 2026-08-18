@@ -75,11 +75,16 @@ resource "kubectl_manifest" "gateways" {
     }
     spec = {
       gatewayClassName = "istio"
-      allowedListeners = [{
+      listeners = [{
+        name     = "http"
+        port     = 80
+        protocol = "HTTP"
+      }]
+      allowedListeners = {
         namespaces = {
           from = "All"
         }
-      }]
+      }
       addresses = [{
         type  = "IPAddress"
         value = each.value.ip
