@@ -22,19 +22,19 @@ module "subnets" {
   networks = [
     {
       name     = null
-      new_bits = local.network.reserved_mask_bits - local.network.mask_bits
+      new_bits = try(local.network.reserved_mask_bits, 29) - local.network.mask_bits
     },
     {
       name     = "kube-vip"
-      new_bits = local.network.kube_vip_mask_bits - local.network.mask_bits
+      new_bits = try(local.network.kube_vip_mask_bits, 31) - local.network.mask_bits
     },
     {
       name     = "control-plane"
-      new_bits = local.network.control_plane_mask_bits - local.network.mask_bits
+      new_bits = try(local.network.control_plane_mask_bits, 29) - local.network.mask_bits
     },
     {
       name     = "workers"
-      new_bits = local.network.worker_mask_bits - local.network.mask_bits
+      new_bits = try(local.network.worker_mask_bits, 27) - local.network.mask_bits
     }
   ]
 }
