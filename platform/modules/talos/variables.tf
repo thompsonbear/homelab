@@ -6,12 +6,14 @@ variable "talos_version" {
   type = string
 }
 
-variable "network" {
-  type = object({
-    dns_server_list   = list(string)
-    dns_search_domain = string
-  })
-  description = "the deployment network details"
+variable "dns_servers" {
+  type        = list(string)
+  description = "The DNS servers for the network (e.g. [\"8.8.8.8\"])"
+}
+
+variable "dns_search_domain" {
+  type        = string
+  description = "The DNS search domain for the network (e.g. example.local)"
 }
 
 variable "kube_vip" {

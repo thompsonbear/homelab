@@ -11,28 +11,31 @@ locals {
   }) }
 
   all_nodes = merge(local.control_plane_nodes, local.worker_nodes)
+
+  network = module.akv.secrets["${var.environment}-network"]
+  network_mask_bits = split("/", local.network.subnet)[1]
 }
 
 module "subnets" {
   source = "hashicorp/subnets/cidr"
 
-  base_cidr_block = "${var.network.gateway_addr}/${var.network.mask_bits}"
+  base_cidr_block = local.network.subnet
   networks = [
     {
       name     = null
-      new_bits = var.network.reserved_mask_bits - var.network.mask_bits
+      new_bits = try(local.network.reserved_mask_bits, 29) - local.network_mask_bits
     },
     {
       name     = "kube-vip"
-      new_bits = var.network.kube_vip_mask_bits - var.network.mask_bits
+      new_bits = try(local.network.kube_vip_mask_bits, 31) - local.network_mask_bits
     },
     {
       name     = "control-plane"
-      new_bits = var.network.control_plane_mask_bits - var.network.mask_bits
+      new_bits = try(local.network.control_plane_mask_bits, 29) - local.network_mask_bits
     },
     {
       name     = "workers"
-      new_bits = var.network.worker_mask_bits - var.network.mask_bits
+      new_bits = try(local.network.worker_mask_bits, 27) - local.network_mask_bits
     }
   ]
 }
@@ -44,17 +47,21 @@ module "akv" {
 }
 
 module "unifi" {
-  source      = "./modules/unifi"
-  environment = var.environment
-  network     = var.network
-  vms         = local.all_nodes
+  source            = "./modules/unifi"
+  environment       = var.environment
+  vlan_tag          = local.network.vlan_tag
+  subnet            = local.network.subnet
+  dns_search_domain = local.network.dns_search_domain
+  firewall_zone     = local.network.firewall_zone
+  vms               = local.all_nodes
 }
 
 module "pve" {
   depends_on   = [module.unifi]
   source       = "./modules/pve"
   environment  = var.environment
-  network      = var.network
+  subnet       = local.network.subnet
+  vlan_tag     = local.network.vlan_tag
   pve_nodes    = var.pve_nodes
   iso_filename = var.talos_iso_filename
   vms          = local.all_nodes
@@ -65,7 +72,8 @@ module "talos" {
   source              = "./modules/talos"
   environment         = var.environment
   talos_version       = var.talos_version
-  network             = var.network
+  dns_search_domain   = local.network.dns_search_domain
+  dns_servers         = local.network.dns_servers
   control_plane_nodes = local.control_plane_nodes
   worker_nodes        = local.worker_nodes
   kube_vip            = cidrhost(module.subnets.network_cidr_blocks["kube-vip"], 0)

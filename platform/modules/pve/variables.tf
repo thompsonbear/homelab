@@ -7,20 +7,14 @@ variable "environment" {
   type = string
 }
 
-variable "network" {
-  type = object({
-    mask_bits         = number
-    gateway_addr      = string
-    vlan_tag          = number
-    dns_server_list   = list(string)
-    dns_search_domain = string
-  })
-  description = "the deployment network details"
+variable "subnet" {
+  type        = string
+  description = "The network subnet in cidr notation with the gateway address (e.g. 10.0.0.1/24)"
+}
 
-  validation {
-    condition     = var.network.mask_bits > 0 && var.network.mask_bits < 32
-    error_message = "mask_bits must be a number within 0 and 32"
-  }
+variable "vlan_tag" {
+  type        = number
+  description = "The VLAN tag for the vm network (e.g. 100)"
 }
 
 variable "pve_nodes" {
