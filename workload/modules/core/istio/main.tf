@@ -2,7 +2,7 @@ locals {
   istio_repo = "https://istio-release.storage.googleapis.com/charts"
   gateway_api_crds = {
     for manifest in provider::kubernetes::manifest_decode_multi(file("${path.module}/resources/gateway-api-crds.yaml")) :
-    manifest.metadata.name => { for key, value in manifest : key => value if key != "status" }
+      "${manifest.kind}/${manifest.metadata.name}" => { for key, value in manifest : key => value if key != "status" }
   }
   gateways = {
     public  = { ip = cidrhost(var.ip_pool, 0) }
