@@ -15,21 +15,6 @@ variable "environment" {
   description = "The environment type (prod/staging/dev/etc.)"
 }
 
-variable "network" {
-  type = object({
-    mask_bits               = number
-    gateway_addr            = string
-    vlan_tag                = number
-    dns_server_list         = list(string)
-    dns_search_domain       = string
-    firewall_zone           = string
-    reserved_mask_bits      = optional(number, 29) # 8 hosts
-    kube_vip_mask_bits      = optional(number, 31) # 2 hosts
-    control_plane_mask_bits = optional(number, 29) # 8 hosts
-    worker_mask_bits        = optional(number, 27) # 32 hosts
-  })
-}
-
 variable "pve_nodes" {
   type = map(object({
     vm_network = optional(object({
