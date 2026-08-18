@@ -1,22 +1,22 @@
 module "namespace" {
-  source = "../namespace"
-  name = "cert-manager"
+  source     = "../namespace"
+  name       = "cert-manager"
   privileged = true
 }
 
 resource "helm_release" "cert_manager" {
-  name = "cert-manager"
-  chart = "cert-manager"
+  name       = "cert-manager"
+  chart      = "cert-manager"
   repository = "https://charts.jetstack.io"
-  namespace = module.namespace.name
-  version = var.tag
+  namespace  = module.namespace.name
+  version    = var.tag
 
   values = [templatefile("${path.module}/resources/values.tftpl", { replicas = var.replicas })]
 }
 
 resource "kubernetes_secret_v1" "cloudflare_token" {
   metadata {
-    name = "cloudflare-token"
+    name      = "cloudflare-token"
     namespace = module.namespace.name
   }
   type = "Opaque"
@@ -26,10 +26,10 @@ resource "kubernetes_secret_v1" "cloudflare_token" {
 }
 
 resource "kubectl_manifest" "public_acme_issuer" {
-  depends_on = [ helm_release.cert_manager, kubernetes_secret_v1.cloudflare_token ]
+  depends_on = [helm_release.cert_manager, kubernetes_secret_v1.cloudflare_token]
   yaml_body = yamlencode({
     "apiVersion" = "cert-manager.io/v1"
-    "kind" =  "ClusterIssuer"
+    "kind"       = "ClusterIssuer"
     "metadata" = {
       "name" = "public-acme"
     }
@@ -39,7 +39,7 @@ resource "kubectl_manifest" "public_acme_issuer" {
         "privateKeySecretRef" = {
           "name" = "public-acme"
         }
-        "server" =  var.environment == "prod" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"
+        "server" = var.environment == "prod" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"
         "solvers" = [{
           "dns01" = {
             "cloudflare" = {
