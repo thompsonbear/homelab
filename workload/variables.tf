@@ -25,6 +25,11 @@ variable "metallb_tag" {
   description = "metallb chart/image version tag - x.y.z"
 }
 
+variable "istio_tag" {
+  type        = string
+  description = "istio charts/images version tag - x.y.z"
+}
+
 variable "apps" {
   type = map(object({
     namespace     = string

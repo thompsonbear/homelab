@@ -19,6 +19,12 @@ module "metallb" {
   ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
+module "istio" {
+  source  = "./modules/core/istio"
+  tag     = var.istio_tag
+  ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
+}
+
 module "app_namespaces" {
   source   = "./modules/core/namespace"
   for_each = toset(distinct([for k, v in var.apps : try(v.namespace, k)]))
