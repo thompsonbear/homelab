@@ -16,7 +16,7 @@ module "cert_manager" {
 module "metallb" {
   source  = "./modules/core/metallb"
   tag     = var.metallb_tag
-  ip_pool = module.akv.secrets["${var.environment}-network"].lb-ip-pool
+  ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "app_namespaces" {
