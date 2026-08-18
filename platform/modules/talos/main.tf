@@ -88,13 +88,13 @@ resource "talos_machine_configuration_apply" "controlplanes_config_apply" {
               ip = "${var.kube_vip}"
             }
           }]
-          nameservers   = var.network.dns_server_list
-          searchDomains = [var.network.dns_search_domain]
+          nameservers   = var.dns_servers
+          searchDomains = [var.dns_search_domain]
           extraHostEntries = [{
             ip = each.value.ip
             aliases = [
               each.key,
-              "${each.key}.${var.network.dns_search_domain}"
+              "${each.key}.${var.dns_search_domain}"
             ]
           }]
         }
@@ -132,13 +132,13 @@ resource "talos_machine_configuration_apply" "workers_config_apply" {
           }]
         }
         network = {
-          nameservers   = var.network.dns_server_list
-          searchDomains = [var.network.dns_search_domain]
+          nameservers   = var.dns_servers
+          searchDomains = [var.dns_search_domain]
           extraHostEntries = [{
             ip = each.value.ip
             aliases = [
               each.key,
-              "${each.key}.${var.network.dns_search_domain}"
+              "${each.key}.${var.dns_search_domain}"
             ]
           }]
         }

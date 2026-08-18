@@ -10,7 +10,7 @@ resource "proxmox_vm_qemu" "vms" {
   os_type = "cloud_init"
 
   tags        = "${var.environment},${each.value.role}"
-  description = "environment: ${var.environment}\nrole: ${each.value.role}\nvcores: ${each.value.vcores}\nmemory: ${each.value.ram_mb / 1024}GB"
+  description = "- environment: ${var.environment}\n- role: ${each.value.role}\n- vcores: ${each.value.vcores}\n- memory: ${each.value.ram_mb / 1024}GB"
 
   target_node        = each.value.pve_node != null ? each.value.pve_node : local.default_pve_node
   agent              = 1
@@ -25,7 +25,7 @@ resource "proxmox_vm_qemu" "vms" {
     id     = 0
     model  = var.pve_nodes[each.value.pve_node != null ? each.value.pve_node : local.default_pve_node].vm_network.iface_model
     bridge = var.pve_nodes[each.value.pve_node != null ? each.value.pve_node : local.default_pve_node].vm_network.bridge_iface
-    tag    = var.network.vlan_tag
+    tag    = var.vlan_tag
   }
 
   disk {
@@ -57,7 +57,7 @@ resource "proxmox_vm_qemu" "vms" {
   }
 
   boot      = "order=virtio0;ide0"
-  ipconfig0 = "ip=${each.value.ip}/${tostring(var.network.mask_bits)},gw=${var.network.gateway_addr}"
+  ipconfig0 = "ip=${each.value.ip}/${split("/", var.subnet)[1]},gw=${split("/", var.subnet)[0]}"
 
   startup_shutdown {
     order            = null
