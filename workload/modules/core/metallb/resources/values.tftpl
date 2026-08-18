@@ -1,0 +1,21 @@
+crds:
+  enabled: true
+controller:
+  enabled: true
+  image:
+    repository: quay.io/metallb/controller
+    tag: v${tag}
+  serviceAccount:
+    create: true
+    name: "metallb-controller-svc"
+
+speaker:
+  enabled: true
+  image:
+    repository: quay.io/metallb/speaker
+    tag: v${tag}
+    pullPolicy:
+  serviceAccount:
+    create: true
+    name: "metallb-speaker-svc"
+  ignoreExcludeLB: true

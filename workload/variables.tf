@@ -16,14 +16,19 @@ variable "environment" {
 }
 
 variable "cert_manager_tag" {
-  type = string
-  description = "cert manager chart version tag"
+  type        = string
+  description = "cert manager chart/image version tag - x.y.z"
+}
+
+variable "metallb_tag" {
+  type        = string
+  description = "metallb chart/image version tag - x.y.z"
 }
 
 variable "apps" {
   type = map(object({
-    namespace = string
-    image_version   = string
+    namespace     = string
+    image_version = string
     chart = object({
       name    = optional(string)
       repo    = string
