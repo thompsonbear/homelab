@@ -20,7 +20,7 @@ resource "helm_release" "mayastor" {
   })]
 }
 
-resource "kubernetes_storage_class" "storage_classes" {
+resource "kubernetes_storage_class_v1" "storage_classes" {
   depends_on = [ helm_release.mayastor ]
   count = 3
   metadata {
