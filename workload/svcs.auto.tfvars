@@ -1,3 +1,4 @@
-cert_manager_tag = "v1.21.1"
+cert_manager_tag = "1.21.1"
 metallb_tag      = "0.16.1"
 istio_tag        = "1.30.3"
+mayastor_tag     = "2.11.1"

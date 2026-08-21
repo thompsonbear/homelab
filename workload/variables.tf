@@ -30,6 +30,11 @@ variable "istio_tag" {
   description = "istio charts/images version tag - x.y.z"
 }
 
+variable "mayastor_tag" {
+  type        = string
+  description = "mayastor chart/image version tag - x.y.z"
+}
+
 variable "apps" {
   type = map(object({
     namespace     = string
