@@ -35,6 +35,15 @@ variable "mayastor_tag" {
   description = "mayastor chart/image version tag - x.y.z"
 }
 
+variable "cnpg" {
+  type = object({
+    image_tag = string
+    chart_tag = string
+  })
+  description = "cnpg chart/image version tags - x.y.z"
+}
+
+
 variable "apps" {
   type = map(object({
     namespace     = string

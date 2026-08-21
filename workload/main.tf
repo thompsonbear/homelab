@@ -31,6 +31,12 @@ module "mayastor" {
   tag    = var.mayastor_tag
 }
 
+module "cnpg_operator" {
+  source    = "./modules/core/cnpg-operator"
+  image_tag = var.cnpg.image_tag
+  chart_tag = var.cnpg.chart_tag
+}
+
 module "app_namespaces" {
   source   = "./modules/core/namespace"
   for_each = toset(distinct([for k, v in var.apps : try(v.namespace, k)]))
