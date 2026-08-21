@@ -15,34 +15,19 @@ variable "environment" {
   description = "The environment type (prod/staging/dev/etc.)"
 }
 
-variable "cert_manager_tag" {
-  type        = string
-  description = "cert manager chart/image version tag - x.y.z"
-}
-
-variable "metallb_tag" {
-  type        = string
-  description = "metallb chart/image version tag - x.y.z"
-}
-
-variable "istio_tag" {
-  type        = string
-  description = "istio charts/images version tag - x.y.z"
-}
-
-variable "mayastor_tag" {
-  type        = string
-  description = "mayastor chart/image version tag - x.y.z"
-}
-
-variable "cnpg" {
+variable "system" {
   type = object({
-    image_tag = string
-    chart_tag = string
+    cert_manager_tag = string
+    metallb_tag      = string
+    istio_tag        = string
+    mayastor_tag     = string
+    cnpg             = object({
+      image_tag = string
+      chart_tag = string
+    })
   })
-  description = "cnpg chart/image version tags - x.y.z"
+  description = "system chart/image version tags - x.y.z"
 }
-
 
 variable "apps" {
   type = map(object({
