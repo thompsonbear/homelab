@@ -5,7 +5,6 @@ module "namespace" {
 }
 
 resource "helm_release" "mayastor" {
-  depends_on = [kubernetes_manifest.gateway_api_crds]
   name       = "mayastor"
   chart      = "mayastor"
   repository = "https://openebs.github.io/mayastor-extensions/"
