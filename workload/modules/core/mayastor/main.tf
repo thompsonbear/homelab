@@ -11,7 +11,7 @@ resource "helm_release" "mayastor" {
   repository = "https://openebs.github.io/mayastor-extensions/"
   namespace  = module.namespace.name
   version    = var.tag
-  values = [templatefile("${path.root}/resources/values.tftpl", {
+  values = [templatefile("${path.module}/resources/values.tftpl", {
     alloy_enabled = var.alloy_enabled
     loki_enabled   = var.loki_enabled
     agents_ha_enabled = var.agents_ha_enabled
