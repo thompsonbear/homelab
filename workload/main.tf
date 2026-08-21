@@ -20,9 +20,15 @@ module "metallb" {
 }
 
 module "istio" {
-  source  = "./modules/core/istio"
-  tag     = var.istio_tag
-  ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
+  depends_on = [module.metallb]
+  source     = "./modules/core/istio"
+  tag        = var.istio_tag
+  ip_pool    = module.akv.secrets["${var.environment}-network"].lb_ip_pool
+}
+
+module "mayastor" {
+  source = "./modules/core/mayastor"
+  tag    = var.mayastor_tag
 }
 
 module "app_namespaces" {
@@ -32,7 +38,7 @@ module "app_namespaces" {
 }
 
 module "apps" {
-  depends_on = [module.cert_manager, module.app_namespaces]
+  depends_on = [module.cert_manager, module.istio, module.mayastor, module.app_namespaces]
   source     = "./modules/app"
   for_each   = var.apps
 

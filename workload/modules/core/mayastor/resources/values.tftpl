@@ -1,0 +1,17 @@
+agents:
+  ha:
+    enabled: ${agents_ha_enabled}
+apis:
+  rest:
+    replicaCount: ${rest_replicas}
+etcd:
+  replicaCount: ${etcd_replicas}
+loki:
+  enabled: ${loki_enabled}
+alloy:
+  enabled: ${alloy_enabled}
+nats:
+  cluster:
+    replicas: ${nats_replicas}
+storageClass:
+  enabled: false
