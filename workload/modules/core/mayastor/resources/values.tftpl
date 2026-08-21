@@ -12,6 +12,7 @@ alloy:
   enabled: ${alloy_enabled}
 nats:
   cluster:
+    enabled: ${nats_replicas > 1 ? true : false}
     replicas: ${nats_replicas}
 storageClass:
   enabled: false
