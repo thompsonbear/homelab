@@ -6,7 +6,7 @@ module "akv" {
 
 module "cert_manager" {
   source             = "./modules/core/cert-manager"
-  tag                = var.cert_manager_tag
+  tag                = var.system.cert_manager_tag
   environment        = "non-prod" # var.environment
   base_public_domain = module.akv.secrets.base-public-domain
   acme_email         = module.akv.secrets.acme-email
@@ -15,26 +15,26 @@ module "cert_manager" {
 
 module "metallb" {
   source  = "./modules/core/metallb"
-  tag     = var.metallb_tag
+  tag     = var.system.metallb_tag
   ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "istio" {
   depends_on = [module.metallb]
   source     = "./modules/core/istio"
-  tag        = var.istio_tag
+  tag        = var.system.istio_tag
   ip_pool    = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "mayastor" {
   source = "./modules/core/mayastor"
-  tag    = var.mayastor_tag
+  tag    = var.system.mayastor_tag
 }
 
 module "cnpg_operator" {
   source    = "./modules/core/cnpg-operator"
-  image_tag = var.cnpg.image_tag
-  chart_tag = var.cnpg.chart_tag
+  image_tag = var.system.cnpg.image_tag
+  chart_tag = var.system.cnpg.chart_tag
 }
 
 module "app_namespaces" {

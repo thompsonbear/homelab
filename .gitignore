@@ -18,8 +18,7 @@ crash.*.log
 *.tfvars
 *.tfvars.json
 !platform.auto.tfvars
-!apps.auto.tfvars
-!system.auto.tfvars
+!workload.auto.tfvars
 
 # Ignore override files as they are usually used to override resources locally and so
 # are not checked in
