@@ -35,6 +35,44 @@ module "cnpg_operator" {
   source    = "./modules/core/cnpg-operator"
   image_tag = var.system.cnpg.image_tag
   chart_tag = var.system.cnpg.chart_tag
+  pg_images = [{
+    major = 15
+    image = "ghcr.io/cloudnative-pg/postgresql:15.19-202608170814-minimal-trixie@sha256:67b23fdf6dbf3d5bc5dc42cdbc5d292375582b1fe378c1dc69eb51c6fbc57730"
+    }, {
+    major = 16
+    image = "ghcr.io/cloudnative-pg/postgresql:16.15-202608170814-minimal-trixie@sha256:e3041d59a94c072fa2fd4436b82ecdf34afc9d38c8cf2b836b009b09a1744c63"
+    }, {
+    major = 17
+    image = "ghcr.io/cloudnative-pg/postgresql:17.11-202608170816-minimal-trixie@sha256:445ead3fd811466950a002b682a97c2a4907078b46fae8796b6637a763266a07"
+    }, {
+    major = 18
+    image = "ghcr.io/cloudnative-pg/postgresql:18.6-202608170814-minimal-trixie@sha256:eb7979e4bd7fccaec0369b550b9649eec1f014de04621fac6e653244e75cca46"
+  }]
+}
+
+module "test_cnpg_cluster1" {
+  depends_on = [module.cnpg_operator, module.mayastor]
+  source     = "./modules/opt/cnpg-cluster"
+  pg_version = 17
+  namespace  = "default"
+  replicas   = 1
+  data_gb    = 20
+  wal_gb     = 5
+  db = {
+    name = "test1"
+  }
+}
+
+module "test_cnpg_cluster2" {
+  depends_on = [module.cnpg_operator, module.mayastor]
+  source     = "./modules/opt/cnpg-cluster"
+  pg_version = 18
+  namespace  = "default"
+  replicas   = 1
+  data_gb    = 15
+  db = {
+    name = "test2"
+  }
 }
 
 module "app_namespaces" {
