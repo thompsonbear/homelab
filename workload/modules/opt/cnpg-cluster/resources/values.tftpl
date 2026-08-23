@@ -17,6 +17,9 @@ cluster:
     database: ${ initdb.name }
     locale: ${ initdb.locale }
     encoding: ${ initdb.encoding }
-    %{ if length(initdb.sql) != 0 }
-    postInitSQL: ${ yamlencode(initdb.sql) }
-    %{ endif }
+%{ if length(initdb.sql) != 0 }
+    postInitSQL:
+%{ for query in initdb.sql }
+        - ${ query }
+%{ endfor }
+%{ endif }
