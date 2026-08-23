@@ -18,3 +18,17 @@ resource "helm_release" "cnpg-operator" {
     value = var.image_tag
   }]
 }
+
+resource "kubectl_manifest" "pg_global_image_catalog" {
+  depends_on = [helm_release.cnpg-operator]
+  yaml_body = yamlencode({
+    apiVersion = "postgresql.cnpg.io/v1"
+    kind       = "ClusterImageCatalog"
+    metadata = {
+      name = "postgresql-global"
+    }
+    spec = {
+      images = var.pg_images
+    }
+  })
+}

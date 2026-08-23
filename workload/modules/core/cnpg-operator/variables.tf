@@ -13,3 +13,8 @@ variable "replicas" {
   description = "The number of replicas to use for the cnpg-operator"
   default     = 1
 }
+
+variable "pg_images" {
+  type        = list(object({ major = number, image = string }))
+  description = "The PostgreSQL images to use for the global image catalog"
+}

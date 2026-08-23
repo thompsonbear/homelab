@@ -21,7 +21,7 @@ variable "system" {
     metallb_tag      = string
     istio_tag        = string
     mayastor_tag     = string
-    cnpg             = object({
+    cnpg = object({
       image_tag = string
       chart_tag = string
     })

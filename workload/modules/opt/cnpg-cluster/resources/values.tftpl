@@ -1,0 +1,25 @@
+mode: standalone
+version:
+    postgresql: ${ pg_version }
+cluster:
+  instances: ${ replicas }
+  imageCatalogRef:
+    kind: ClusterImageCatalog
+    name: postgresql-global
+  storage:
+    size: ${ data_gb }Gi
+    storageClass: "mayastor-1"
+  walStorage:
+    enabled: ${ wal_gb != 0 }
+    size: ${ wal_gb }Gi
+    storageClass: "mayastor-1"
+  initdb:
+    database: ${ initdb.name }
+    locale: ${ initdb.locale }
+    encoding: ${ initdb.encoding }
+%{ if length(initdb.sql) != 0 ~}
+    postInitSQL:
+%{ for query in initdb.sql ~}
+      - ${ query }
+%{ endfor ~}
+%{ endif ~}
