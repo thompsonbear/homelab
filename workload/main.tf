@@ -50,35 +50,6 @@ module "cnpg_operator" {
   }]
 }
 
-module "test_cnpg_cluster1" {
-  depends_on = [module.cnpg_operator, module.mayastor]
-  source     = "./modules/opt/cnpg-cluster"
-  pg_version = 17
-  namespace  = "default"
-  replicas   = 1
-  data_gb    = 20
-  wal_gb     = 5
-  db = {
-    name = "test1"
-    sql = [
-      "CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT);",
-      "SELECT * FROM test;"
-    ]
-  }
-}
-
-module "test_cnpg_cluster2" {
-  depends_on = [module.cnpg_operator, module.mayastor]
-  source     = "./modules/opt/cnpg-cluster"
-  pg_version = 18
-  namespace  = "default"
-  replicas   = 1
-  data_gb    = 15
-  db = {
-    name = "test2"
-  }
-}
-
 module "app_namespaces" {
   source   = "./modules/core/namespace"
   for_each = toset(distinct([for k, v in var.apps : try(v.namespace, k)]))
