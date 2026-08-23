@@ -60,6 +60,10 @@ module "test_cnpg_cluster1" {
   wal_gb     = 5
   db = {
     name = "test1"
+    sql = [
+      "CREATE TABLE test (id SERIAL PRIMARY KEY, name TEXT);",
+      "SELECT * FROM test;"
+    ]
   }
 }
 
