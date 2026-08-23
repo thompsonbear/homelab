@@ -1,3 +1,8 @@
+variable "app_name" {
+  type        = string
+  description = "Name of the related application"
+}
+
 variable "namespace" {
   type        = string
   description = "Namespace for the CNPG cluster"
