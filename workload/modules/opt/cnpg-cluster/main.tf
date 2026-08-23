@@ -18,3 +18,8 @@ resource "helm_release" "cnpg_cluster" {
     }
   })]
 }
+
+resource "time_sleep" "wait_for_cnpg" {
+  depends_on = [helm_release.cnpg_cluster]
+  create_duration = "60s"
+}
