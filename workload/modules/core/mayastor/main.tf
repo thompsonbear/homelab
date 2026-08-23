@@ -24,11 +24,11 @@ resource "kubernetes_storage_class_v1" "storage_classes" {
   depends_on = [helm_release.mayastor]
   count      = 3
   metadata {
-    name = "mayastor-${count.index}"
+    name = "mayastor-${count.index + 1}"
   }
   parameters = {
     protocol = "nvmf"
-    repl     = "${count.index}"
+    repl     = "${count.index + 1}"
   }
   storage_provisioner = "io.openebs.csi-mayastor"
   reclaim_policy      = "Retain"
