@@ -36,7 +36,6 @@ variable "wal_gb" {
 variable "db" {
   type = object({
     name     = string
-    locale   = optional(string, "en_US.utf8")
     encoding = optional(string, "UTF8")
     sql      = optional(list(string), [])
   })

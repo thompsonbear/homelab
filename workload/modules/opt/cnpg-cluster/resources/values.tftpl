@@ -15,7 +15,6 @@ cluster:
     storageClass: "mayastor-1"
   initdb:
     database: ${ initdb.name }
-    locale: ${ initdb.locale }
     encoding: ${ initdb.encoding }
 %{ if length(initdb.sql) != 0 ~}
     postInitSQL:

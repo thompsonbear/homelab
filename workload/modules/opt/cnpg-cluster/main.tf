@@ -12,7 +12,6 @@ resource "helm_release" "cnpg_cluster" {
     wal_gb     = var.wal_gb
     initdb = {
       name     = var.db.name
-      locale   = var.db.locale
       encoding = var.db.encoding
       sql      = var.db.sql
     }
