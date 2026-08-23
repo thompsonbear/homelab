@@ -20,6 +20,6 @@ cluster:
 %{ if length(initdb.sql) != 0 ~}
     postInitSQL:
 %{ for query in initdb.sql ~}
-        - ${ query }
+      - ${ query }
 %{ endfor ~}
 %{ endif ~}
