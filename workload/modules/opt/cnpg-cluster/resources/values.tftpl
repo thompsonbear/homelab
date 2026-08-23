@@ -17,4 +17,9 @@ cluster:
     database: ${ initdb.name }
     locale: ${ initdb.locale }
     encoding: ${ initdb.encoding }
-    postInitSQL: ${ initdb.sql }
+    %{ if initdb.sql != []}
+    postInitSQL:
+    %{ for query in initdb.sql ~}
+      - ${ query }
+    %{ endfor ~}
+    %{ endif ~}
