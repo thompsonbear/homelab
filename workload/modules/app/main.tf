@@ -57,7 +57,7 @@ resource "kubectl_manifest" "cert" {
       renewBefore = "336h"  # 14 days
       privateKey = {
         algorithm = "ECDSA"
-        size      = "384"
+        size      = 384
         encoding  = "PKCS8"
       }
 
