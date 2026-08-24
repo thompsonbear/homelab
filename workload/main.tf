@@ -51,9 +51,10 @@ module "cnpg_operator" {
 }
 
 module "keycloak" {
-  depends_on = [module.cnpg_operator, module.mayastor, module.istio, module.cert_manager]
-  source     = "./modules/core/keycloak"
-  tag        = var.system.keycloak_tag
+  depends_on         = [module.cnpg_operator, module.mayastor, module.istio, module.cert_manager]
+  source             = "./modules/core/keycloak"
+  tag                = var.system.keycloak_tag
+  base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
 }
 
 module "app_namespaces" {
