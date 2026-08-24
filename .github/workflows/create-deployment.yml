@@ -48,7 +48,7 @@ jobs:
     name: Workload Terraform
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: $/.github/workflows/tf-apply.yml
-    needs: [parse-environment, get-pre-merge-sha, platform]
+    needs: [parse-environment, get-pre-merge-sha, platform-terraform]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: workload

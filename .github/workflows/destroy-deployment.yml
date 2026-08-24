@@ -34,7 +34,7 @@ jobs:
     name: Platform Terraform
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: $/.github/workflows/tf-destroy.yml
-    needs: [parse-environment, workload]
+    needs: [parse-environment, workload-terraform]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: platform

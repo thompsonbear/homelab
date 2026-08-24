@@ -1,9 +1,7 @@
 locals {
-  default_manifests_dir = "${path.root}/resources/${var.app_name}/manifests"
-
   manifests_dir = coalesce(
     var.manifests_dir,
-    local.default_manifests_dir
+    "${path.root}/resources/${var.app_name}/manifests"
   )
 
   yaml_files = fileset(
@@ -14,35 +12,37 @@ locals {
   manifest_lists = [
     for file in local.yaml_files :
     provider::kubernetes::manifest_decode_multi(
-      "${local.manifests_dir}/${file}"
+      templatefile("${local.manifests_dir}/${file}", local.template_vars)
     )
   ]
 
-  manifest_list = flatten(local.manifest_lists)
-
   manifests = {
-    for manifest in local.manifest_list :
+    for manifest in flatten(local.manifest_lists) :
     join("/", [
       manifest.kind,
       try(manifest.metadata.namespace, "cluster"),
       manifest.metadata.name
     ]) => manifest
   }
-}
 
-resource "kubernetes_manifest" "app_manifests" {
-  for_each = local.manifests
-  manifest = each.value
+  template_vars = {
+    app_name  = var.app_name
+    namespace = var.namespace
+    tag       = var.image_tag
+    fqdn      = "${var.dns.labels[0]}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"
+    fqdns     = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
+    postgres  = module.cnpg_cluster.0.db
+  }
 }
 
 module "cnpg_cluster" {
   count      = var.postgres != null ? 1 : 0
   source     = "../opt/cnpg-cluster"
-  tag        = var.postgres.chart_tag
-  replicas   = var.postgres.replicas
   app_name   = var.app_name
   namespace  = var.namespace
+  tag        = var.postgres.chart_tag
   pg_version = var.postgres.version
+  replicas   = var.postgres.replicas
   base_gb    = var.postgres.base_gb
   wal_gb     = var.postgres.wal_gb
   db = {
@@ -50,4 +50,10 @@ module "cnpg_cluster" {
     encoding = var.postgres.encoding
     sql      = var.postgres.sql
   }
+}
+
+resource "kubernetes_manifest" "app_manifests" {
+  depends_on = [module.cnpg_cluster]
+  for_each   = local.manifests
+  manifest   = each.value
 }

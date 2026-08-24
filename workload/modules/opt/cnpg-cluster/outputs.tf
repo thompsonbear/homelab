@@ -1,0 +1,8 @@
+output "db" {
+  value = {
+    name   = var.db.name
+    host   = "${var.app_name}-cnpg-cluster-rw.${var.namespace}.svc.cluster.local"
+    port   = 5432
+    secret = "${var.app_name}-cnpg-cluster-app"
+  }
+}

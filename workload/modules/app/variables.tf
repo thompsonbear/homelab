@@ -8,7 +8,27 @@ variable "namespace" {
   description = "The namespace of the app"
 }
 
-variable "image_version" {
+variable "base_public_domain" {
+  type        = string
+  description = "The public domain assigned to public apps"
+  default     = null
+  validation {
+    error_message = "base_public_domain can not be empty when dns.public is true"
+    condition     = var.base_public_domain != null || var.dns.public == false
+  }
+}
+
+variable "base_private_domain" {
+  type        = string
+  description = "The private domain assigned to non-public apps"
+  default     = null
+  validation {
+    error_message = "base_private_domain can not be empty when dns.public is false"
+    condition     = var.base_private_domain != null || var.dns.public == true
+  }
+}
+
+variable "image_tag" {
   type        = string
   description = "The image version of the app"
   default     = "latest"
@@ -33,7 +53,7 @@ variable "manifests_dir" {
 variable "dns" {
   type = object({
     labels = list(string)
-    public = optional(bool, null)
+    public = optional(bool, false)
   })
 }
 
