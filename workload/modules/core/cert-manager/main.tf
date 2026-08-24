@@ -25,7 +25,7 @@ resource "kubernetes_secret_v1" "cloudflare_token" {
   }
 }
 
-resource "kubectl_manifest" "public_acme_issuer" {
+resource "kubectl_manifest" "letsencrypt_issuer" {
   depends_on = [helm_release.cert_manager, kubernetes_secret_v1.cloudflare_token]
   yaml_body = yamlencode({
     "apiVersion" = "cert-manager.io/v1"
