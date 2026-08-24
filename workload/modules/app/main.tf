@@ -12,7 +12,7 @@ locals {
   manifest_lists = [
     for file in local.yaml_files :
     provider::kubernetes::manifest_decode_multi(
-      templatefile("${local.manifests_dir}/${file}", local.template_vars)
+      "${local.manifests_dir}/${file}", local.template_vars
     )
   ]
 
@@ -55,5 +55,5 @@ module "cnpg_cluster" {
 resource "kubernetes_manifest" "app_manifests" {
   depends_on = [module.cnpg_cluster]
   for_each   = local.manifests
-  manifest   = each.value
+  manifest   = yamldecode(templatestring(yamlencode(each.value), local.template_vars))
 }
