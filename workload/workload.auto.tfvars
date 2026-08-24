@@ -3,6 +3,7 @@ system = {
   metallb_tag      = "0.16.1"
   istio_tag        = "1.30.3"
   mayastor_tag     = "2.11.1"
+  keycloak_tag     = "26.7.2"
   cnpg = {
     image_tag = "1.30.0"
     chart_tag = "0.29.0"
