@@ -18,7 +18,7 @@ locals {
     )
   ]
 
-  manifest_list = flatten(local.manifest_lists...)
+  manifest_list = flatten(local.manifest_lists)
 
   manifests = {
     for manifest in local.manifest_list :
