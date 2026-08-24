@@ -1,0 +1,35 @@
+name: Plan Platform Deployment
+on:
+  pull_request:
+    branches:
+      - 'deployment/**'
+    paths:
+      - 'platform/**'
+
+permissions:
+  contents: read
+  packages: read
+  id-token: write
+
+jobs:
+  parse-environment:
+    name: Parse Environment
+    runs-on: self-hosted
+    outputs:
+      environment: ${{ steps.get-branch-suffix.outputs.environment }}
+    steps:
+      - name: Extract deployment branch suffix
+        id: get-branch-suffix
+        run: |
+          branch=${{ github.base_ref }}
+          echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
+  terraform-plan:
+    name: Terraform Plan
+    uses: $/.github/workflows/tf-plan.yml
+    needs: parse-environment
+    with:
+      environment: ${{ needs.parse-environment.outputs.environment }}
+      storage_account_container_name: platform
+      sha: ${{ github.event.pull_request.head.sha }}
+      working_dir: "./platform"
+    secrets: inherit

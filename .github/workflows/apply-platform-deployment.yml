@@ -1,9 +1,10 @@
-name: Apply Deployment
-
+name: Apply Platform Deployment
 on:
   push:
     branches:
       - 'deployment/**'
+    paths:
+      - 'platform/**'
 
 permissions:
   contents: read
@@ -34,8 +35,8 @@ jobs:
           sha=$(jq -r '.commits[-2].id' "$GITHUB_EVENT_PATH")
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "Pre-merge SHA: $sha"
-  platform:
-    name: Platform
+  terraform-apply:
+    name: Terraform Apply
     uses: $/.github/workflows/tf-apply.yml
     needs: [parse-environment, get-pre-merge-sha]
     with:
@@ -43,14 +44,4 @@ jobs:
       storage_account_container_name: platform
       sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
       working_dir: "./platform"
-    secrets: inherit
-  workload:
-    name: Workload
-    uses: $/.github/workflows/tf-apply.yml
-    needs: [parse-environment, get-pre-merge-sha, platform]
-    with:
-      environment: ${{ needs.parse-environment.outputs.environment }}
-      storage_account_container_name: workload
-      sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
-      working_dir: "./workload"
     secrets: inherit
