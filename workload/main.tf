@@ -8,7 +8,7 @@ module "cert_manager" {
   source             = "./modules/core/cert-manager"
   tag                = var.system.cert_manager_tag
   environment        = "non-prod" # var.environment
-  base_public_domain = module.akv.secrets.base-public-domain
+  base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   acme_email         = module.akv.secrets.acme-email
   cloudflare_token   = module.akv.secrets.cloudflare-token
 }
