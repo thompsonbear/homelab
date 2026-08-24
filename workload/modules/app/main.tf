@@ -1,5 +1,5 @@
 locals {
-  default_manifests_dir = "${path.root}/resources/${app_name}/manifests"
+  default_manifests_dir = "${path.root}/resources/${var.app_name}/manifests"
 
   manifests_dir = coalesce(
     var.manifests_dir,
@@ -39,7 +39,7 @@ module "cnpg_cluster" {
   count      = var.postgres != null ? 1 : 0
   source     = "../opt/cnpg-cluster"
   app_name   = var.app_name
-  namespace  = module.namespace.name
+  namespace  = var.namespace
   pg_version = var.postgres.version
   base_gb    = var.postgres.base_gb
   wal_gb     = var.postgres.wal_gb
