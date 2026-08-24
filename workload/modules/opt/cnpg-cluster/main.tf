@@ -8,7 +8,7 @@ resource "helm_release" "cnpg_cluster" {
   values = [templatefile("${path.module}/resources/values.tftpl", {
     pg_version = var.pg_version
     replicas   = var.replicas
-    data_gb    = var.data_gb
+    base_gb    = var.base_gb
     wal_gb     = var.wal_gb
     initdb = {
       name     = var.db.name
@@ -19,6 +19,6 @@ resource "helm_release" "cnpg_cluster" {
 }
 
 resource "time_sleep" "wait_for_cnpg" {
-  depends_on = [helm_release.cnpg_cluster]
+  depends_on      = [helm_release.cnpg_cluster]
   create_duration = "60s"
 }

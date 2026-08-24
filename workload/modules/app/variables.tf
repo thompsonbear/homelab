@@ -1,3 +1,8 @@
+variable "app_name" {
+  type        = string
+  description = "Unique name for the application"
+}
+
 variable "namespace" {
   type        = string
   description = "The namespace of the app"
@@ -15,13 +20,20 @@ variable "chart" {
     repo    = string
     version = optional(string, "latest")
   })
+  default     = null
   description = "The name, repository, and chart version for the helm chart"
+}
+
+variable "manifests_dir" {
+  type        = string
+  default     = null
+  description = "The directory containing any manifest files to apply"
 }
 
 variable "dns" {
   type = object({
     labels = list(string)
-    public = optional(bool, false)
+    public = optional(bool, null)
   })
 }
 
@@ -43,16 +55,20 @@ variable "keycloak" {
 
 variable "postgres" {
   type = object({
-    base_gb  = optional(number, 20)
-    wal_gb   = optional(number, 5)
-    replicas = optional(number, 2)
+    chart_tag = optional(string, "0.8.1")
+    version   = optional(number, 18)
+    base_gb   = optional(number, 10)
+    wal_gb    = optional(number, 0)
+    replicas  = optional(number, 2)
+    encoding  = optional(string, "UTF8")
+    sql       = optional(list(string), [])
   })
   default = null
 }
 
 variable "valkey" {
   type = object({
-    size_gb  = optional(number, 10)
+    size_gb  = optional(number, 5)
     replicas = optional(number, 2)
   })
   default = null

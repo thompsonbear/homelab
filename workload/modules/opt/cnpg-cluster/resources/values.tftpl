@@ -7,7 +7,7 @@ cluster:
     kind: ClusterImageCatalog
     name: postgresql-global
   storage:
-    size: ${ data_gb }Gi
+    size: ${ base_gb }Gi
     storageClass: "mayastor-1"
   walStorage:
     enabled: ${ wal_gb != 0 }
