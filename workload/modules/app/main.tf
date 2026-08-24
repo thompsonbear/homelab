@@ -30,11 +30,6 @@ locals {
   }
 }
 
-resource "kubernetes_manifest" "app_manifests" {
-  for_each = local.manifests
-  manifest = each.value
-}
-
 module "cnpg_cluster" {
   count      = var.postgres != null ? 1 : 0
   source     = "../opt/cnpg-cluster"
@@ -50,4 +45,10 @@ module "cnpg_cluster" {
     encoding = var.postgres.encoding
     sql      = var.postgres.sql
   }
+}
+
+resource "kubernetes_manifest" "app_manifests" {
+  depends_on = [ module.cnpg_cluster ]
+  for_each = local.manifests
+  manifest = each.value
 }
