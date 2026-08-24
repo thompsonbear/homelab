@@ -26,9 +26,9 @@ variable "replicas" {
   default     = 2
 }
 
-variable "data_gb" {
+variable "base_gb" {
   type        = number
-  description = "Size of the data storage in GB"
+  description = "Size of the base storage in GB"
   default     = 10
 }
 
