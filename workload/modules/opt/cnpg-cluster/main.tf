@@ -1,5 +1,5 @@
 resource "helm_release" "cnpg_cluster" {
-  name       = "${var.app_name}-db"
+  name       = "${var.app_name}-cnpg"
   chart      = "cluster"
   repository = "https://cloudnative-pg.github.io/charts"
   namespace  = var.namespace
