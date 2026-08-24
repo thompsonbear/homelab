@@ -20,8 +20,8 @@ jobs:
         run: |
           branch=${{ github.event.ref }}
           echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
-  workload:
-    name: Workload
+  workload-terraform:
+    name: Workload Terraform
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: $/.github/workflows/tf-destroy.yml
     needs: parse-environment
@@ -30,8 +30,8 @@ jobs:
       storage_account_container_name: workload
       working_dir: "./workload"
     secrets: inherit
-  platform:
-    name: Platform
+  platform-terraform:
+    name: Platform Terraform
     if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: $/.github/workflows/tf-destroy.yml
     needs: [parse-environment, workload]

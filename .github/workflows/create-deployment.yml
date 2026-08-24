@@ -1,9 +1,6 @@
-name: Apply Deployment
-
+name: Create Deployment
 on:
-  push:
-    branches:
-      - 'deployment/**'
+  create:
 
 permissions:
   contents: read
@@ -13,6 +10,7 @@ permissions:
 jobs:
   parse-environment:
     name: Parse Environment
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     runs-on: self-hosted
     outputs:
       environment: ${{ steps.get-branch-suffix.outputs.environment }}
@@ -24,6 +22,7 @@ jobs:
           echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
   get-pre-merge-sha:
     name: Get Pre-merge SHA
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     runs-on: self-hosted
     outputs:
       sha: ${{ steps.get-sha.outputs.sha }}
@@ -34,8 +33,9 @@ jobs:
           sha=$(jq -r '.commits[-2].id' "$GITHUB_EVENT_PATH")
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "Pre-merge SHA: $sha"
-  platform:
-    name: Platform
+  platform-terraform:
+    name: Platform Terraform
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: $/.github/workflows/tf-apply.yml
     needs: [parse-environment, get-pre-merge-sha]
     with:
@@ -44,8 +44,9 @@ jobs:
       sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
       working_dir: "./platform"
     secrets: inherit
-  workload:
-    name: Workload
+  workload-terraform:
+    name: Workload Terraform
+    if: github.event.ref_type == 'branch' && startsWith(github.event.ref, 'deployment/')
     uses: $/.github/workflows/tf-apply.yml
     needs: [parse-environment, get-pre-merge-sha, platform]
     with:

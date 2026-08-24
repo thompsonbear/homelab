@@ -1,6 +1,6 @@
-name: Plan Deployment
+name: Apply Workload Deployment
 on:
-  pull_request:
+  push:
     branches:
       - 'deployment/**'
 
@@ -19,25 +19,27 @@ jobs:
       - name: Extract deployment branch suffix
         id: get-branch-suffix
         run: |
-          branch=${{ github.base_ref }}
+          branch=${{ github.ref_name }}
           echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
-  platform:
-    name: Platform
-    uses: $/.github/workflows/tf-plan.yml
-    needs: parse-environment
-    with:
-      environment: ${{ needs.parse-environment.outputs.environment }}
-      storage_account_container_name: platform
-      sha: ${{ github.event.pull_request.head.sha }}
-      working_dir: "./platform"
-    secrets: inherit
-  workload:
-    name: Workload
-    uses: $/.github/workflows/tf-plan.yml
-    needs: [parse-environment, platform]
+  get-pre-merge-sha:
+    name: Get Pre-merge SHA
+    runs-on: self-hosted
+    outputs:
+      sha: ${{ steps.get-sha.outputs.sha }}
+    steps:
+      - name: Get SHA
+        id: get-sha
+        run: |
+          sha=$(jq -r '.commits[-2].id' "$GITHUB_EVENT_PATH")
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Pre-merge SHA: $sha"
+  terraform:
+    name: Terraform
+    uses: $/.github/workflows/tf-apply.yml
+    needs: [parse-environment, get-pre-merge-sha]
     with:
       environment: ${{ needs.parse-environment.outputs.environment }}
       storage_account_container_name: workload
-      sha: ${{ github.event.pull_request.head.sha }}
+      sha: ${{ needs.get-pre-merge-sha.outputs.sha }}
       working_dir: "./workload"
     secrets: inherit
