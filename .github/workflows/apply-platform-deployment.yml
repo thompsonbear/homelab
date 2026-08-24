@@ -35,8 +35,8 @@ jobs:
           sha=$(jq -r '.commits[-2].id' "$GITHUB_EVENT_PATH")
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
           echo "Pre-merge SHA: $sha"
-  terraform-apply:
-    name: Terraform Apply
+  terraform:
+    name: Terraform
     uses: $/.github/workflows/tf-apply.yml
     needs: [parse-environment, get-pre-merge-sha]
     with:

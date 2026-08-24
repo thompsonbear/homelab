@@ -23,8 +23,8 @@ jobs:
         run: |
           branch=${{ github.base_ref }}
           echo "environment=${branch#deployment/}" >> $GITHUB_OUTPUT
-  terraform-plan:
-    name: Terraform Plan
+  terraform:
+    name: Terraform
     uses: $/.github/workflows/tf-plan.yml
     needs: parse-environment
     with:
