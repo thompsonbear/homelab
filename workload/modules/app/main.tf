@@ -12,7 +12,7 @@ locals {
   manifest_lists = [
     for file in local.yaml_files :
     provider::kubernetes::manifest_decode_multi(
-      "${local.manifests_dir}/${file}", local.template_vars
+      templatefile("${local.manifests_dir}/${file}", local.template_vars)
     )
   ]
 
@@ -29,8 +29,8 @@ locals {
     app_name  = var.app_name
     namespace = var.namespace
     tag       = var.image_tag
-    fqdn      = "${var.dns.labels[0]}.${var.dns.public ? var.base_public_domain : var.base_private_domain}"
-    fqdns     = [for label in var.dns.labels : "${label}.${var.dns.public ? var.base_public_domain : var.base_private_domain}"]
+    # fqdn      = "${var.dns.labels[0]}.${var.dns.public ? var.base_public_domain : var.base_private_domain}"
+    # fqdns     = [for label in var.dns.labels : "${label}.${var.dns.public ? var.base_public_domain : var.base_private_domain}"]
     postgres  = module.cnpg_cluster.0.db
   }
 }
@@ -55,5 +55,5 @@ module "cnpg_cluster" {
 resource "kubernetes_manifest" "app_manifests" {
   depends_on = [module.cnpg_cluster]
   for_each   = local.manifests
-  manifest   = yamldecode(templatestring(yamlencode(each.value), local.template_vars))
+  manifest   = each.value
 }
