@@ -18,7 +18,7 @@ variable "chart" {
   type = object({
     name    = string
     repo    = string
-    version = optional(string, null)
+    version = optional(string, "latest")
   })
   default     = null
   description = "The name, repository, and chart version for the helm chart"
@@ -55,20 +55,21 @@ variable "keycloak" {
 
 variable "postgres" {
   type = object({
-    version  = optional(number, null)
-    base_gb  = optional(number, null)
-    wal_gb   = optional(number, null)
-    replicas = optional(number, null)
-    encoding = optional(string, null)
-    sql      = optional(list(string), [])
+    chart_tag = optional(string, "0.8.1")
+    version   = optional(number, 18)
+    base_gb   = optional(number, 10)
+    wal_gb    = optional(number, 0)
+    replicas  = optional(number, 2)
+    encoding  = optional(string, "UTF8")
+    sql       = optional(list(string), [])
   })
   default = null
 }
 
 variable "valkey" {
   type = object({
-    size_gb  = optional(number, null)
-    replicas = optional(number, null)
+    size_gb  = optional(number, 5)
+    replicas = optional(number, 2)
   })
   default = null
 }

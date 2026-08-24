@@ -38,6 +38,8 @@ resource "kubernetes_manifest" "app_manifests" {
 module "cnpg_cluster" {
   count      = var.postgres != null ? 1 : 0
   source     = "../opt/cnpg-cluster"
+  tag        = var.postgres.chart_tag
+  replicas   = var.postgres.replicas
   app_name   = var.app_name
   namespace  = var.namespace
   pg_version = var.postgres.version
