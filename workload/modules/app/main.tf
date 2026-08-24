@@ -26,12 +26,13 @@ locals {
   }
 
   template_vars = {
-    app_name  = var.app_name
-    namespace = var.namespace
-    tag       = var.image_tag
-    fqdn      = "${var.dns.labels[0]}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"
-    fqdns     = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
-    postgres  = module.cnpg_cluster.0.db
+    app_name     = var.app_name
+    namespace    = var.namespace
+    tag          = var.image_tag
+    fqdn         = "${var.dns.labels[0]}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"
+    fqdns        = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
+    backend_port = var.backend.port
+    postgres     = module.cnpg_cluster.0.db
   }
 }
 
