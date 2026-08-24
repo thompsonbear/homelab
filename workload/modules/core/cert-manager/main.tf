@@ -16,7 +16,7 @@ resource "helm_release" "cert_manager" {
 
 resource "kubernetes_secret_v1" "cloudflare_token" {
   metadata {
-    name      = "cloudflare-token"
+    name      = "cloudflare-token-secret"
     namespace = module.namespace.name
   }
   type = "Opaque"
