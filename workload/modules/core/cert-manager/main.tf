@@ -40,6 +40,7 @@ resource "kubectl_manifest" "public_acme_issuer" {
           "name" = "public-acme"
         }
         "server" = var.environment == "prod" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"
+        "profile" = "tlsserver"
         "solvers" = [{
           "dns01" = {
             "cloudflare" = {

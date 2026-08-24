@@ -53,8 +53,8 @@ resource "kubectl_manifest" "cert" {
       secretName  = local.cert_secret
       commonName  = local.fqdn
       dnsNames    = local.fqdns
-      duration    = "1128h" # 47 days
-      renewBefore = "336h"  # 14 days
+      duration    = "1080h" # 45 days
+      renewBefore = "360h"  # 15 days
       privateKey = {
         algorithm = "ECDSA"
         size      = 384
