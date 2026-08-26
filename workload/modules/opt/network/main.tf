@@ -43,6 +43,7 @@ resource "kubectl_manifest" "listenerset" {
     "spec" = {
       "parentRef" = {
         "kind" = "Gateway"
+        "namespace" = "istio-system"
         "name" = var.dns.public ? "public" : "private"
       }
       "listeners" = [
