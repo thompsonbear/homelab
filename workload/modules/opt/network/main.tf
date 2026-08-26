@@ -42,7 +42,7 @@ resource "kubectl_manifest" "listenerset" {
     "spec" = {
       "parentRef" = {
         "kind" = "Gateway"
-        "name" = var.public ? "public" : "private"
+        "name" = var.dns.public ? "public" : "private"
       }
       "listeners" = [
         {
@@ -77,7 +77,7 @@ resource "kubectl_manifest" "httproute" {
           "sectionName" = var.app_name
         }
       ]
-      "hostnames" = var.fqdns
+      "hostnames" = local.fqdns
       "rules" = [
         {
           "matches" = [
