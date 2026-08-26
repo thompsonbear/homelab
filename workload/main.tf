@@ -55,6 +55,7 @@ module "keycloak" {
   source             = "./modules/core/keycloak"
   tag                = var.system.keycloak_tag
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
+  public_gateway_ip  = module.istio.gateways.public.ip
 }
 
 module "app_namespaces" {

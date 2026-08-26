@@ -7,3 +7,7 @@ variable "base_public_domain" {
   type        = string
   description = "The base public domain to use for Keycloak"
 }
+
+variable "public_gateway_ip" {
+  type = string
+}

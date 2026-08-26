@@ -14,6 +14,14 @@ variable "base_private_domain" {
   type = string
 }
 
+variable "public_gateway_ip" {
+  type = string
+}
+
+variable "private_gateway_ip" {
+  type = string
+}
+
 variable "dns" {
   type = object({
     labels = list(string)

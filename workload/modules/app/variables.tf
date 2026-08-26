@@ -28,6 +28,26 @@ variable "base_private_domain" {
   }
 }
 
+variable "public_gateway_ip" {
+  type        = string
+  description = "The public ip assigned to the public istio gateway"
+  default     = null
+  validation {
+    error_message = "public_gateway_ip can not be empty when dns.public is true"
+    condition     = var.public_gateway_ip != null || var.dns.public == false
+  }
+}
+
+variable "private_gateway_ip" {
+  type        = string
+  description = "The private ip assigned to the private istio gateway"
+  default     = null
+  validation {
+    error_message = "private_gateway_ip can not be empty when dns.public is false"
+    condition     = var.private_gateway_ip != null || var.dns.public == true
+  }
+}
+
 variable "image_tag" {
   type        = string
   description = "The image version of the app"

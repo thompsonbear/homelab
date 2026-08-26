@@ -32,19 +32,26 @@ resource "kubectl_manifest" "cert" {
   })
 }
 
+resource "unifi_dns_record" "vm_dns_a_records" {
+  for_each = toset(local.fqdns)
+  name     = each.value
+  record   = var.dns.public ? var.public_gateway_ip : var.private_gateway_ip
+  type     = "A"
+}
+
 resource "kubectl_manifest" "listenerset" {
   yaml_body = yamlencode({
     "apiVersion" = "gateway.networking.k8s.io/v1"
     "kind"       = "ListenerSet"
     "metadata" = {
-      name = var.app_name
+      name      = var.app_name
       namespace = var.namespace
     }
     "spec" = {
       "parentRef" = {
-        "kind" = "Gateway"
+        "kind"      = "Gateway"
         "namespace" = "istio-system"
-        "name" = var.dns.public ? "public" : "private"
+        "name"      = var.dns.public ? "public" : "private"
       }
       "listeners" = [
         {
@@ -69,7 +76,7 @@ resource "kubectl_manifest" "httproute" {
     "apiVersion" = "gateway.networking.k8s.io/v1"
     "kind"       = "HTTPRoute"
     "metadata" = {
-      name = var.app_name
+      name      = var.app_name
       namespace = var.namespace
     }
     "spec" = {

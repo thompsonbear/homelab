@@ -17,6 +17,10 @@ terraform {
       source  = "alekc/kubectl"
       version = "3.0.0-beta3"
     }
+    unifi = {
+      source  = "filipowm/unifi"
+      version = "1.1.0"
+    }
   }
 }
 

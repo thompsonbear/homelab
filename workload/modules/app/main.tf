@@ -44,6 +44,8 @@ module "network" {
   namespace           = var.namespace
   base_public_domain  = var.base_public_domain
   base_private_domain = var.base_private_domain
+  public_gateway_ip   = var.public_gateway_ip
+  private_gateway_ip  = var.private_gateway_ip
   dns                 = var.dns
   backend             = var.backend
 }
