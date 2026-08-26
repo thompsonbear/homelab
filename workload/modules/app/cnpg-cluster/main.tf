@@ -3,13 +3,13 @@ resource "helm_release" "cnpg_cluster" {
   chart      = "cluster"
   repository = "https://cloudnative-pg.github.io/charts"
   namespace  = var.namespace
-  version    = var.tag
+  version    = var.cnpg_cluster_chart_tag
 
   values = [templatefile("${path.module}/resources/values.tftpl", {
-    pg_version = var.pg_version
-    replicas   = var.replicas
-    base_gb    = var.base_gb
-    wal_gb     = var.wal_gb
+    pg_major_version = var.pg_major_version
+    replicas         = var.replicas
+    base_gb          = var.base_gb
+    wal_gb           = var.wal_gb
     initdb = {
       name     = var.db.name
       encoding = var.db.encoding

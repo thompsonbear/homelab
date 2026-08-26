@@ -5,7 +5,7 @@ module "akv" {
 }
 
 module "cert_manager" {
-  source             = "./modules/core/cert-manager"
+  source             = "./modules/system/cert-manager"
   tag                = var.system.cert_manager_tag
   environment        = "non-prod" # var.environment
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
@@ -14,25 +14,25 @@ module "cert_manager" {
 }
 
 module "metallb" {
-  source  = "./modules/core/metallb"
+  source  = "./modules/system/metallb"
   tag     = var.system.metallb_tag
   ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "istio" {
   depends_on = [module.metallb]
-  source     = "./modules/core/istio"
+  source     = "./modules/system/istio"
   tag        = var.system.istio_tag
   ip_pool    = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "mayastor" {
-  source = "./modules/core/mayastor"
+  source = "./modules/system/mayastor"
   tag    = var.system.mayastor_tag
 }
 
 module "cnpg_operator" {
-  source    = "./modules/core/cnpg-operator"
+  source    = "./modules/system/cnpg-operator"
   image_tag = var.system.cnpg.image_tag
   chart_tag = var.system.cnpg.chart_tag
   pg_images = [{
@@ -52,14 +52,14 @@ module "cnpg_operator" {
 
 module "keycloak" {
   depends_on         = [module.cnpg_operator, module.mayastor, module.istio, module.cert_manager]
-  source             = "./modules/core/keycloak"
+  source             = "./modules/system/keycloak"
   tag                = var.system.keycloak_tag
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   public_gateway_ip  = module.istio.gateways.public.ip
 }
 
 module "app_namespaces" {
-  source   = "./modules/core/namespace"
+  source   = "./modules/system/namespace"
   for_each = toset(distinct([for k, v in var.apps : try(v.namespace, k)]))
   name     = each.key
 }

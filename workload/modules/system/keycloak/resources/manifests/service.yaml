@@ -1,16 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: keycloak
-  namespace: ${ namespace }
+  name: ${ app.name }
+  namespace: ${ app.namespace }
   labels:
-    app: keycloak
+    app: ${ app.name }
 spec:
   ports:
     - protocol: TCP
-      port: ${ backend_port }
+      port: ${ app.backend.port }
       targetPort: http
       name: http
   selector:
-    app: keycloak
+    app: ${ app.name }
   type: ClusterIP

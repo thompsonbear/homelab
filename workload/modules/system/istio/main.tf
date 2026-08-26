@@ -5,8 +5,14 @@ locals {
     "${manifest.kind}/${manifest.metadata.name}" => { for key, value in manifest : key => value if key != "status" }
   }
   gateways = {
-    public  = { ip = cidrhost(var.ip_pool, 0) }
-    private = { ip = cidrhost(var.ip_pool, 1) }
+    public = {
+      ip   = cidrhost(var.ip_pool, 0)
+      name = "public"
+    }
+    private = {
+      ip   = cidrhost(var.ip_pool, 1)
+      name = "private"
+    }
   }
 }
 
@@ -70,7 +76,7 @@ resource "kubectl_manifest" "gateways" {
     apiVersion = "gateway.networking.k8s.io/v1"
     kind       = "Gateway"
     metadata = {
-      name      = each.key
+      name      = each.value.name
       namespace = module.namespace.name
     }
     spec = {

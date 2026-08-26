@@ -28,24 +28,12 @@ variable "base_private_domain" {
   }
 }
 
-variable "public_gateway_ip" {
-  type        = string
-  description = "The public ip assigned to the public istio gateway"
-  default     = null
-  validation {
-    error_message = "public_gateway_ip can not be empty when dns.public is true"
-    condition     = var.public_gateway_ip != null || var.dns.public == false
-  }
-}
-
-variable "private_gateway_ip" {
-  type        = string
-  description = "The private ip assigned to the private istio gateway"
-  default     = null
-  validation {
-    error_message = "private_gateway_ip can not be empty when dns.public is false"
-    condition     = var.private_gateway_ip != null || var.dns.public == true
-  }
+variable "gateways" {
+  type = map(object({
+    ip   = string
+    name = string
+  }))
+  description = "Map including a public and private istio gateway"
 }
 
 variable "image_tag" {

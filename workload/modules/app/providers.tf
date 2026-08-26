@@ -6,5 +6,8 @@ terraform {
     kubectl = {
       source = "alekc/kubectl"
     }
+    unifi = {
+      source = "filipowm/unifi"
+    }
   }
 }
