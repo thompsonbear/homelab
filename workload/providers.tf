@@ -63,3 +63,9 @@ provider "kubectl" {
   cluster_ca_certificate = local.k8s_ca_cert
   load_config_file       = false
 }
+
+provider "unifi" {
+  api_key        = module.akv.secrets.unifi.api_key
+  api_url        = module.akv.secrets.unifi.api_url
+  allow_insecure = true
+}
