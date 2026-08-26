@@ -25,50 +25,27 @@ locals {
     ]) => manifest
   }
 
-  fqdn        = "${var.dns.labels[0]}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"
-  fqdns       = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
-  cert_secret = "${var.app_name}-tls"
+  fqdns = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
 
   template_vars = {
     app_name     = var.app_name
     namespace    = var.namespace
     tag          = var.image_tag
-    fqdn         = local.fqdn
+    fqdn         = local.fqdns[0]
     fqdns        = local.fqdns
-    cert_secret  = local.cert_secret
+    tls_secret   = module.istio_app.cert_name
     backend_port = var.backend.port
     postgres     = module.cnpg_cluster.0.db
   }
 }
 
-resource "kubectl_manifest" "cert" {
-  yaml_body = yamlencode({
-    apiVersion = "cert-manager.io/v1"
-    kind       = "Certificate"
-    metadata = {
-      name      = local.cert_secret
-      namespace = var.namespace
-    }
-    spec = {
-      secretName  = local.cert_secret
-      commonName  = local.fqdn
-      dnsNames    = local.fqdns
-      duration    = "1080h" # 45 days
-      renewBefore = "360h"  # 15 days
-      privateKey = {
-        algorithm = "ECDSA"
-        size      = 384
-        encoding  = "PKCS8"
-      }
-
-      usages = ["server auth"]
-      issuerRef = {
-        name  = var.dns.public ? "letsencrypt" : "ejbca"
-        kind  = "ClusterIssuer"
-        group = var.dns.public ? "cert-manager.io" : "ejbca-issuer.keyfactor.com"
-      }
-    }
-  })
+module "network" {
+  source     = "../opt/network"
+  app_name   = var.app_name
+  namespace  = var.namespace
+  public     = var.dns.public
+  fqdns      = local.fqdns
+  backend    = var.backend
 }
 
 module "cnpg_cluster" {
