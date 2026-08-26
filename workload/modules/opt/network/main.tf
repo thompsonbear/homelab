@@ -38,6 +38,7 @@ resource "kubectl_manifest" "listenerset" {
     "kind"       = "ListenerSet"
     "metadata" = {
       name = var.app_name
+      namespace = var.namespace
     }
     "spec" = {
       "parentRef" = {
@@ -68,6 +69,7 @@ resource "kubectl_manifest" "httproute" {
     "kind"       = "HTTPRoute"
     "metadata" = {
       name = var.app_name
+      namespace = var.namespace
     }
     "spec" = {
       "parentRefs" = [
