@@ -1,5 +1,6 @@
 locals {
   cert_name = "${var.app_name}-tls"
+  fqdns     = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
 }
 
 resource "kubectl_manifest" "cert" {
@@ -35,10 +36,10 @@ resource "kubectl_manifest" "listenerset" {
   yaml_body = yamlencode({
     "apiVersion" = "gateway.networking.k8s.io/v1"
     "kind"       = "ListenerSet"
-    "metadata"   = {
+    "metadata" = {
       name = var.app_name
     }
-    "spec"       = {
+    "spec" = {
       "parentRef" = {
         "kind" = "Gateway"
         "name" = var.public ? "public" : "private"
@@ -48,7 +49,7 @@ resource "kubectl_manifest" "listenerset" {
           "name"     = var.app_name
           "port"     = 443
           "protocol" = "HTTPS"
-          "tls"      = {
+          "tls" = {
             "certificateRefs" = [
               {
                 "name" = local.cert_name
@@ -65,14 +66,14 @@ resource "kubectl_manifest" "httproute" {
   yaml_body = yamlencode({
     "apiVersion" = "gateway.networking.k8s.io/v1"
     "kind"       = "HTTPRoute"
-    "metadata"   = {
+    "metadata" = {
       name = var.app_name
     }
-    "spec"       = {
+    "spec" = {
       "parentRefs" = [
         {
-          "kind" = "ListenerSet"
-          "name" = var.app_name
+          "kind"        = "ListenerSet"
+          "name"        = var.app_name
           "sectionName" = var.app_name
         }
       ]
@@ -82,7 +83,7 @@ resource "kubectl_manifest" "httproute" {
           "matches" = [
             {
               "path" = {
-                "type" = "PathPrefix"
+                "type"  = "PathPrefix"
                 "value" = "/"
               }
             }

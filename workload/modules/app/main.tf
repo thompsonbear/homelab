@@ -25,27 +25,27 @@ locals {
     ]) => manifest
   }
 
-  fqdns = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
 
   template_vars = {
     app_name     = var.app_name
     namespace    = var.namespace
     tag          = var.image_tag
-    fqdn         = local.fqdns[0]
-    fqdns        = local.fqdns
-    tls_secret   = module.istio_app.cert_name
+    fqdn         = module.network.fqdns[0]
+    fqdns        = module.network.fqdns
+    tls_secret   = module.network.cert_name
     backend_port = var.backend.port
     postgres     = module.cnpg_cluster.0.db
   }
 }
 
 module "network" {
-  source     = "../opt/network"
-  app_name   = var.app_name
-  namespace  = var.namespace
-  public     = var.dns.public
-  fqdns      = local.fqdns
-  backend    = var.backend
+  source              = "../opt/network"
+  app_name            = var.app_name
+  namespace           = var.namespace
+  base_public_domain  = var.base_public_domain
+  base_private_domain = var.base_private_domain
+  dns                 = var.dns
+  backend             = var.backend
 }
 
 module "cnpg_cluster" {

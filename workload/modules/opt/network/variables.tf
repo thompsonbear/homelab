@@ -1,24 +1,29 @@
 variable "app_name" {
-  type        = string
+  type = string
 }
 
 variable "namespace" {
-  type        = string
+  type = string
 }
 
-variable "public" {
-  type        = bool
-  description = "Whether the app should be exposed publicly"
+variable "base_public_domain" {
+  type = string
 }
 
-variable "fqdns" {
-  type = list(string)
-  description = "List of fully qualified domain names to include in the certificate and listenerset"
+variable "base_private_domain" {
+  type = string
+}
+
+variable "dns" {
+  type = object({
+    labels = list(string)
+    public = bool
+  })
 }
 
 variable "backend" {
   type = object({
     service = string
-    port = number
+    port    = number
   })
 }

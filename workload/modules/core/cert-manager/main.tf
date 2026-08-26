@@ -39,7 +39,7 @@ resource "kubectl_manifest" "letsencrypt_issuer" {
         "privateKeySecretRef" = {
           "name" = "letsencrypt"
         }
-        "server" = var.environment == "prod" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"
+        "server"  = var.environment == "prod" ? "https://acme-v02.api.letsencrypt.org/directory" : "https://acme-staging-v02.api.letsencrypt.org/directory"
         "profile" = "tlsserver"
         "solvers" = [{
           "dns01" = {
