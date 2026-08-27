@@ -4,7 +4,7 @@ locals {
     for manifest in flatten([
       for file in fileset(local.manifests_dir, "*.{yml,yaml}") :
       provider::kubernetes::manifest_decode_multi(
-        templatefile("${local.manifests_dir}/${file}", { app = local.app })
+        templatefile("${local.manifests_dir}/${file}", { app = nonsensitive(local.app) })
       )
     ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
   }
@@ -14,8 +14,8 @@ locals {
     name            = var.app_name
     namespace       = var.namespace
     tag             = var.image_tag
-    fqdn            = nonsensitive(local.fqdns[0])
-    fqdns           = nonsensitive(local.fqdns)
+    fqdn            = local.fqdns[0]
+    fqdns           = local.fqdns
     tls_secret_name = "${var.app_name}-tls"
     gateway         = var.dns.public ? var.gateways.public : var.gateways.private
     backend         = var.backend
