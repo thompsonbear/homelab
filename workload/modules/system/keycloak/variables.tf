@@ -8,6 +8,9 @@ variable "base_public_domain" {
   description = "The base public domain to use for Keycloak"
 }
 
-variable "public_gateway_ip" {
-  type = string
+variable "gateways" {
+  type = map(object({
+    ip   = string
+    name = string
+  }))
 }
