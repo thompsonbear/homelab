@@ -14,8 +14,8 @@ locals {
     name            = var.app_name
     namespace       = var.namespace
     tag             = var.image_tag
-    fqdn            = local.fqdns[0]
-    fqdns           = local.fqdns
+    fqdn            = nonsensitive(local.fqdns[0])
+    fqdns           = nonsensitive(local.fqdns)
     tls_secret_name = "${var.app_name}-tls"
     gateway         = var.dns.public ? var.gateways.public : var.gateways.private
     backend         = var.backend
