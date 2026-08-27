@@ -1,15 +1,10 @@
 locals {
+  manifests_dir = coalesce(var.custom_manifests_dir, "${path.root}/resources/${var.app_name}/manifests")
   manifests = {
     for manifest in flatten([
-      for file in fileset(
-        coalesce(var.manifests_dir, "${path.root}/resources/${var.app_name}/manifests"),
-        "*.{yml,yaml}"
-      ) :
+      for file in fileset( local.manifests_dir, "*.{yml,yaml}") :
       provider::kubernetes::manifest_decode_multi(
-        templatefile(
-          "${coalesce(var.manifests_dir, "${path.root}/resources/${var.app_name}/manifests")}/${file}",
-          local.app
-        )
+        templatefile( "${local.manifests_dir}/${file}", local.app )
       )
     ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
   }

@@ -52,7 +52,7 @@ variable "chart" {
   description = "The name, repository, and chart version for the helm chart"
 }
 
-variable "manifests_dir" {
+variable "custom_manifests_dir" {
   type        = string
   default     = null
   description = "The directory containing any manifest files to apply"
