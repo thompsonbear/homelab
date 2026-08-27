@@ -1,7 +1,8 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: keycloak
+  name: ${ app.name }
+  namespace: ${ app.namespace }
   labels:
     app: ${ app.name }
 spec:
