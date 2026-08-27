@@ -65,7 +65,7 @@ resource "kubectl_manifest" "cert" {
 resource "unifi_dns_record" "dns_a_records" {
   for_each = toset(local.app.fqdns)
   name     = each.value
-  record   = local.gateway.ip
+  record   = local.app.gateway.ip
   type     = "A"
 }
 
