@@ -13,6 +13,7 @@ locals {
   app = {
     name            = var.app_name
     namespace       = var.namespace
+    replicas        = var.replicas
     tag             = var.image_tag
     fqdn            = local.fqdns[0]
     fqdns           = local.fqdns

@@ -8,6 +8,12 @@ variable "namespace" {
   description = "The namespace of the app"
 }
 
+variable "replicas" {
+  type        = number
+  description = "The number of replicas for the app"
+  default     = 1
+}
+
 variable "base_public_domain" {
   type        = string
   description = "The public domain assigned to public apps"

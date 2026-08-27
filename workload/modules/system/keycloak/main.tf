@@ -8,6 +8,7 @@ module "app" {
   source               = "../../app"
   app_name             = "keycloak"
   namespace            = module.namespace.name
+  replicas             = var.replicas
   image_tag            = var.tag
   base_public_domain   = var.base_public_domain
   gateways             = var.gateways

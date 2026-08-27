@@ -54,6 +54,7 @@ module "keycloak" {
   depends_on         = [module.cnpg_operator, module.mayastor, module.cert_manager]
   source             = "./modules/system/keycloak"
   tag                = var.system.keycloak_tag
+  replicas           = 1
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   gateways           = module.istio.gateways
 }

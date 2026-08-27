@@ -1,0 +1,81 @@
+kind: StatefulSet
+metadata:
+  name: keycloak
+  labels:
+    app: ${ app.name }
+spec:
+  serviceName: ${ app.backend.service }
+  # Run with one replica to save resources, or with two replicas to allow for rolling updates for configuration changes
+  replicas: ${ app.replicas }
+  selector:
+    matchLabels:
+      app: ${ app.name }
+  template:
+    metadata:
+      labels:
+        app: ${ app.name }
+    spec:
+      containers:
+        - name: ${ app.name }
+          image: quay.io/keycloak/keycloak:${ tag }
+          args: ["start"]
+          env:
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: ${ app.name }-bootstrap-secret
+                  key: "username"
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: ${ app.name }-bootstrap-secret
+                  key: "password"
+            - name: KC_PROXY_HEADERS
+              value: "xforwarded"
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_HOSTNAME_STRICT
+              value: "true"
+            - name: KC_HOSTNAME
+              value: ${ app.fqdn }
+            - name: KC_HEALTH_ENABLED
+              value: "true"
+            - name: 'KC_DB'
+              value: 'postgres'
+            - name: 'KC_DB_URL'
+              valueFrom:
+                secretKeyRef:
+                  name: ${ app.postgres.secret }
+                  value: "jdbc-uri"
+          ports:
+            - name: http
+              containerPort: ${ app.backend.port }
+            - name: jgroups
+              containerPort: 7800
+            - name: jgroups-fd
+              containerPort: 57800
+          startupProbe:
+            httpGet:
+              path: /health/started
+              port: 9000
+            periodSeconds: 1
+            failureThreshold: 600
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 9000
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 9000
+            periodSeconds: 10
+            failureThreshold: 3
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 2000Mi
+            requests:
+              cpu: 500m
+              memory: 1700Mi
