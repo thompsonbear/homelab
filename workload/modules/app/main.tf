@@ -1,13 +1,13 @@
 locals {
   manifests_dir = coalesce(var.custom_manifests_dir, "${path.root}/resources/${var.app_name}/manifests")
-  manifests = nonsensitive({
+  manifests = {
     for manifest in flatten([
       for file in fileset(local.manifests_dir, "*.{yml,yaml}") :
       provider::kubernetes::manifest_decode_multi(
         templatefile("${local.manifests_dir}/${file}", { app = local.app })
       )
-    ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
-  })
+    ]) : nonsensitive("${manifest.kind}/${manifest.metadata.name}") => nonsensitive(manifest)
+  }
 
   fqdns = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
   app = {
