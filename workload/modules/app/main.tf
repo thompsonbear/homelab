@@ -4,9 +4,9 @@ locals {
     for manifest in flatten([
       for file in fileset(local.manifests_dir, "*.{yml,yaml}") :
       provider::kubernetes::manifest_decode_multi(
-        templatefile("${local.manifests_dir}/${file}", { app = local.app })
+        nonsensitive(templatefile("${local.manifests_dir}/${file}", { app = local.app }))
       )
-    ]) : nonsensitive("${manifest.kind}/${manifest.metadata.name}") => nonsensitive(manifest)
+    ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
   }
 
   fqdns = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
