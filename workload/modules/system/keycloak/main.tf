@@ -5,13 +5,13 @@ module "namespace" {
 }
 
 module "app" {
-  source             = "../../app"
-  app_name           = "keycloak"
-  namespace          = module.namespace.name
-  image_tag          = var.tag
-  base_public_domain = var.base_public_domain
-  gateways  = var.gateways
-  manifests_dir      = "${path.module}/resources/manifests"
+  source               = "../../app"
+  app_name             = "keycloak"
+  namespace            = module.namespace.name
+  image_tag            = var.tag
+  base_public_domain   = var.base_public_domain
+  gateways             = var.gateways
+  custom_manifests_dir = "${path.module}/resources/manifests"
   dns = {
     labels = ["auth"]
     public = true

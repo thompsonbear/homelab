@@ -2,9 +2,9 @@ locals {
   manifests_dir = coalesce(var.custom_manifests_dir, "${path.root}/resources/${var.app_name}/manifests")
   manifests = {
     for manifest in flatten([
-      for file in fileset( local.manifests_dir, "*.{yml,yaml}") :
+      for file in fileset(local.manifests_dir, "*.{yml,yaml}") :
       provider::kubernetes::manifest_decode_multi(
-        templatefile( "${local.manifests_dir}/${file}", local.app )
+        templatefile("${local.manifests_dir}/${file}", local.app)
       )
     ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
   }
@@ -19,11 +19,11 @@ locals {
     tls_secret_name = "${var.app_name}-tls"
     gateway         = var.dns.public ? var.gateways.public : var.gateways.private
     backend         = var.backend
-    postgres        = {
-        name   = var.app_name
-        host   = "${var.app_name}-cnpg-cluster-rw.${var.namespace}.svc.cluster.local"
-        port   = 5432
-        secret = "${var.app_name}-cnpg-cluster-app"
+    postgres = {
+      name   = var.app_name
+      host   = "${var.app_name}-cnpg-cluster-rw.${var.namespace}.svc.cluster.local"
+      port   = 5432
+      secret = "${var.app_name}-cnpg-cluster-app"
     }
   }
 }
