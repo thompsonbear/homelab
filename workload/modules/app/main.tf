@@ -24,7 +24,12 @@ locals {
     tls_secret_name = "${var.app_name}-tls"
     gateway         = var.dns.public ? var.gateways.public : var.gateways.private
     backend         = var.backend
-    postgres        = module.cnpg_cluster.0.db
+    postgres        = {
+        name   = var.app_name
+        host   = "${var.app_name}-cnpg-cluster-rw.${var.namespace}.svc.cluster.local"
+        port   = 5432
+        secret = "${var.app_name}-cnpg-cluster-app"
+    }
   }
 }
 
