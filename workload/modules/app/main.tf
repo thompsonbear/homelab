@@ -4,7 +4,7 @@ locals {
     for manifest in flatten([
       for file in fileset(local.manifests_dir, "*.{yml,yaml}") :
       provider::kubernetes::manifest_decode_multi(
-        nonsensitive(templatefile("${local.manifests_dir}/${file}", { app = local.app })
+        nonsensitive(templatefile("${local.manifests_dir}/${file}", { app = local.app }))
       )
     ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
   }
