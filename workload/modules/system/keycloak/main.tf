@@ -32,6 +32,7 @@ module "app" {
   }
   backend = {
     service = "keycloak"
+    port = 8080
   }
   postgres = {}
 }
