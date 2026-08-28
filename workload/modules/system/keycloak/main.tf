@@ -13,6 +13,7 @@ resource "kubernetes_secret_v1" "keycloak_admin_secret" {
     "username" = var.keycloak_admin.username
     "password" = var.keycloak_admin.password
   }
+  type = "kubernetes.io/basic-auth"
 }
 
 module "app" {
