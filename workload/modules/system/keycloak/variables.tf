@@ -19,3 +19,10 @@ variable "gateways" {
     name = string
   }))
 }
+
+variable "keycloak_admin" {
+  type = object({
+    username = string
+    password = string
+  })
+}

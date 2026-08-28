@@ -4,7 +4,19 @@ module "namespace" {
   privileged = false
 }
 
+resource "kubernetes_secret_v1" "keycloak_admin_secret" {
+  metadata {
+    name      = "keycloak-admin-secret"
+    namespace = module.namespace.name
+  }
+  data = {
+    "username" = var.keycloak_admin.username
+    "password" = var.keycloak_admin.password
+  }
+}
+
 module "app" {
+  depends_on = [ kubernetes_secret_v1.keycloak_admin_secret ]
   source               = "../../app"
   app_name             = "keycloak"
   namespace            = module.namespace.name

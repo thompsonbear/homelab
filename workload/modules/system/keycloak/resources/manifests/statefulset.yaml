@@ -48,7 +48,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: ${ app.postgres.secret }
-                  value: "jdbc-uri"
+                  key: "jdbc-uri"
           ports:
             - name: http
               containerPort: ${ app.backend.port }

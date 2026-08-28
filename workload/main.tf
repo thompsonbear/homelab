@@ -55,6 +55,7 @@ module "keycloak" {
   source             = "./modules/system/keycloak"
   tag                = var.system.keycloak_tag
   replicas           = 1
+  keycloak_admin     = module.akv.secrets.keycloak-admin
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   gateways           = module.istio.gateways
 }
