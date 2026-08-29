@@ -18,10 +18,10 @@ variable "context" {
   type = object({
     base_public_domain = string
     base_private_domain = string
-    gateways = object({
+    gateways = map(object({
       ip = string
       name = string
-    })
+    }))
   })
 }
 
