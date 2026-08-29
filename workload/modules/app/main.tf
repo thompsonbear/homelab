@@ -156,7 +156,7 @@ module "cnpg_cluster" {
 }
 
 resource "kubernetes_secret_v1" "secrets" {
-  for_each = nonsensitive(var.secrets)
+  for_each = nonsensitive(var.secrets) # marked as non-sensitive as the keys/secret names are not secret
   metadata {
     name      = each.key
     namespace = var.namespace

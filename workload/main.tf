@@ -58,61 +58,61 @@ module "app_namespaces" {
 
 locals {
   context = {
-    base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
+    base_public_domain  = module.akv.secrets["${var.environment}-base-public-domain"]
     base_private_domain = module.akv.secrets["${var.environment}-base-private-domain"]
-    gateways = module.istio.gateways
+    gateways            = module.istio.gateways
   }
 }
 
 module "keycloak_app" {
   depends_on = [module.cnpg_operator, module.mayastor, module.cert_manager, module.app_namespaces]
   source     = "./modules/app"
-  context = local.context
+  context    = local.context
 
-  app_name   = "keycloak"
-  namespace  = "keycloak"
-  replicas = 1
-  image_tag  = var.system.keycloak_tag
-  backend    = { service = "keycloak", port = 8080 }
-  dns        = { labels = ["auth"], public = true }
-  secrets    = { admin-secret = module.akv.secrets.admin-secret }
-  postgres   = { base_gb = 20, wal_gb = 10, replicas = 1 }
+  app_name  = "keycloak"
+  namespace = "keycloak"
+  replicas  = 1
+  image_tag = var.system.keycloak_tag
+  backend   = { service = "keycloak", port = 8080 }
+  dns       = { labels = ["auth"], public = true }
+  secrets   = { admin-secret = module.akv.secrets.admin-secret }
+  postgres  = { base_gb = 20, wal_gb = 10, replicas = 1 }
 }
 
-# module "apps" {
-#   depends_on = [module.keycloak, module.app_namespaces]
-#   source     = "./modules/app"
-#   for_each   = var.apps
-#
-#   app_name = each.key
-#
-#   namespace = try(each.value.namespace, each.key)
-#
-#   image_version = each.value.image_version
-#
-#   chart = {
-#     name    = try(each.value.chart.name, each.key)
-#     repo    = each.value.chart.repo
-#     version = try(each.value.chart.version, each.value.version)
-#   }
-#
-#   dns = can(each.value.dns) ? {
-#     labels = try(each.value.dns.labels, [each.key])
-#     public = try(each.value.dns.public, false)
-#     } : {
-#     labels = [each.key]
-#     public = false
-#   }
-#
-#   backend = can(each.value.backend) ? {
-#     service = try(each.value.backend.service, each.key)
-#     port    = try(each.value.backend.port, 80)
-#     } : {
-#     service = each.key
-#     port    = 80
-#   }
-#
-#   keycloak = can(each.value.keycloak) ? each.value.keycloak : null
-#   postgres = can(each.value.postgres) ? each.value.postgres : null
-#   valkey   = can(each.value.valkey) ? each.value.valkey : null
-# }
+module "apps" {
+  depends_on = [module.keycloak_app]
+  source     = "./modules/app"
+  context    = local.context
+
+  app_name  = each.key
+  namespace = try(each.value.namespace, each.key)
+  replicas  = try(each.value.replicas, 1)
+  image_tag = each.value.image_tag
+
+  chart = {
+    name    = try(each.value.chart.name, each.key)
+    repo    = each.value.chart.repo
+    version = try(each.value.chart.version, each.value.version)
+  }
+
+  dns = can(each.value.dns) ? {
+    labels = try(each.value.dns.labels, [each.key])
+    public = try(each.value.dns.public, false)
+    } : {
+    labels = [each.key]
+    public = false
+  }
+
+  backend = can(each.value.backend) ? {
+    service = try(each.value.backend.service, each.key)
+    port    = try(each.value.backend.port, 80)
+    } : {
+    service = each.key
+    port    = 80
+  }
+
+  secrets  = try(each.value.secrets, null)
+  keycloak = try(each.value.keycloak, null)
+  postgres = try(each.value.postgres, null)
+  valkey   = try(each.value.valkey, null)
+}

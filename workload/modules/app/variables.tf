@@ -16,10 +16,10 @@ variable "replicas" {
 
 variable "context" {
   type = object({
-    base_public_domain = string
+    base_public_domain  = string
     base_private_domain = string
     gateways = map(object({
-      ip = string
+      ip   = string
       name = string
     }))
   })
