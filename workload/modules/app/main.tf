@@ -156,10 +156,10 @@ module "cnpg_cluster" {
 }
 
 resource "kubernetes_secret_v1" "secrets" {
-  for_each = var.secrets
+  for_each = nonsensitive(var.secrets)
   metadata {
     name      = each.key
-    namespace = module.namespace.name
+    namespace = var.namespace
   }
   data = each.value
 }
