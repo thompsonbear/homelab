@@ -14,38 +14,28 @@ variable "replicas" {
   default     = 1
 }
 
-variable "base_public_domain" {
-  type        = string
-  description = "The public domain assigned to public apps"
-  default     = null
-  validation {
-    error_message = "base_public_domain can not be empty when dns.public is true"
-    condition     = var.base_public_domain != null || var.dns.public == false
-  }
-}
-
-variable "base_private_domain" {
-  type        = string
-  description = "The private domain assigned to non-public apps"
-  default     = null
-  validation {
-    error_message = "base_private_domain can not be empty when dns.public is false"
-    condition     = var.base_private_domain != null || var.dns.public == true
-  }
-}
-
-variable "gateways" {
-  type = map(object({
-    ip   = string
-    name = string
-  }))
-  description = "Map including a public and private istio gateway"
+variable "context" {
+  type = object({
+    base_public_domain = string
+    base_private_domain = string
+    gateways = object({
+      ip = string
+      name = string
+    })
+  })
 }
 
 variable "image_tag" {
   type        = string
   description = "The image version of the app"
   default     = "latest"
+}
+
+variable "secrets" {
+  type        = map(map(string))
+  sensitive   = true
+  description = "Secrets to create in the app namespace"
+  default     = null
 }
 
 variable "chart" {
@@ -56,12 +46,6 @@ variable "chart" {
   })
   default     = null
   description = "The name, repository, and chart version for the helm chart"
-}
-
-variable "custom_manifests_dir" {
-  type        = string
-  default     = null
-  description = "The directory containing any manifest files to apply"
 }
 
 variable "dns" {

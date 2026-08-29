@@ -25,12 +25,12 @@ spec:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-admin-secret
+                  name: admin-secret
                   key: "username"
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: keycloak-admin-secret
+                  name: admin-secret
                   key: "password"
             - name: KC_PROXY_HEADERS
               value: "xforwarded"

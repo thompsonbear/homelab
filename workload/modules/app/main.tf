@@ -1,5 +1,5 @@
 locals {
-  manifests_dir = coalesce(var.custom_manifests_dir, "${path.root}/resources/${var.app_name}/manifests")
+  manifests_dir = "${path.root}/resources/${var.app_name}/manifests"
   manifests = {
     for manifest in flatten([
       for file in fileset(local.manifests_dir, "*.{yml,yaml}") :
@@ -9,7 +9,7 @@ locals {
     ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
   }
 
-  fqdns = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.base_public_domain : var.base_private_domain)}"]
+  fqdns = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.context.base_public_domain : var.context.base_private_domain)}"]
   app = {
     name            = var.app_name
     namespace       = var.namespace
@@ -18,7 +18,7 @@ locals {
     fqdn            = local.fqdns[0]
     fqdns           = local.fqdns
     tls_secret_name = "${var.app_name}-tls"
-    gateway         = var.dns.public ? var.gateways.public : var.gateways.private
+    gateway         = var.dns.public ? var.context.gateways.public : var.context.gateways.private
     backend         = var.backend
     postgres = {
       name   = var.app_name
@@ -155,8 +155,17 @@ module "cnpg_cluster" {
   }
 }
 
+resource "kubernetes_secret_v1" "secrets" {
+  for_each = var.secrets
+  metadata {
+    name      = each.key
+    namespace = module.namespace.name
+  }
+  data = each.value
+}
+
 resource "kubernetes_manifest" "app_manifests" {
-  depends_on = [module.cnpg_cluster]
+  depends_on = [module.cnpg_cluster, kubernetes_secret_v1.secrets]
   for_each   = local.manifests
   manifest   = each.value
 }

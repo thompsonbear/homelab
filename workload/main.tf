@@ -50,20 +50,33 @@ module "cnpg_operator" {
   }]
 }
 
-module "keycloak" {
-  depends_on         = [module.cnpg_operator, module.mayastor, module.cert_manager]
-  source             = "./modules/system/keycloak"
-  tag                = var.system.keycloak_tag
-  replicas           = 1
-  keycloak_admin     = module.akv.secrets.keycloak-admin
-  base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
-  gateways           = module.istio.gateways
-}
-
 module "app_namespaces" {
   source   = "./modules/system/namespace"
-  for_each = toset(distinct([for k, v in var.apps : try(v.namespace, k)]))
+  for_each = toset(distinct(concat([for k, v in var.apps : try(v.namespace, k)], ["keycloak"])))
   name     = each.key
+}
+
+locals {
+  context = {
+    base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
+    base_private_domain = module.akv.secrets["${var.environment}-base-private-domain"]
+    gateways = module.istio.gateways
+  }
+}
+
+module "keycloak_app" {
+  depends_on = [module.cnpg_operator, module.mayastor, module.cert_manager, module.app_namespaces]
+  source     = "./modules/app"
+  context = local.context
+
+  app_name   = "keycloak"
+  namespace  = "keycloak"
+  replicas = 1
+  image_tag  = var.system.keycloak_tag
+  backend    = { service = "keycloak", port = 8080 }
+  dns        = { labels = ["auth"], public = true }
+  secrets    = { admin-secret = module.akv.secrets.admin-secret }
+  postgres   = { base_gb = 20, wal_gb = 10, replicas = 1 }
 }
 
 # module "apps" {
