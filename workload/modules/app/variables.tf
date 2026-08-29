@@ -35,7 +35,7 @@ variable "secrets" {
   type        = map(map(string))
   sensitive   = true
   description = "Secrets to create in the app namespace"
-  default     = null
+  default     = {}
 }
 
 variable "chart" {

@@ -112,7 +112,7 @@ module "apps" {
     port    = 80
   }
 
-  secrets  = try(each.value.secrets, null)
+  secrets  = try(each.value.secrets, {})
   keycloak = try(each.value.keycloak, null)
   postgres = try(each.value.postgres, null)
   valkey   = try(each.value.valkey, null)
