@@ -12,8 +12,8 @@ system = {
 
 apps = {
   home-assistant = {
-    namespace     = "home-assistant"
-    image_version = "2025.12.4"
+    namespace = "home-assistant"
+    image_tag = "2025.12.4"
     chart = {
       name    = "home-assistant"
       repo    = "https://pajikos.github.io/home-assistant-helm-chart/"

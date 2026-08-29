@@ -68,15 +68,14 @@ module "keycloak_app" {
   depends_on = [module.cnpg_operator, module.mayastor, module.cert_manager, module.app_namespaces]
   source     = "./modules/app"
   context    = local.app_context
-
-  app_name  = "keycloak"
-  namespace = "keycloak"
-  replicas  = 1
-  image_tag = var.system.keycloak_tag
-  backend   = { service = "keycloak", port = 8080 }
-  dns       = { labels = ["auth"], public = true }
-  secrets   = { admin-secret = module.akv.secrets.admin-secret }
-  postgres  = { base_gb = 20, wal_gb = 10, replicas = 1 }
+  app_name   = "keycloak"
+  namespace  = "keycloak"
+  replicas   = 1
+  image_tag  = var.system.keycloak_tag
+  backend    = { service = "keycloak", port = 8080 }
+  dns        = { labels = ["auth"], public = true }
+  secrets    = { admin-secret = module.akv.secrets.admin-secret }
+  postgres   = { base_gb = 20, wal_gb = 10, replicas = 1 }
 }
 
 module "apps" {
@@ -88,7 +87,7 @@ module "apps" {
   app_name  = each.key
   namespace = try(each.value.namespace, each.key)
   replicas  = try(each.value.replicas, 1)
-  image_tag = each.value.image_tag
+  image_tag = try(each.value.image_tag, "latest")
 
   chart = {
     name    = try(each.value.chart.name, each.key)
