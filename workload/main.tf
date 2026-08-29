@@ -57,7 +57,7 @@ module "app_namespaces" {
 }
 
 locals {
-  context = {
+  app_context = {
     base_public_domain  = module.akv.secrets["${var.environment}-base-public-domain"]
     base_private_domain = module.akv.secrets["${var.environment}-base-private-domain"]
     gateways            = module.istio.gateways
@@ -67,7 +67,7 @@ locals {
 module "keycloak_app" {
   depends_on = [module.cnpg_operator, module.mayastor, module.cert_manager, module.app_namespaces]
   source     = "./modules/app"
-  context    = local.context
+  context    = local.app_context
 
   app_name  = "keycloak"
   namespace = "keycloak"
@@ -81,8 +81,9 @@ module "keycloak_app" {
 
 module "apps" {
   depends_on = [module.keycloak_app]
+  for_each   = var.apps
   source     = "./modules/app"
-  context    = local.context
+  context    = local.app_context
 
   app_name  = each.key
   namespace = try(each.value.namespace, each.key)

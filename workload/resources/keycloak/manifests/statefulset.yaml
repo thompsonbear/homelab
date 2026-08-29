@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: ${ app.name }
-          image: quay.io/keycloak/keycloak:${ app.tag }
+          image: quay.io/keycloak/keycloak:${ app.image_tag }
           args: ["start"]
           env:
             - name: KC_BOOTSTRAP_ADMIN_USERNAME

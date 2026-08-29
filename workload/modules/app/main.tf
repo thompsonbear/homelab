@@ -1,20 +1,11 @@
 locals {
-  manifests_dir = "${path.root}/resources/${var.app_name}/manifests"
-  manifests = {
-    for manifest in flatten([
-      for file in fileset(local.manifests_dir, "*.{yml,yaml}") :
-      provider::kubernetes::manifest_decode_multi(
-        nonsensitive(templatefile("${local.manifests_dir}/${file}", { app = local.app }))
-      )
-    ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
-  }
-
-  fqdns = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.context.base_public_domain : var.context.base_private_domain)}"]
+  resources_dir = "${path.root}/resources/${var.app_name}"
+  fqdns         = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.context.base_public_domain : var.context.base_private_domain)}"]
   app = {
     name            = var.app_name
     namespace       = var.namespace
     replicas        = var.replicas
-    tag             = var.image_tag
+    image_tag       = var.image_tag
     fqdn            = local.fqdns[0]
     fqdns           = local.fqdns
     tls_secret_name = "${var.app_name}-tls"
@@ -28,6 +19,7 @@ locals {
     }
   }
 }
+
 
 resource "kubectl_manifest" "cert" {
   yaml_body = yamlencode({
@@ -156,7 +148,9 @@ module "cnpg_cluster" {
 }
 
 resource "kubernetes_secret_v1" "secrets" {
-  for_each = nonsensitive(var.secrets) # marked as non-sensitive as the keys/secret names are not secret
+  # marked as non-sensitive as the keys/secret names are not secret
+  # the data values are still secret but should not appear in outputs
+  for_each = nonsensitive(var.secrets)
   metadata {
     name      = each.key
     namespace = var.namespace
@@ -164,8 +158,29 @@ resource "kubernetes_secret_v1" "secrets" {
   data = each.value
 }
 
+locals {
+  manifests = {
+    for manifest in flatten([
+      for file in fileset("${local.resources_dir}/manifests", "*.{yml,yaml}") :
+      provider::kubernetes::manifest_decode_multi(
+        nonsensitive(templatefile("${local.resources_dir}/manifests/${file}", { app = local.app }))
+      )
+    ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
+  }
+}
+
 resource "kubernetes_manifest" "app_manifests" {
   depends_on = [module.cnpg_cluster, kubernetes_secret_v1.secrets]
   for_each   = local.manifests
   manifest   = each.value
+}
+
+resource "helm_release" "chart" {
+  count      = var.chart != null ? 1 : 0
+  chart      = var.chart.name
+  repository = var.chart.repo
+  name       = var.app_name
+  namespace  = var.namespace
+  version    = var.chart.version
+  values     = try([templatefile("${local.resources_dir}/helm/values.yaml", { app = local.app })], [])
 }
