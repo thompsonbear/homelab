@@ -25,7 +25,7 @@ apps = {
     }
     backend = {
       service = "home-assistant"
-      port    = 8123
+      port    = 8080
     }
   }
   #  bluesky-pds = {

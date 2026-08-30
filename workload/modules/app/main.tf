@@ -57,6 +57,22 @@ resource "unifi_dns_record" "dns_a_records" {
   type     = "A"
 }
 
+locals {
+  listeners = [ for fqdn in local.fqdns : {
+    "name" = fqdn
+    "hostname" = fqdn
+    "port" = 443
+    "protocol" = "HTTPS"
+    "tls" = {
+      "certificateRefs" = [
+        {
+          "name" = local.app.tls_secret_name
+        }
+      ]
+    }
+  }]
+}
+
 resource "kubectl_manifest" "listenerset" {
   depends_on = [kubectl_manifest.cert]
   yaml_body = yamlencode({
@@ -72,20 +88,19 @@ resource "kubectl_manifest" "listenerset" {
         "namespace" = "istio-system"
         "name"      = local.app.gateway.name
       }
-      "listeners" = [
-        {
-          "name"     = local.app.name
-          "port"     = 443
-          "protocol" = "HTTPS"
-          "tls" = {
-            "certificateRefs" = [
-              {
-                "name" = local.app.tls_secret_name
-              }
-            ]
-          }
+      "listeners" = [ for fqdn in local.app.fqdns : {
+        "name" = fqdn
+        "hostname" = fqdn
+        "port" = 443
+        "protocol" = "HTTPS"
+        "tls" = {
+          "certificateRefs" = [
+            {
+              "name" = local.app.tls_secret_name
+            }
+          ]
         }
-      ]
+      }]
     }
   })
 }
@@ -99,13 +114,11 @@ resource "kubectl_manifest" "httproute" {
       namespace = local.app.namespace
     }
     "spec" = {
-      "parentRefs" = [
-        {
-          "kind"        = "ListenerSet"
-          "name"        = local.app.name
-          "sectionName" = local.app.name
-        }
-      ]
+      "parentRefs" = [ for fqdn in local.app.fqdns : {
+        "kind"        = "ListenerSet"
+        "name"        = fqdn
+        "sectionName" = fqdn
+      }]
       "hostnames" = local.app.fqdns
       "rules" = [
         {
