@@ -10,6 +10,7 @@ locals {
     fqdns           = local.fqdns
     tls_secret_name = "${var.app_name}-tls"
     gateway         = var.dns.public ? var.context.gateways.public : var.context.gateways.private
+    base_domain     = var.dns.public ? var.context.base_public_domain : var.context.base_private_domain
     backend         = var.backend
     postgres = {
       name   = var.app_name
