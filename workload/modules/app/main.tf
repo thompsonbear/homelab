@@ -58,10 +58,10 @@ resource "unifi_dns_record" "dns_a_records" {
 }
 
 locals {
-  listeners = [ for fqdn in local.fqdns : {
-    "name" = fqdn
+  listeners = [for fqdn in local.fqdns : {
+    "name"     = fqdn
     "hostname" = fqdn
-    "port" = 443
+    "port"     = 443
     "protocol" = "HTTPS"
     "tls" = {
       "certificateRefs" = [
@@ -88,10 +88,10 @@ resource "kubectl_manifest" "listenerset" {
         "namespace" = "istio-system"
         "name"      = local.app.gateway.name
       }
-      "listeners" = [ for fqdn in local.app.fqdns : {
-        "name" = fqdn
+      "listeners" = [for fqdn in local.app.fqdns : {
+        "name"     = fqdn
         "hostname" = fqdn
-        "port" = 443
+        "port"     = 443
         "protocol" = "HTTPS"
         "tls" = {
           "certificateRefs" = [
@@ -115,8 +115,8 @@ resource "kubectl_manifest" "httproute" {
     }
     "spec" = {
       "parentRefs" = [{
-        "kind"        = "ListenerSet"
-        "name"        = local.app.name
+        "kind" = "ListenerSet"
+        "name" = local.app.name
       }]
       "rules" = [
         {

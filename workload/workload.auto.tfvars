@@ -20,7 +20,7 @@ apps = {
       version = "0.3.36"
     }
     dns = {
-      labels = ["home", "home-assistant"]
+      labels = ["home"]
       public = true
     }
     backend = {
