@@ -28,21 +28,21 @@ apps = {
       port    = 8080
     }
   }
-  #  bluesky-pds = {
-  #    namespace     = "bluesky-pds"
-  #    image_version = "0.4.208"
-  #    chart = {
-  #      name    = "bluesky-pds"
-  #      repo    = "https://charts.bear.fyi"
-  #      version = "0.4.208"
-  #    }
-  #    dns = {
-  #      labels = ["pds"]
-  #      public = true
-  #    }
-  #    backend = {
-  #      service = "bluesky-pds"
-  #      port    = 80
-  #    }
-  #  }
+  bluesky-pds = {
+    namespace     = "bluesky-pds"
+    image_version = "0.4.208"
+    chart = {
+      name    = "bluesky-pds"
+      repo    = "https://charts.bear.fyi"
+      version = "0.4.208"
+    }
+    dns = {
+      labels = ["pds"]
+      public = true
+    }
+    backend = {
+      service = "bluesky-pds"
+      port    = 3000
+    }
+  }
 }

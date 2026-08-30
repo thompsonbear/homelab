@@ -1,0 +1,8 @@
+pds:
+  config:
+    hostname: ${ app.fqdn }
+    emailFromAddress: "pds@${ app.base_domain }"
+  dataStorage:
+    size: 20Gi
+    mountPath: "/pds"
+    storageClass: "mayastor-2"
