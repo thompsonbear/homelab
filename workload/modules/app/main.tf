@@ -117,9 +117,7 @@ resource "kubectl_manifest" "httproute" {
       "parentRefs" = [ for fqdn in local.app.fqdns : {
         "kind"        = "ListenerSet"
         "name"        = local.app.name
-        "sectionName" = fqdn
       }]
-      "hostnames" = local.app.fqdns
       "rules" = [
         {
           "matches" = [
