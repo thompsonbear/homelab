@@ -2,11 +2,11 @@ image:
   repository: ghcr.io/home-assistant/home-assistant
   pullPolicy: IfNotPresent
   tag: ${ app.image_tag }
+service:
+  port: 8123
 env:
 - name: TZ
   value: America/New_York
-ingress:
-  enabled: false
 configuration:
   enabled: true
   forceInit: false
