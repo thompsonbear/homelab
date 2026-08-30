@@ -30,7 +30,7 @@ apps = {
   }
   bluesky-pds = {
     namespace     = "bluesky-pds"
-    image_version = "0.4.208"
+    image_tag = "0.4.208"
     chart = {
       name    = "bluesky-pds"
       repo    = "https://charts.bear.fyi"
