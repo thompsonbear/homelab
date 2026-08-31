@@ -21,6 +21,10 @@ terraform {
       source  = "filipowm/unifi"
       version = "1.1.0"
     }
+    keycloak = {
+      source  = "keycloak/keycloak"
+      version = "5.9.0"
+    }
   }
 }
 
@@ -68,4 +72,13 @@ provider "unifi" {
   api_key        = module.akv.secrets.unifi.api_key
   api_url        = module.akv.secrets.unifi.api_url
   allow_insecure = true
+}
+
+provider "keycloak" {
+  client_id                = "admin-cli"
+  username                 = module.akv.secrets.admin-secret.username
+  password                 = module.akv.secrets.admin-secret.password
+  url                      = "https://${module.keycloak_app.app.fqdn}"
+  initial_login            = false
+  tls_insecure_skip_verify = true # var.environment == "prod" ?? false : true
 }

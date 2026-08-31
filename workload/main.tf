@@ -78,6 +78,12 @@ module "keycloak_app" {
   postgres   = { base_gb = 20, wal_gb = 10, replicas = 1 }
 }
 
+resource "keycloak_realm" "this" {
+  depends_on = [ module.keycloak_app ]
+  realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
+  display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${capitalize(var.environment)}"
+}
+
 module "apps" {
   depends_on = [module.keycloak_app]
   for_each   = var.apps
