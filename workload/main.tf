@@ -84,6 +84,27 @@ resource "keycloak_realm" "this" {
   display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${capitalize(var.environment)}"
 }
 
+resource "keycloak_oidc_identity_provider" "microsoft_entra_idp" {
+  realm        = keycloak_realm.this.id
+  alias        = "entra" # https://<KEYCLOAK_HOSTNAME>/realms/<REALM>/broker/entra/endpoint
+  display_name = "Microsoft Entra"
+
+  client_id     = module.akv.secrets.entra-app.client_id
+  client_secret = module.akv.secrets.entra-app.client_secret
+
+  issuer            = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/v2.0"
+  authorization_url = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/authorize"
+  token_url         = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/token"
+  logout_url        = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/logout"
+  jwks_url          = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/discovery/v2.0/keys"
+  user_info_url     = "https://graph.microsoft.com/oidc/userinfo"
+  default_scopes    = "openid offline_access"
+
+  sync_mode          = "IMPORT"
+  trust_email        = true
+  validate_signature = true
+}
+
 module "apps" {
   depends_on = [module.keycloak_app]
   for_each   = var.apps
