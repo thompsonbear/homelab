@@ -57,7 +57,6 @@ module "cnpg_operator" {
       image = { reference = "ghcr.io/cloudnative-pg/pgvector:0.8.6-202609071550-18-trixie@sha256:a2b828fe19d3c65138fc9308530dc2104eafa9b12ab6dc29a15c6432c1bebfe0" }
     }]
   }]
-  shared_preload_libraries = ["vchord"]
 }
 
 module "app_namespaces" {
