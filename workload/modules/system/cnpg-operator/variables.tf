@@ -15,6 +15,15 @@ variable "replicas" {
 }
 
 variable "pg_images" {
-  type        = list(object({ major = number, image = string }))
-  description = "The PostgreSQL images to use for the global image catalog"
+  type = list(object({
+    major = number
+    image = string
+    extensions = optional(list(object({
+      name = string
+      image = object({ reference = string})
+      dynamic_library_path = optional(list(string))
+      extension_control_path = optional(list(string))
+    })))
+  }))
+  description = "The PostgreSQL/extension images to use for the global image catalog"
 }
