@@ -19,9 +19,9 @@ variable "pg_images" {
     major = number
     image = string
     extensions = optional(list(object({
-      name = string
-      image = object({ reference = string})
-      dynamic_library_path = optional(list(string))
+      name                   = string
+      image                  = object({ reference = string })
+      dynamic_library_path   = optional(list(string))
       extension_control_path = optional(list(string))
     })))
   }))

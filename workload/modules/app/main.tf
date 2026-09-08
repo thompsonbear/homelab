@@ -14,9 +14,9 @@ locals {
     backend         = var.backend
     postgres = {
       name   = var.app_name
-      host   = "${var.app_name}-cnpg-cluster-rw.${var.namespace}.svc.cluster.local"
+      host   = "${var.app_name}-cnpg-rw.${var.namespace}.svc.cluster.local"
       port   = 5432
-      secret = "${var.app_name}-cnpg-cluster-app"
+      secret = "${var.app_name}-cnpg-app"
     }
   }
 }

@@ -48,11 +48,11 @@ module "cnpg_operator" {
     major = 18
     image = "ghcr.io/cloudnative-pg/postgresql:18.6-202608170814-minimal-trixie@sha256:eb7979e4bd7fccaec0369b550b9649eec1f014de04621fac6e653244e75cca46"
     extensions = [{
-      name  = "vchord"
-      image = { reference = "ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1" }
-      dynamic_library_path = [ "/usr/lib/postgresql/18/lib/" ]
+      name                   = "vchord"
+      image                  = { reference = "ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1" }
+      dynamic_library_path   = ["/usr/lib/postgresql/18/lib/"]
       extension_control_path = ["/usr/share/postgresql/18/"]
-    }, {
+      }, {
       name  = "pgvector"
       image = { reference = "ghcr.io/cloudnative-pg/pgvector:0.8.6-202609071550-18-trixie@sha256:a2b828fe19d3c65138fc9308530dc2104eafa9b12ab6dc29a15c6432c1bebfe0" }
     }]
@@ -88,7 +88,7 @@ module "keycloak_app" {
 }
 
 resource "keycloak_realm" "this" {
-  depends_on = [ module.keycloak_app ]
+  depends_on   = [module.keycloak_app]
   realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
   display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${capitalize(var.environment)}"
 }

@@ -1,24 +1,43 @@
-resource "helm_release" "cnpg_cluster" {
-  name       = "${var.app_name}-cnpg"
-  chart      = "cluster"
-  repository = "https://cloudnative-pg.github.io/charts"
-  namespace  = var.namespace
-  version    = var.cnpg_cluster_chart_tag
-
-  values = [templatefile("${path.module}/resources/values.tftpl", {
-    pg_major_version = var.pg_major_version
-    replicas         = var.replicas
-    base_gb          = var.base_gb
-    wal_gb           = var.wal_gb
-    initdb = {
-      name     = var.db.name
-      encoding = var.db.encoding
-      sql      = var.db.sql
+resource "kubectl_manifest" "cnpg_cluster" {
+  yaml_body = yamlencode({
+    apiVersion = "postgresql.cnpg.io/v1"
+    kind       = "Cluster"
+    metadata = {
+      name      = "${var.app_name}-cnpg"
+      namespace = var.namespace
     }
-  })]
+    spec = {
+      instances = var.replicas
+      imageCatalogRef = {
+        apiGroup = "postgresql.cnpg.io"
+        kind     = "ClusterImageCatalog"
+        major    = var.pg_major_version
+        name     = "postgresql-global"
+      }
+      bootstrap = {
+        initdb = {
+          database               = var.db.name
+          encoding               = var.db.encoding
+          postInitApplicationSQL = concat(var.db.sql, [for extension in var.extensions : "CREATE EXTENSION IF NOT EXISTS ${extension.name} CASCADE;" if extension.create])
+        }
+      }
+      storage = {
+        size         = "${var.base_gb}Gi"
+        storageClass = "mayastor-1"
+      }
+      walStorage = {
+        size         = "${var.wal_gb}Gi"
+        storageClass = "mayastor-1"
+      }
+      postgresql = {
+        extensions               = [for extension in var.extensions : { name = extension.name }]
+        shared_preload_libraries = [for extension in var.extensions : extension.name if extension.preload]
+      }
+    }
+  })
 }
 
 resource "time_sleep" "wait_for_cnpg" {
-  depends_on      = [helm_release.cnpg_cluster]
+  depends_on      = [kubectl_manifest.cnpg_cluster]
   create_duration = "60s"
 }
