@@ -59,6 +59,11 @@ module "cnpg_operator" {
   }]
 }
 
+module "valkey_operator" {
+  source = "./modules/system/valkey-operator"
+  tag    = var.system.valkey_tag
+}
+
 module "app_namespaces" {
   source   = "./modules/system/namespace"
   for_each = toset(distinct(concat([for k, v in var.apps : try(v.namespace, k)], ["keycloak"])))
@@ -88,7 +93,7 @@ module "keycloak_app" {
 }
 
 resource "keycloak_realm" "this" {
-  depends_on   = [module.keycloak_app]
+  depends_on   = [module.keycloak_app, module.valkey_operator]
   realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
   display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${capitalize(var.environment)}"
 }

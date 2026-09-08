@@ -8,6 +8,7 @@ system = {
     image_tag = "1.30.0"
     chart_tag = "0.29.0"
   }
+  valkey_tag = "0.6.0"
 }
 
 apps = {
@@ -70,5 +71,6 @@ apps = {
         create  = false
       }]
     }
+    valkey = {}
   }
 }

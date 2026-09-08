@@ -68,8 +68,9 @@ variable "apps" {
     }))
 
     valkey = optional(object({
-      size_gb  = optional(number)
+      shards   = optional(number)
       replicas = optional(number)
+      size_gb  = optional(number)
     }))
   }))
 }

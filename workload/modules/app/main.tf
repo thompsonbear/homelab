@@ -159,6 +159,16 @@ module "cnpg_cluster" {
   }
 }
 
+module "valkey_cluster" {
+  count     = var.valkey != null ? 1 : 0
+  source    = "./valkey-cluster"
+  app_name  = local.app.name
+  namespace = local.app.namespace
+  shards    = var.valkey.shards
+  replicas  = var.valkey.replicas
+  size_gb   = var.valkey.size_gb
+}
+
 resource "kubernetes_secret_v1" "secrets" {
   # marked as non-sensitive as the keys/secret names are not secret
   # the data values are still secret but should not appear in outputs
