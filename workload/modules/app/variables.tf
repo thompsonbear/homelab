@@ -73,13 +73,17 @@ variable "keycloak" {
 
 variable "postgres" {
   type = object({
-    chart_tag = optional(string, "0.8.1")
-    version   = optional(number, 18)
-    base_gb   = optional(number, 10)
-    wal_gb    = optional(number, 0)
-    replicas  = optional(number, 2)
-    encoding  = optional(string, "UTF8")
-    sql       = optional(list(string), [])
+    version  = optional(number, 18)
+    base_gb  = optional(number, 10)
+    wal_gb   = optional(number, 0)
+    replicas = optional(number, 2)
+    encoding = optional(string, "UTF8")
+    sql      = optional(list(string), [])
+    extensions = optional(list(object({
+      name    = string
+      create  = optional(bool, true)
+      preload = optional(bool, false)
+    })), [])
   })
   default = null
 }

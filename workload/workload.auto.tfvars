@@ -45,4 +45,30 @@ apps = {
       port    = 3000
     }
   }
+  immich = {
+    namespace = "immich"
+    image_tag = "v3.1.0"
+    dns = {
+      labels = ["img", "immich"]
+      public = true
+    }
+    backend = {
+      service = "immich-api"
+      port    = 2253
+    }
+    postgres = {
+      base_gb  = 20
+      wal_gb   = 10
+      replicas = 1
+      extensions = [{
+        name    = "vchord"
+        preload = true
+        create  = true
+        }, {
+        name    = "pgvector"
+        preload = false
+        create  = false
+      }]
+    }
+  }
 }

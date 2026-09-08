@@ -52,11 +52,21 @@ variable "apps" {
       logout_uris   = optional(list(string))
       client_roles  = optional(list(string))
     }))
+
     postgres = optional(object({
+      version  = optional(number)
       base_gb  = optional(number)
       wal_gb   = optional(number)
       replicas = optional(number)
+      encoding = optional(string)
+      sql      = optional(list(string))
+      extensions = optional(list(object({
+        name    = string
+        create  = optional(bool)
+        preload = optional(bool)
+      })), [])
     }))
+
     valkey = optional(object({
       size_gb  = optional(number)
       replicas = optional(number)

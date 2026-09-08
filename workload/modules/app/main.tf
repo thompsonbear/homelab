@@ -153,9 +153,10 @@ module "cnpg_cluster" {
   base_gb                = var.postgres.base_gb
   wal_gb                 = var.postgres.wal_gb
   db = {
-    name     = local.app.name
-    encoding = var.postgres.encoding
-    sql      = var.postgres.sql
+    name       = local.app.name
+    encoding   = var.postgres.encoding
+    sql        = var.postgres.sql
+    extensions = var.postgres.extensions
   }
 }
 

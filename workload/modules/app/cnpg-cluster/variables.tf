@@ -6,10 +6,6 @@ variable "namespace" {
   type = string
 }
 
-variable "cnpg_cluster_chart_tag" {
-  type = string
-}
-
 variable "pg_major_version" {
   type = number
 }
@@ -31,10 +27,10 @@ variable "db" {
     name     = string
     encoding = string
     sql      = list(string)
-    extensions = optional(list(object({
+    extensions = list(object({
       name    = string
-      create  = optional(bool, false)
-      preload = optional(bool, false)
-    })), [])
+      create  = bool
+      preload = bool
+    }))
   })
 }
