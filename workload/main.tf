@@ -125,11 +125,11 @@ module "apps" {
   replicas  = try(each.value.replicas, 1)
   image_tag = try(each.value.image_tag, "latest")
 
-  chart = {
+  chart = try({
     name    = try(each.value.chart.name, each.key)
     repo    = each.value.chart.repo
-    version = try(each.value.chart.version, each.value.version)
-  }
+    version = try(each.value.chart.version, each.value.image_tag)
+  }, null)
 
   dns = can(each.value.dns) ? {
     labels = try(each.value.dns.labels, [each.key])
