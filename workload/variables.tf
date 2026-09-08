@@ -34,11 +34,11 @@ variable "apps" {
   type = map(object({
     namespace = string
     image_tag = string
-    chart = object({
+    chart = optional(object({
       name    = optional(string)
       repo    = string
       version = optional(string)
-    })
+    }))
     dns = object({
       labels = optional(list(string))
       public = optional(bool)
