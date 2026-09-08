@@ -143,14 +143,14 @@ resource "kubectl_manifest" "httproute" {
 }
 
 module "cnpg_cluster" {
-  count                  = var.postgres != null ? 1 : 0
-  source                 = "./cnpg-cluster"
-  app_name               = local.app.name
-  namespace              = local.app.namespace
-  pg_major_version       = var.postgres.version
-  replicas               = var.postgres.replicas
-  base_gb                = var.postgres.base_gb
-  wal_gb                 = var.postgres.wal_gb
+  count            = var.postgres != null ? 1 : 0
+  source           = "./cnpg-cluster"
+  app_name         = local.app.name
+  namespace        = local.app.namespace
+  pg_major_version = var.postgres.version
+  replicas         = var.postgres.replicas
+  base_gb          = var.postgres.base_gb
+  wal_gb           = var.postgres.wal_gb
   db = {
     name       = local.app.name
     encoding   = var.postgres.encoding
