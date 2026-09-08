@@ -4,7 +4,7 @@ variable "realm_id" {
 }
 
 variable "namespace" {
-  type        = string
+  type = string
 }
 
 variable "client_id" {

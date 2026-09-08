@@ -29,7 +29,7 @@ apps = {
     }
   }
   bluesky-pds = {
-    namespace     = "bluesky-pds"
+    namespace = "bluesky-pds"
     image_tag = "0.4.208"
     chart = {
       name    = "bluesky-pds"

@@ -5,7 +5,7 @@ resource "random_password" "client_secret" {
 
 resource "kubernetes_secret_v1" "oauth_secret" {
   metadata {
-    name = "${var.client_id}-oauth-secret"
+    name      = "${var.client_id}-oauth-secret"
     namespace = var.namespace
   }
   data = {
