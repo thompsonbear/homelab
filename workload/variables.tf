@@ -26,6 +26,7 @@ variable "system" {
       image_tag = string
       chart_tag = string
     })
+    valkey_tag = string
   })
   description = "system chart/image version tags - x.y.z"
 }
