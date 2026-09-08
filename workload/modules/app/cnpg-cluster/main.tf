@@ -18,7 +18,7 @@ resource "kubectl_manifest" "cnpg_cluster" {
         initdb = {
           database               = var.db.name
           encoding               = var.db.encoding
-          postInitApplicationSQL = concat(var.db.sql, [for extension in var.extensions : "CREATE EXTENSION IF NOT EXISTS ${extension.name} CASCADE;" if extension.create])
+          postInitApplicationSQL = concat(var.db.sql, [for extension in var.db.extensions : "CREATE EXTENSION IF NOT EXISTS ${extension.name} CASCADE;" if extension.create])
         }
       }
       storage = {
@@ -30,8 +30,8 @@ resource "kubectl_manifest" "cnpg_cluster" {
         storageClass = "mayastor-1"
       }
       postgresql = {
-        extensions               = [for extension in var.extensions : { name = extension.name }]
-        shared_preload_libraries = [for extension in var.extensions : extension.name if extension.preload]
+        extensions               = [for extension in var.db.extensions : { name = extension.name }]
+        shared_preload_libraries = [for extension in var.db.extensions : extension.name if extension.preload]
       }
     }
   })

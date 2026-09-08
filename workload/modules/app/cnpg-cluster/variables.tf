@@ -31,5 +31,10 @@ variable "db" {
     name     = string
     encoding = string
     sql      = list(string)
+    extensions = optional(list(object({
+      name    = string
+      create  = optional(bool, false)
+      preload = optional(bool, false)
+    })), [])
   })
 }
