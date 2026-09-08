@@ -147,7 +147,6 @@ module "cnpg_cluster" {
   source                 = "./cnpg-cluster"
   app_name               = local.app.name
   namespace              = local.app.namespace
-  cnpg_cluster_chart_tag = var.postgres.chart_tag
   pg_major_version       = var.postgres.version
   replicas               = var.postgres.replicas
   base_gb                = var.postgres.base_gb
