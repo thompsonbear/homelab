@@ -7,7 +7,7 @@ module "akv" {
 module "cert_manager" {
   source             = "./modules/system/cert-manager"
   tag                = var.system.cert_manager_tag
-  environment        = "non-prod" # var.environment
+  environment        = var.environment
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   acme_email         = module.akv.secrets.acme-email
   cloudflare_token   = module.akv.secrets.cloudflare-token
@@ -32,6 +32,7 @@ module "mayastor" {
 }
 
 module "cnpg_operator" {
+  depends_on = [ module.mayastor ]
   source    = "./modules/system/cnpg-operator"
   image_tag = var.system.cnpg.image_tag
   chart_tag = var.system.cnpg.chart_tag
@@ -60,6 +61,7 @@ module "cnpg_operator" {
 }
 
 module "valkey_operator" {
+  depends_on = [ module.mayastor ]
   source = "./modules/system/valkey-operator"
   tag = var.system.valkey_tag
 }
@@ -79,7 +81,7 @@ locals {
 }
 
 module "keycloak_app" {
-  depends_on = [module.cnpg_operator, module.mayastor, module.cert_manager, module.app_namespaces]
+  depends_on = [module.cnpg_operator, module.valkey_operator, module.mayastor, module.cert_manager, module.app_namespaces]
   source     = "./modules/app"
   context    = local.app_context
   app_name   = "keycloak"
@@ -93,9 +95,9 @@ module "keycloak_app" {
 }
 
 resource "keycloak_realm" "this" {
-  depends_on   = [module.keycloak_app, module.valkey_operator]
+  depends_on   = [module.keycloak_app ]
   realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
-  display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${capitalize(var.environment)}"
+  display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${upper(var.environment)}"
 }
 
 resource "keycloak_oidc_identity_provider" "microsoft_entra_idp" {
