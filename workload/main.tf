@@ -7,7 +7,7 @@ module "akv" {
 module "cert_manager" {
   source             = "./modules/system/cert-manager"
   tag                = var.system.cert_manager_tag
-  environment        = "non-prod" # var.environment
+  environment        = var.environment
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   acme_email         = module.akv.secrets.acme-email
   cloudflare_token   = module.akv.secrets.cloudflare-token
@@ -32,6 +32,7 @@ module "mayastor" {
 }
 
 module "cnpg_operator" {
+  depends_on = [ module.mayastor ]
   source    = "./modules/system/cnpg-operator"
   image_tag = var.system.cnpg.image_tag
   chart_tag = var.system.cnpg.chart_tag
@@ -60,6 +61,7 @@ module "cnpg_operator" {
 }
 
 module "valkey_operator" {
+  depends_on = [ module.mayastor ]
   source = "./modules/system/valkey-operator"
   tag = var.system.valkey_tag
 }
@@ -78,46 +80,46 @@ locals {
   }
 }
 
-# module "keycloak_app" {
-#   depends_on = [module.cnpg_operator, module.mayastor, module.cert_manager, module.app_namespaces]
-#   source     = "./modules/app"
-#   context    = local.app_context
-#   app_name   = "keycloak"
-#   namespace  = "keycloak"
-#   replicas   = 1
-#   image_tag  = var.system.keycloak_tag
-#   backend    = { service = "keycloak", port = 8080 }
-#   dns        = { labels = ["auth"], public = true }
-#   secrets    = { admin-secret = module.akv.secrets.admin-secret }
-#   postgres   = { base_gb = 20, wal_gb = 10, replicas = 1 }
-# }
-#
-# resource "keycloak_realm" "this" {
-#   depends_on   = [module.keycloak_app, module.valkey_operator]
-#   realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
-#   display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${capitalize(var.environment)}"
-# }
-#
-# resource "keycloak_oidc_identity_provider" "microsoft_entra_idp" {
-#   realm        = keycloak_realm.this.id
-#   alias        = "entra" # https://<KEYCLOAK_HOSTNAME>/realms/<REALM>/broker/entra/endpoint
-#   display_name = "Microsoft Entra"
-#
-#   client_id     = module.akv.secrets.entra-app.client_id
-#   client_secret = module.akv.secrets.entra-app.client_secret
-#
-#   issuer            = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/v2.0"
-#   authorization_url = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/authorize"
-#   token_url         = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/token"
-#   logout_url        = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/logout"
-#   jwks_url          = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/discovery/v2.0/keys"
-#   user_info_url     = "https://graph.microsoft.com/oidc/userinfo"
-#   default_scopes    = "openid offline_access"
-#
-#   sync_mode          = "IMPORT"
-#   trust_email        = true
-#   validate_signature = true
-# }
+module "keycloak_app" {
+  depends_on = [module.cnpg_operator, module.valkey_operator, module.mayastor, module.cert_manager, module.app_namespaces]
+  source     = "./modules/app"
+  context    = local.app_context
+  app_name   = "keycloak"
+  namespace  = "keycloak"
+  replicas   = 1
+  image_tag  = var.system.keycloak_tag
+  backend    = { service = "keycloak", port = 8080 }
+  dns        = { labels = ["auth"], public = true }
+  secrets    = { admin-secret = module.akv.secrets.admin-secret }
+  postgres   = { base_gb = 20, wal_gb = 10, replicas = 1 }
+}
+
+resource "keycloak_realm" "this" {
+  depends_on   = [module.keycloak_app ]
+  realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
+  display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${capitalize(var.environment)}"
+}
+
+resource "keycloak_oidc_identity_provider" "microsoft_entra_idp" {
+  realm        = keycloak_realm.this.id
+  alias        = "entra" # https://<KEYCLOAK_HOSTNAME>/realms/<REALM>/broker/entra/endpoint
+  display_name = "Microsoft Entra"
+
+  client_id     = module.akv.secrets.entra-app.client_id
+  client_secret = module.akv.secrets.entra-app.client_secret
+
+  issuer            = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/v2.0"
+  authorization_url = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/authorize"
+  token_url         = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/token"
+  logout_url        = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/logout"
+  jwks_url          = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/discovery/v2.0/keys"
+  user_info_url     = "https://graph.microsoft.com/oidc/userinfo"
+  default_scopes    = "openid offline_access"
+
+  sync_mode          = "IMPORT"
+  trust_email        = true
+  validate_signature = true
+}
 
 # module "apps" {
 #   depends_on = [module.keycloak_app]
