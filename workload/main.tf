@@ -149,7 +149,7 @@ module "apps" {
   }
 
   secrets  = try(each.value.secrets, {})
-  keycloak = try(each.value.keycloak, null)
+  # keycloak = try(each.value.keycloak, null)
   postgres = try(each.value.postgres, null)
   valkey   = try(each.value.valkey, null)
 }
