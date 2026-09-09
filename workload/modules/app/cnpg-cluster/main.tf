@@ -3,7 +3,7 @@ resource "kubectl_manifest" "cnpg_cluster" {
     apiVersion = "postgresql.cnpg.io/v1"
     kind       = "Cluster"
     metadata = {
-      name      = "${var.app_name}-cnpg"
+      name      = "postgres-${var.app_name}"
       namespace = var.namespace
     }
     spec = {
