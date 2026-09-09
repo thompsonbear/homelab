@@ -120,7 +120,7 @@ locals {
 # }
 
 module "apps" {
-  depends_on = [module.keycloak_app]
+  # depends_on = [module.keycloak_app]
   for_each   = var.apps
   source     = "./modules/app"
   context    = local.app_context
