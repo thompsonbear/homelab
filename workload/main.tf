@@ -119,37 +119,37 @@ resource "keycloak_oidc_identity_provider" "microsoft_entra_idp" {
   validate_signature = true
 }
 
-module "apps" {
-  depends_on = [module.keycloak_app]
-  for_each   = var.apps
-  source     = "./modules/app"
-  context    = local.app_context
-
-  app_name  = each.key
-  namespace = try(each.value.namespace, each.key)
-  replicas  = try(each.value.replicas, 1)
-  image_tag = try(each.value.image_tag, "latest")
-
-  chart = can(each.value.chart) ? each.value.chart : null
-
-  dns = can(each.value.dns) ? {
-    labels = try(each.value.dns.labels, [each.key])
-    public = try(each.value.dns.public, false)
-    } : {
-    labels = [each.key]
-    public = false
-  }
-
-  backend = can(each.value.backend) ? {
-    service = try(each.value.backend.service, each.key)
-    port    = try(each.value.backend.port, 80)
-    } : {
-    service = each.key
-    port    = 80
-  }
-
-  secrets  = try(each.value.secrets, {})
-  keycloak = try(each.value.keycloak, null)
-  postgres = try(each.value.postgres, null)
-  valkey   = try(each.value.valkey, null)
-}
+# module "apps" {
+#   depends_on = [module.keycloak_app]
+#   for_each   = var.apps
+#   source     = "./modules/app"
+#   context    = local.app_context
+#
+#   app_name  = each.key
+#   namespace = try(each.value.namespace, each.key)
+#   replicas  = try(each.value.replicas, 1)
+#   image_tag = try(each.value.image_tag, "latest")
+#
+#   chart = can(each.value.chart) ? each.value.chart : null
+#
+#   dns = can(each.value.dns) ? {
+#     labels = try(each.value.dns.labels, [each.key])
+#     public = try(each.value.dns.public, false)
+#     } : {
+#     labels = [each.key]
+#     public = false
+#   }
+#
+#   backend = can(each.value.backend) ? {
+#     service = try(each.value.backend.service, each.key)
+#     port    = try(each.value.backend.port, 80)
+#     } : {
+#     service = each.key
+#     port    = 80
+#   }
+#
+#   secrets  = try(each.value.secrets, {})
+#   keycloak = try(each.value.keycloak, null)
+#   postgres = try(each.value.postgres, null)
+#   valkey   = try(each.value.valkey, null)
+# }
