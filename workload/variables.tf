@@ -20,6 +20,7 @@ variable "system" {
     cert_manager_tag = string
     metallb_tag      = string
     istio_tag        = string
+    csi_nfs_tag      = string
     mayastor_tag     = string
     keycloak_tag     = string
     cnpg = object({
