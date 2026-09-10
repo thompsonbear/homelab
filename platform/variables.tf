@@ -35,7 +35,6 @@ variable "vm_name_prefix" {
 
 variable "vms" {
   type = list(object({
-    id           = optional(number)
     pve_node     = optional(string)
     vcores       = number
     ram_mb       = number
