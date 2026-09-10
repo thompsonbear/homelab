@@ -76,7 +76,7 @@ resource "kubernetes_deployment_v1" "nfs_server_deploy" {
     namespace = module.namespace.name
   }
   spec {
-    replicas = 2
+    replicas = 1
     selector {
       match_labels = {
         role = "nfs-server"
