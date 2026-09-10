@@ -35,17 +35,9 @@ resource "kubernetes_storage_class_v1" "storage_classes" {
   reclaim_policy      = "Retain"
 }
 
-data "kubernetes_nodes" "diskpool_nodes" {
-  metadata {
-    labels = {
-      "openebs.io/engine" = "mayastor"
-    }
-  }
-}
-
 resource "kubectl_manifest" "diskpools" {
   depends_on = [helm_release.mayastor]
-  for_each   = { for node in data.kubernetes_nodes.diskpool_nodes.nodes : node.metadata[0].name => node }
+  for_each   = toset(var.diskpool_nodes)
   yaml_body = yamlencode({
     apiVersion = "openebs.io/v1beta3"
     kind       = "DiskPool"

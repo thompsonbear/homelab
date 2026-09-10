@@ -43,3 +43,8 @@ variable "nfs_storage_gb" {
   type        = number
   description = "NFS storage size in GiB"
 }
+
+variable "diskpool_nodes" {
+  type        = list(string)
+  description = "list of nodes to use for disk storage pools"
+}

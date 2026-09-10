@@ -36,6 +36,7 @@ module "mayastor" {
   source         = "./modules/system/mayastor"
   tag            = var.system.mayastor_tag
   nfs_storage_gb = 200
+  diskpool_nodes = [for k, v in module.akv.secrets["${var.environment}-nodes"] : k if v.role == "worker" && v.data_disk_gb != null]
 }
 
 module "cnpg_operator" {
