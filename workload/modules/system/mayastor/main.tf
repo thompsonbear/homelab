@@ -44,7 +44,7 @@ data "kubernetes_nodes" "diskpool_nodes" {
 }
 
 resource "kubectl_manifest" "diskpools" {
-  depends_on = [helm_release.mayastor]
+  depends_on = [helm_release.mayastor, data.kubernetes_nodes.diskpool_nodes]
   for_each   = { for node in data.kubernetes_nodes.diskpool_nodes.nodes : node.metadata[0].name => node }
   yaml_body = yamlencode({
     apiVersion = "openebs.io/v1beta3"
