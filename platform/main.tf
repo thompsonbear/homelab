@@ -79,6 +79,13 @@ module "talos" {
   kube_vip            = cidrhost(module.subnets.network_cidr_blocks["kube-vip"], 0)
 }
 
+resource "azurerm_key_vault_secret" "nodes" {
+  name         = "${var.environment}-nodes"
+  value        = jsonencode(local.all_nodes)
+  content_type = "application/json"
+  key_vault_id = module.akv.id
+}
+
 resource "azurerm_key_vault_secret" "talosconfig" {
   name         = "${var.environment}-talosconfig"
   value        = module.talos.cluster.talosconfig
