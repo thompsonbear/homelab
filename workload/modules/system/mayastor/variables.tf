@@ -38,3 +38,8 @@ variable "alloy_enabled" {
   description = "enable alloy"
   default     = false
 }
+
+variable "nfs_storage_gb" {
+  type        = number
+  description = "NFS storage size in GiB"
+}

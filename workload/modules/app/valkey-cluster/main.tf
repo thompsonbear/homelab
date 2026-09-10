@@ -1,5 +1,5 @@
 resource "random_password" "valkey_password" {
-  length  = 32
+  length = 32
 }
 
 resource "kubernetes_secret_v1" "valkey_secret" {
@@ -8,12 +8,12 @@ resource "kubernetes_secret_v1" "valkey_secret" {
     namespace = var.namespace
   }
   data = {
-   password = random_password.valkey_password.result
+    password = random_password.valkey_password.result
   }
 }
 
 resource "kubectl_manifest" "valkey_cluster" {
-  depends_on = [ kubernetes_secret_v1.valkey_secret ]
+  depends_on = [kubernetes_secret_v1.valkey_secret]
   yaml_body = yamlencode({
     "apiVersion" = "valkey.io/v1alpha1"
     "kind"       = "ValkeyCluster"

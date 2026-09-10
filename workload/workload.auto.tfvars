@@ -2,6 +2,7 @@ system = {
   cert_manager_tag = "1.21.1"
   metallb_tag      = "0.16.1"
   istio_tag        = "1.30.3"
+  csi_nfs_tag      = "4.13.4"
   mayastor_tag     = "2.11.1"
   keycloak_tag     = "26.7.2"
   cnpg = {

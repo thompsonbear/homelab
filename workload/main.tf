@@ -26,16 +26,23 @@ module "istio" {
   ip_pool    = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
+module "csi-nfs" {
+  source = "./modules/system/csi-nfs"
+  tag    = var.system.csi_nfs_tag
+}
+
 module "mayastor" {
-  source = "./modules/system/mayastor"
-  tag    = var.system.mayastor_tag
+  depends_on     = [module.csi-nfs]
+  source         = "./modules/system/mayastor"
+  tag            = var.system.mayastor_tag
+  nfs_storage_gb = 200
 }
 
 module "cnpg_operator" {
-  depends_on = [ module.mayastor ]
-  source    = "./modules/system/cnpg-operator"
-  image_tag = var.system.cnpg.image_tag
-  chart_tag = var.system.cnpg.chart_tag
+  depends_on = [module.mayastor]
+  source     = "./modules/system/cnpg-operator"
+  image_tag  = var.system.cnpg.image_tag
+  chart_tag  = var.system.cnpg.chart_tag
   pg_images = [{
     major = 15
     image = "ghcr.io/cloudnative-pg/postgresql:15.19-202608170814-minimal-trixie@sha256:67b23fdf6dbf3d5bc5dc42cdbc5d292375582b1fe378c1dc69eb51c6fbc57730"
@@ -61,9 +68,9 @@ module "cnpg_operator" {
 }
 
 module "valkey_operator" {
-  depends_on = [ module.mayastor ]
-  source = "./modules/system/valkey-operator"
-  tag = var.system.valkey_tag
+  depends_on = [module.mayastor]
+  source     = "./modules/system/valkey-operator"
+  tag        = var.system.valkey_tag
 }
 
 module "app_namespaces" {
@@ -95,7 +102,7 @@ module "keycloak_app" {
 }
 
 resource "keycloak_realm" "this" {
-  depends_on   = [module.keycloak_app ]
+  depends_on   = [module.keycloak_app]
   realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
   display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${upper(var.environment)}"
 }
