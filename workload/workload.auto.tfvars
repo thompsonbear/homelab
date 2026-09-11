@@ -73,7 +73,8 @@ apps = {
       }]
     }
     valkey = {
-      replicas = 1
+      replicas = 2
+      shards = 3
     }
   }
 }
