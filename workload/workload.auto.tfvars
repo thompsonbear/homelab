@@ -72,6 +72,8 @@ apps = {
         create  = false
       }]
     }
-    valkey = {}
+    valkey = {
+      replicas = 1
+    }
   }
 }
