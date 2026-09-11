@@ -142,7 +142,7 @@ resource "kubernetes_storage_class_v1" "nfs_storage_class" {
   }
   parameters = {
     server = "${kubernetes_service_v1.nfs_server_svc.metadata[0].name}.${module.namespace.name}.svc.cluster.local"
-    path   = "/"
+    share  = "/"
   }
   storage_provisioner = "nfs.csi.k8s.io"
   reclaim_policy      = "Retain"
