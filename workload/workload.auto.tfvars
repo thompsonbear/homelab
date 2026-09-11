@@ -72,9 +72,6 @@ apps = {
         create  = false
       }]
     }
-    valkey = {
-      replicas = 5
-      shards = 2
-    }
+    valkey = {}
   }
 }
