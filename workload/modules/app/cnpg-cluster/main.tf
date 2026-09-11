@@ -29,6 +29,14 @@ resource "kubectl_manifest" "cnpg_cluster" {
         size         = "${var.wal_gb}Gi"
         storageClass = "mayastor-1"
       }
+      managed = {
+        roles = [{
+          name = var.app_name
+          superuser = true
+          createdb = true
+          login = true
+        }]
+      }
       postgresql = {
         extensions               = [for extension in var.db.extensions : { name = extension.name }]
         shared_preload_libraries = [for extension in var.db.extensions : extension.name if extension.preload]
