@@ -93,7 +93,6 @@ variable "postgres" {
 
 variable "valkey" {
   type = object({
-    tag       = string
     clustered = optional(bool, false)
     size_gb   = optional(number, 5)
     shards    = optional(number, 1)
