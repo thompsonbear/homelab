@@ -3,7 +3,6 @@ dataStorage:
   enabled: ${ instances ==  1 }
   requestedSize: "${ size_gb }Gi"
   className: "mayastor-2"
-  keepPvc: true
 auth:
   enabled: true
   usersExistingSecret: ${ user_secret }

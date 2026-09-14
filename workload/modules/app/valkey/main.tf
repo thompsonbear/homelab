@@ -31,7 +31,7 @@ resource "kubernetes_secret_v1" "valkey_secret" {
   }
 }
 
-resource "helm_release" "valkey_standard" {
+resource "helm_release" "valkey" {
   count      = var.clustered ? 0 : 1
   name       = "valkey"
   chart      = "valkey"

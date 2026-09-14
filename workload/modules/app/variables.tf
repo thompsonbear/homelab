@@ -22,6 +22,9 @@ variable "context" {
       ip   = string
       name = string
     }))
+    system = object({
+      valkey_tag = string
+    })
   })
 }
 

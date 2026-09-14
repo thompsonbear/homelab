@@ -170,7 +170,7 @@ module "valkey" {
   source    = "./valkey"
   app_name  = local.app.name
   namespace = local.app.namespace
-  tag       = var.valkey.tag
+  tag       = var.context.system.valkey_tag
   clustered = var.valkey.clustered
   shards    = var.valkey.shards
   instances = var.valkey.instances

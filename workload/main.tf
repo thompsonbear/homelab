@@ -85,6 +85,7 @@ locals {
     base_public_domain  = module.akv.secrets["${var.environment}-base-public-domain"]
     base_private_domain = module.akv.secrets["${var.environment}-base-private-domain"]
     gateways            = module.istio.gateways
+    system              = var.system
   }
 }
 
@@ -161,5 +162,5 @@ module "apps" {
   secrets  = try(each.value.secrets, {})
   keycloak = try(each.value.keycloak, null)
   postgres = try(each.value.postgres, null)
-  valkey   = can(each.value.valkey) ? try(merge(each.value.valkey, { tag = var.system.valkey_tag }), null) : null
+  valkey   = try(each.value.valkey, null)
 }
