@@ -11,7 +11,7 @@ auth:
     default:
       permissions: "~* &* +@all"
       passwordKey: ${ app_name }
-    ${ app_name }:
+    "${ app_name }":
       permissions: "~* &* +@all"
       passwordKey: ${ app_name }
 
