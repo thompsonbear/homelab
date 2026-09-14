@@ -39,8 +39,8 @@ resource "helm_release" "valkey" {
   namespace  = var.namespace
   version    = var.tag
   set = [{
-    name        = "auth.aclUsers.${var.app_name}"
-    value       = {permissions = "~* &* +@all"}
+    name        = "auth.aclUsers.${var.app_name}.permissions"
+    value       = "~* &* +@all"
   }]
   values = [templatefile("${path.module}/resources/values.yaml", {
     app_name    = var.app_name
