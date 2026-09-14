@@ -10,9 +10,6 @@ auth:
     default:
       permissions: "~* &* +@all"
       passwordKey: ${ app_name }
-    "${ app_name }":
-      permissions: "~* &* +@all"
-      passwordKey: ${ app_name }
 
 # Replica configuration for master-replica replication mode
 replica:
