@@ -94,7 +94,7 @@ variable "valkey" {
     clustered = optional(bool, false)
     size_gb   = optional(number, 5)
     shards    = optional(number, 1)
-    replicas  = optional(number, 2)
+    instances = optional(number, 1)
   })
   default = null
 }
