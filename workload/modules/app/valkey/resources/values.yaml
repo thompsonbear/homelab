@@ -1,0 +1,24 @@
+# Persistent storage configuration (standalone deployment only)
+dataStorage:
+  enabled: ${ instances ==  1 }
+  requestedSize: "${ size_gb }Gi"
+  className: "mayastor-2"
+  keepPvc: true
+auth:
+  enabled: true
+  usersExistingSecret: ${ user_secret }
+  aclUsers:
+    default:
+      permissions: "~* &* +@all"
+      passwordKey: ${ app_name }
+    ${ app_name }:
+      permissions: "~* &* +@all"
+      passwordKey: ${ app_name }
+
+# Replica configuration for master-replica replication mode
+replica:
+  enabled: ${ instances > 1 }
+  replicas: ${ instances - 1 }
+  persistence:
+    size: "${ size_gb }Gi"
+    storageClass: "mayastor-1"

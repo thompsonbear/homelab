@@ -6,11 +6,19 @@ variable "namespace" {
   type = string
 }
 
+variable "tag" {
+  type = string
+}
+
+variable "clustered" {
+  type = string
+}
+
 variable "shards" {
   type = number
 }
 
-variable "replicas" {
+variable "instances" {
   type = number
 }
 

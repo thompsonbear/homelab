@@ -161,5 +161,5 @@ module "apps" {
   secrets  = try(each.value.secrets, {})
   keycloak = try(each.value.keycloak, null)
   postgres = try(each.value.postgres, null)
-  valkey   = try(each.value.valkey, null)
+  valkey   = try(merge(each.value.valkey, { tag = var.system.valkey_tag }), null)
 }
