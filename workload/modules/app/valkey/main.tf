@@ -19,7 +19,7 @@ locals {
     options = {
       redisOptions = {
         username = var.app_name
-        password = random_password.valkey_password.result
+        password = random_password.valkey_app_password.result
       }
     }
   }) : null
