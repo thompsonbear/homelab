@@ -1,4 +1,8 @@
-resource "random_password" "valkey_password" {
+resource "random_password" "valkey_default_password" {
+  length = 32
+}
+
+resource "random_password" "valkey_app_password" {
   length = 32
 }
 
@@ -27,7 +31,8 @@ resource "kubernetes_secret_v1" "valkey_secret" {
     namespace = var.namespace
   }
   data = {
-    "${var.app_name}" = random_password.valkey_password.result
+    default = random_password.valkey_default_password.result
+    "${var.app_name}" = random_password.valkey_app_password.result
   }
 }
 
@@ -38,10 +43,10 @@ resource "helm_release" "valkey" {
   repository = "https://valkey.io/valkey-helm/"
   namespace  = var.namespace
   version    = var.tag
-  # set = [{
-  #   name        = "auth.aclUsers.${var.app_name}.permissions"
-  #   value       = "~* &* +@all"
-  # }]
+  set = [{
+    name        = "auth.aclUsers.${var.app_name}.permissions"
+    value       = "~* &* +@all"
+  }]
   values = [templatefile("${path.module}/resources/values.yaml", {
     app_name    = var.app_name
     instances   = var.instances

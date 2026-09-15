@@ -9,7 +9,6 @@ auth:
   aclUsers:
     default:
       permissions: "~* &* +@all"
-      passwordKey: ${ app_name }
 
 # Replica configuration for master-replica replication mode
 replica:
