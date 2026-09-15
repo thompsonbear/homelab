@@ -43,10 +43,6 @@ resource "helm_release" "valkey" {
   repository = "https://valkey.io/valkey-helm/"
   namespace  = var.namespace
   version    = var.tag
-  set = [{
-    name        = "auth.aclUsers.${var.app_name}.permissions"
-    value       = "~* &* +@all"
-  }]
   values = [templatefile("${path.module}/resources/values.yaml", {
     app_name    = var.app_name
     instances   = var.instances
@@ -55,7 +51,7 @@ resource "helm_release" "valkey" {
   })]
 }
 
-resource "kubectl_manifest" "valkey_clustered" {
+resource "kubectl_manifest" "valkey_cluster" {
   count = var.clustered ? 1 : 0
   yaml_body = yamlencode({
     "apiVersion" = "valkey.io/v1alpha1"
