@@ -8,9 +8,9 @@ auth:
   usersExistingSecret: ${ user_secret }
   aclUsers:
     default:
-      permissions: {{- "~* &* +@all" | quote }}
+      permissions: ''~* &* +@all''
     ${ app_name }:
-      permissions: {{- "~* &* +@all" | quote }}
+      permissions: ''~* &* +@all''
 
 # Replica configuration for master-replica replication mode
 replica:
