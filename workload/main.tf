@@ -42,8 +42,8 @@ module "mayastor" {
 module "cnpg_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/cnpg-operator"
-  image_tag  = var.system.cnpg.image_tag
-  chart_tag  = var.system.cnpg.chart_tag
+  image_tag  = var.system.cnpg_operator.image_tag
+  chart_tag  = var.system.cnpg_operator.chart_tag
   pg_images = [{
     major = 15
     image = "ghcr.io/cloudnative-pg/postgresql:15.19-202608170814-minimal-trixie@sha256:67b23fdf6dbf3d5bc5dc42cdbc5d292375582b1fe378c1dc69eb51c6fbc57730"
@@ -71,7 +71,7 @@ module "cnpg_operator" {
 module "valkey_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/valkey-operator"
-  tag        = var.system.valkey_tag
+  tag        = var.system.valkey_operator_tag
 }
 
 module "app_namespaces" {

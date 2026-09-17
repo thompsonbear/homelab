@@ -5,11 +5,12 @@ system = {
   csi_nfs_tag      = "4.13.4"
   mayastor_tag     = "2.11.1"
   keycloak_tag     = "26.7.2"
-  cnpg = {
+  cnpg_operator = {
     image_tag = "1.30.0"
     chart_tag = "0.29.0"
   }
-  valkey_tag = "0.6.0"
+  valkey_operator_tag = "0.6.0"
+  valkey_tag = "0.12.0"
 }
 
 apps = {
