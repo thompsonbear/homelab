@@ -73,6 +73,8 @@ apps = {
         create  = false
       }]
     }
-    valkey = {}
+    valkey = {
+      instances = 3
+    }
   }
 }
