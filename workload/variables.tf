@@ -23,11 +23,12 @@ variable "system" {
     csi_nfs_tag      = string
     mayastor_tag     = string
     keycloak_tag     = string
-    cnpg = object({
+    cnpg_operator = object({
       image_tag = string
       chart_tag = string
     })
     valkey_tag = string
+    valkey_operator_tag = string
   })
   description = "system chart/image version tags - x.y.z"
 }
