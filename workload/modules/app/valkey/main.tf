@@ -38,7 +38,7 @@ resource "kubernetes_secret_v1" "valkey_secret" {
 
 resource "helm_release" "valkey" {
   count      = var.clustered ? 0 : 1
-  name       = "valkey"
+  name       = "valkey-${var.app_name}"
   chart      = "valkey"
   repository = "https://valkey.io/valkey-helm/"
   namespace  = var.namespace
