@@ -57,7 +57,7 @@ apps = {
     }
     backend = {
       service = "immich-api"
-      port    = 2253
+      port    = 2283
     }
     postgres = {
       base_gb  = 20

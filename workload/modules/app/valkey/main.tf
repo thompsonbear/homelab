@@ -14,7 +14,7 @@ locals {
     }
   ]]
 
-  cluster_config = var.clustered ? jsonencode({
+  valkey_config = var.clustered ? jsonencode({
     nodes = local.valkey_cluster_nodes
     options = {
       redisOptions = {
