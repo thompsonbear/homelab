@@ -50,7 +50,11 @@ apps = {
   }
   immich = {
     namespace = "immich"
-    image_tag = "v3.1.0"
+    chart = {
+      name    = "immich"
+      repo    = "https://charts.bear.fyi"
+      version = "0.1.1"
+    }
     dns = {
       labels = ["img", "immich"]
       public = true

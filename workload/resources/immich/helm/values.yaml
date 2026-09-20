@@ -1,0 +1,32 @@
+server:
+  env:
+  - name: DB_URL
+    valueFrom:
+      secretKeyRef:
+        name: postgres-immich-app
+        key: "uri"
+  - name: DB_STORAGE_TYPE
+    value: "HDD"
+  - name: REDIS_HOSTNAME
+    value: valkey-immich
+  - name: REDIS_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: valkey-immich-app
+        key: "immich"
+  api:
+    replicaCount: 1
+  microservices:
+    replicaCount: 1
+  persistence:
+    enabled: true
+    size: 100Gi
+    storageClass: "mayastor-nfs"
+machineLearning:
+  enabled: true
+  replicaCount: 1
+  modelCache:
+    # emptyDir or persistentVolumeClaim
+    type: persistentVolumeClaim
+    size: 10Gi
+    storageClass: "mayastor-1"
