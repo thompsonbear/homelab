@@ -31,54 +31,54 @@ apps = {
       port    = 8080
     }
   }
-  bluesky-pds = {
-    namespace = "bluesky-pds"
-    image_tag = "0.4.208"
-    chart = {
-      name    = "bluesky-pds"
-      repo    = "https://charts.bear.fyi"
-      version = "0.4.208"
-    }
-    dns = {
-      labels = ["pds"]
-      public = true
-    }
-    backend = {
-      service = "bluesky-pds"
-      port    = 3000
-    }
-  }
-  immich = {
-    namespace = "immich"
-    chart = {
-      name    = "immich"
-      repo    = "https://charts.bear.fyi"
-      version = "0.1.1"
-    }
-    dns = {
-      labels = ["img", "immich"]
-      public = true
-    }
-    backend = {
-      service = "immich-api"
-      port    = 2283
-    }
-    postgres = {
-      base_gb  = 20
-      wal_gb   = 10
-      replicas = 1
-      extensions = [{
-        name    = "vchord"
-        preload = true
-        create  = true
-        }, {
-        name    = "pgvector"
-        preload = false
-        create  = false
-      }]
-    }
-    valkey = {
-      instances = 3
-    }
-  }
+  # bluesky-pds = {
+  #   namespace = "bluesky-pds"
+  #   image_tag = "0.4.208"
+  #   chart = {
+  #     name    = "bluesky-pds"
+  #     repo    = "https://charts.bear.fyi"
+  #     version = "0.4.208"
+  #   }
+  #   dns = {
+  #     labels = ["pds"]
+  #     public = true
+  #   }
+  #   backend = {
+  #     service = "bluesky-pds"
+  #     port    = 3000
+  #   }
+  # }
+  # immich = {
+  #   namespace = "immich"
+  #   chart = {
+  #     name    = "immich"
+  #     repo    = "https://charts.bear.fyi"
+  #     version = "0.1.1"
+  #   }
+  #   dns = {
+  #     labels = ["img", "immich"]
+  #     public = true
+  #   }
+  #   backend = {
+  #     service = "immich-api"
+  #     port    = 2283
+  #   }
+  #   postgres = {
+  #     base_gb  = 20
+  #     wal_gb   = 10
+  #     replicas = 1
+  #     extensions = [{
+  #       name    = "vchord"
+  #       preload = true
+  #       create  = true
+  #       }, {
+  #       name    = "pgvector"
+  #       preload = false
+  #       create  = false
+  #     }]
+  #   }
+  #   valkey = {
+  #     instances = 3
+  #   }
+  # }
 }
