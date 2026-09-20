@@ -36,7 +36,7 @@ variable "system" {
 variable "apps" {
   type = map(object({
     namespace = string
-    image_tag = string
+    image_tag = optional(string)
     chart = optional(object({
       name    = optional(string)
       repo    = string
