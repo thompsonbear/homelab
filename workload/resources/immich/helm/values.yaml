@@ -9,6 +9,8 @@ server:
     value: "HDD"
   - name: REDIS_HOSTNAME
     value: valkey-immich
+  - name: REDIS_USERNAME
+    value: immich
   - name: REDIS_PASSWORD
     valueFrom:
       secretKeyRef:
