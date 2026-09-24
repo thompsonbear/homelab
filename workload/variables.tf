@@ -56,9 +56,9 @@ variable "app_defaults" {
       version = number
       base_gb = number
       wal_gb = number
-      encoding = "UTF8"
-      sql = []
-      replicas = 2
+      encoding = string
+      sql = list(string)
+      replicas = number
     })
     valkey = object({
       clustered = bool
