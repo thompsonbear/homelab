@@ -36,14 +36,14 @@ module "mayastor" {
   source         = "./modules/system/mayastor"
   tag            = var.system.mayastor_tag
   nfs_storage_gb = 200
-  diskpool_nodes = [for k, v in module.akv.secrets["${var.environment}-nodes"] : k if v.role == "worker" && v.data_disk_gb != null]
+  diskpool_nodes = nonsensitive([for k, v in module.akv.secrets["${var.environment}-nodes"] : k if v.role == "worker" && v.data_disk_gb != null])
 }
 
 module "cnpg_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/cnpg-operator"
-  image_tag  = var.system.cnpg.image_tag
-  chart_tag  = var.system.cnpg.chart_tag
+  image_tag  = var.system.cnpg_operator.image_tag
+  chart_tag  = var.system.cnpg_operator.chart_tag
   pg_images = [{
     major = 15
     image = "ghcr.io/cloudnative-pg/postgresql:15.19-202608170814-minimal-trixie@sha256:67b23fdf6dbf3d5bc5dc42cdbc5d292375582b1fe378c1dc69eb51c6fbc57730"
@@ -71,7 +71,7 @@ module "cnpg_operator" {
 module "valkey_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/valkey-operator"
-  tag        = var.system.valkey_tag
+  tag        = var.system.valkey_operator_tag
 }
 
 module "app_namespaces" {
@@ -85,6 +85,7 @@ locals {
     base_public_domain  = module.akv.secrets["${var.environment}-base-public-domain"]
     base_private_domain = module.akv.secrets["${var.environment}-base-private-domain"]
     gateways            = module.istio.gateways
+    system              = var.system
   }
 }
 

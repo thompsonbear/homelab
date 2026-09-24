@@ -23,11 +23,12 @@ variable "system" {
     csi_nfs_tag      = string
     mayastor_tag     = string
     keycloak_tag     = string
-    cnpg = object({
+    cnpg_operator = object({
       image_tag = string
       chart_tag = string
     })
     valkey_tag = string
+    valkey_operator_tag = string
   })
   description = "system chart/image version tags - x.y.z"
 }
@@ -35,7 +36,7 @@ variable "system" {
 variable "apps" {
   type = map(object({
     namespace = string
-    image_tag = string
+    image_tag = optional(string)
     chart = optional(object({
       name    = optional(string)
       repo    = string
@@ -70,9 +71,10 @@ variable "apps" {
     }))
 
     valkey = optional(object({
-      shards   = optional(number)
-      replicas = optional(number)
-      size_gb  = optional(number)
+      clustered = optional(bool)
+      shards    = optional(number)
+      instances = optional(number)
+      size_gb   = optional(number)
     }))
   }))
 }

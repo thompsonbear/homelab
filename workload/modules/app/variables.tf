@@ -22,6 +22,9 @@ variable "context" {
       ip   = string
       name = string
     }))
+    system = object({
+      valkey_tag = string
+    })
   })
 }
 
@@ -90,9 +93,10 @@ variable "postgres" {
 
 variable "valkey" {
   type = object({
-    size_gb  = optional(number, 5)
-    shards   = optional(number, 1)
-    replicas = optional(number, 2)
+    clustered = optional(bool, false)
+    size_gb   = optional(number, 5)
+    shards    = optional(number, 1)
+    instances = optional(number, 1)
   })
   default = null
 }

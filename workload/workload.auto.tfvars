@@ -5,11 +5,12 @@ system = {
   csi_nfs_tag      = "4.13.4"
   mayastor_tag     = "2.11.1"
   keycloak_tag     = "26.7.2"
-  cnpg = {
+  cnpg_operator = {
     image_tag = "1.30.0"
     chart_tag = "0.29.0"
   }
-  valkey_tag = "0.6.0"
+  valkey_operator_tag = "0.6.0"
+  valkey_tag = "0.12.0"
 }
 
 apps = {
@@ -30,48 +31,54 @@ apps = {
       port    = 8080
     }
   }
-  bluesky-pds = {
-    namespace = "bluesky-pds"
-    image_tag = "0.4.208"
-    chart = {
-      name    = "bluesky-pds"
-      repo    = "https://charts.bear.fyi"
-      version = "0.4.208"
-    }
-    dns = {
-      labels = ["pds"]
-      public = true
-    }
-    backend = {
-      service = "bluesky-pds"
-      port    = 3000
-    }
-  }
-  immich = {
-    namespace = "immich"
-    image_tag = "v3.1.0"
-    dns = {
-      labels = ["img", "immich"]
-      public = true
-    }
-    backend = {
-      service = "immich-api"
-      port    = 2253
-    }
-    postgres = {
-      base_gb  = 20
-      wal_gb   = 10
-      replicas = 1
-      extensions = [{
-        name    = "vchord"
-        preload = true
-        create  = true
-        }, {
-        name    = "pgvector"
-        preload = false
-        create  = false
-      }]
-    }
-    valkey = {}
-  }
+  # bluesky-pds = {
+  #   namespace = "bluesky-pds"
+  #   image_tag = "0.4.208"
+  #   chart = {
+  #     name    = "bluesky-pds"
+  #     repo    = "https://charts.bear.fyi"
+  #     version = "0.4.208"
+  #   }
+  #   dns = {
+  #     labels = ["pds"]
+  #     public = true
+  #   }
+  #   backend = {
+  #     service = "bluesky-pds"
+  #     port    = 3000
+  #   }
+  # }
+  # immich = {
+  #   namespace = "immich"
+  #   chart = {
+  #     name    = "immich"
+  #     repo    = "https://charts.bear.fyi"
+  #     version = "0.1.1"
+  #   }
+  #   dns = {
+  #     labels = ["img", "immich"]
+  #     public = true
+  #   }
+  #   backend = {
+  #     service = "immich-api"
+  #     port    = 2283
+  #   }
+  #   postgres = {
+  #     base_gb  = 20
+  #     wal_gb   = 10
+  #     replicas = 1
+  #     extensions = [{
+  #       name    = "vchord"
+  #       preload = true
+  #       create  = true
+  #       }, {
+  #       name    = "pgvector"
+  #       preload = false
+  #       create  = false
+  #     }]
+  #   }
+  #   valkey = {
+  #     instances = 3
+  #   }
+  # }
 }

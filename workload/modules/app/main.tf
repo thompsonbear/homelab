@@ -165,13 +165,15 @@ module "cnpg_cluster" {
   }
 }
 
-module "valkey_cluster" {
+module "valkey" {
   count     = var.valkey != null ? 1 : 0
-  source    = "./valkey-cluster"
+  source    = "./valkey"
   app_name  = local.app.name
   namespace = local.app.namespace
+  tag       = var.context.system.valkey_tag
+  clustered = var.valkey.clustered
   shards    = var.valkey.shards
-  replicas  = var.valkey.replicas
+  instances = var.valkey.instances
   size_gb   = var.valkey.size_gb
 }
 
