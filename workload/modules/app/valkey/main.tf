@@ -31,7 +31,7 @@ resource "kubernetes_secret_v1" "valkey_secret" {
     namespace = var.namespace
   }
   data = {
-    default = random_password.valkey_default_password.result
+    default           = random_password.valkey_default_password.result
     "${var.app_name}" = random_password.valkey_app_password.result
   }
 }

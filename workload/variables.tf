@@ -17,44 +17,41 @@ variable "environment" {
 
 variable "system" {
   type = object({
-    cert_manager_tag = string
-    metallb_tag      = string
-    istio_tag        = string
-    csi_nfs_tag      = string
-    mayastor_tag     = string
-    keycloak_tag     = string
-    cnpg_operator = object({
-      image_tag = string
-      chart_tag = string
-    })
-    valkey_tag = string
-    valkey_operator_tag = string
+    cert_manager = { chart_tag = string }
+    metallb      = { chart_tag = string }
+    istio        = { chart_tag = string }
+    csi_nfs      = { chart_tag = string }
+    mayastor     = { chart_tag = string }
+    keycloak     = { image_tag = string, app_defaults = map(any) }
+    cnpg         = { operator = { image_tag = string, chart_tag = string }, app_defaults = map(any) }
+    valkey       = { operator = { chart_tag = string }, chart_tag = string, app_defaults = map(any) }
   })
-  description = "system chart/image version tags - x.y.z"
+  description = "system configuration"
 }
 
 variable "apps" {
   type = map(object({
-    namespace = string
-    image_tag = optional(string)
+    namespace = optional(string, null)
+
     chart = optional(object({
       name    = optional(string)
       repo    = string
       version = optional(string)
-    }))
-    dns = object({
-      labels = optional(list(string))
-      public = optional(bool)
-    })
-    backend = optional(object({
-      service = optional(string)
-      port    = optional(number)
-    }))
+    }), null)
+
+    route = optional(object({
+      dns_labels     = optional(list(string))
+      https_redirect = optional(bool)
+      public         = optional(bool)
+      svc_name       = optional(string)
+      svc_port       = optional(number)
+    }), null)
+
     keycloak = optional(object({
       redirect_uris = optional(list(string))
       logout_uris   = optional(list(string))
       client_roles  = optional(list(string))
-    }))
+    }), null)
 
     postgres = optional(object({
       version  = optional(number)
@@ -68,13 +65,13 @@ variable "apps" {
         create  = optional(bool)
         preload = optional(bool)
       })), [])
-    }))
+    }), null)
 
     valkey = optional(object({
       clustered = optional(bool)
       shards    = optional(number)
       instances = optional(number)
       size_gb   = optional(number)
-    }))
+    }), null)
   }))
 }

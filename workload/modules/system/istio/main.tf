@@ -4,16 +4,6 @@ locals {
     for manifest in provider::kubernetes::manifest_decode_multi(file("${path.module}/resources/gateway-api-crds.yaml")) :
     "${manifest.kind}/${manifest.metadata.name}" => { for key, value in manifest : key => value if key != "status" }
   }
-  gateways = {
-    public = {
-      ip   = cidrhost(var.ip_pool, 0)
-      name = "public"
-    }
-    private = {
-      ip   = cidrhost(var.ip_pool, 1)
-      name = "private"
-    }
-  }
 }
 
 resource "kubernetes_manifest" "gateway_api_crds" {
@@ -71,7 +61,7 @@ resource "helm_release" "ztunnel" {
 
 resource "kubectl_manifest" "gateways" {
   depends_on = [helm_release.ztunnel]
-  for_each   = local.gateways
+  for_each   = var.gateways
   yaml_body = yamlencode({
     apiVersion = "gateway.networking.k8s.io/v1"
     kind       = "Gateway"

@@ -1,3 +1,38 @@
+locals {
+  context = {
+    base_public_domain  = module.akv.secrets["${var.environment}-base-public-domain"]
+    base_private_domain = module.akv.secrets["${var.environment}-base-private-domain"]
+    gateways = {
+      public  = { ip = cidrhost(module.akv.secrets["${var.environment}-network"].lb_ip_pool, 0), name = "public" }
+      private = { ip = cidrhost(module.akv.secrets["${var.environment}-network"].lb_ip_pool, 1), name = "private" }
+    }
+    # system = var.system
+  }
+
+  app_configs = {
+    for k, v in var.apps : k => {
+      namespace = v.namespace != null ? v.namespace : k
+
+      chart = v.chart != null ? merge({
+        name    = k
+        version = "latest"
+      }, v.chart) : null
+
+      route = merge({
+        dns_labels     = [k]
+        https_redirect = true
+        public         = false
+        svc_name       = k
+        svc_port       = 80
+      }, v.route)
+
+      keycloak = v.keycloak != null ? merge(var.system.keycloak.app_defaults, v.keycloak) : null
+      postgres = v.postgres != null ? merge(var.system.cnpg.app_defaults, v.postgres) : null
+      valkey   = v.valkey != null ? merge(var.system.valkey.app_defaults, v.valkey) : null
+    }
+  }
+}
+
 module "akv" {
   source         = "../modules/akv"
   name           = var.az_key_vault_name
@@ -6,7 +41,7 @@ module "akv" {
 
 module "cert_manager" {
   source             = "./modules/system/cert-manager"
-  tag                = var.system.cert_manager_tag
+  tag                = var.system.cert_manager.chart_tag
   environment        = var.environment
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   acme_email         = module.akv.secrets.acme-email
@@ -15,28 +50,31 @@ module "cert_manager" {
 
 module "metallb" {
   source  = "./modules/system/metallb"
-  tag     = var.system.metallb_tag
+  tag     = var.system.metallb.chart_tag
   ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "istio" {
   depends_on = [module.metallb]
   source     = "./modules/system/istio"
-  tag        = var.system.istio_tag
-  ip_pool    = module.akv.secrets["${var.environment}-network"].lb_ip_pool
+  tag        = var.system.istio.chart_tag
+  gateways = local.context.gateways
 }
 
 module "csi-nfs" {
   source = "./modules/system/csi-nfs"
-  tag    = var.system.csi_nfs_tag
+  tag    = var.system.csi_nfs.chart_tag
 }
 
 module "mayastor" {
   depends_on     = [module.csi-nfs]
   source         = "./modules/system/mayastor"
-  tag            = var.system.mayastor_tag
+  tag            = var.system.mayastor.chart_tag
   nfs_storage_gb = 200
-  diskpool_nodes = nonsensitive([for k, v in module.akv.secrets["${var.environment}-nodes"] : k if v.role == "worker" && v.data_disk_gb != null])
+  diskpool_nodes = nonsensitive([
+    for k, v in module.akv.secrets["${var.environment}-nodes"] :
+      k if v.role == "worker" && v.data_disk_gb != null
+  ])
 }
 
 module "cnpg_operator" {
@@ -44,34 +82,13 @@ module "cnpg_operator" {
   source     = "./modules/system/cnpg-operator"
   image_tag  = var.system.cnpg_operator.image_tag
   chart_tag  = var.system.cnpg_operator.chart_tag
-  pg_images = [{
-    major = 15
-    image = "ghcr.io/cloudnative-pg/postgresql:15.19-202608170814-minimal-trixie@sha256:67b23fdf6dbf3d5bc5dc42cdbc5d292375582b1fe378c1dc69eb51c6fbc57730"
-    }, {
-    major = 16
-    image = "ghcr.io/cloudnative-pg/postgresql:16.15-202608170814-minimal-trixie@sha256:e3041d59a94c072fa2fd4436b82ecdf34afc9d38c8cf2b836b009b09a1744c63"
-    }, {
-    major = 17
-    image = "ghcr.io/cloudnative-pg/postgresql:17.11-202608170816-minimal-trixie@sha256:445ead3fd811466950a002b682a97c2a4907078b46fae8796b6637a763266a07"
-    }, {
-    major = 18
-    image = "ghcr.io/cloudnative-pg/postgresql:18.6-202608170814-minimal-trixie@sha256:eb7979e4bd7fccaec0369b550b9649eec1f014de04621fac6e653244e75cca46"
-    extensions = [{
-      name                   = "vchord"
-      image                  = { reference = "ghcr.io/tensorchord/vchord-scratch:pg18-v1.1.1" }
-      dynamic_library_path   = ["/usr/lib/postgresql/18/lib/"]
-      extension_control_path = ["/usr/share/postgresql/18/"]
-      }, {
-      name  = "pgvector"
-      image = { reference = "ghcr.io/cloudnative-pg/pgvector:0.8.6-202609071550-18-trixie@sha256:a2b828fe19d3c65138fc9308530dc2104eafa9b12ab6dc29a15c6432c1bebfe0" }
-    }]
-  }]
+  pg_images  = var.system.cnpg_operator.pg_images
 }
 
 module "valkey_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/valkey-operator"
-  tag        = var.system.valkey_operator_tag
+  tag        = var.system.valkey.operator.chart_tag
 }
 
 module "app_namespaces" {
@@ -80,87 +97,64 @@ module "app_namespaces" {
   name     = each.key
 }
 
-locals {
-  app_context = {
-    base_public_domain  = module.akv.secrets["${var.environment}-base-public-domain"]
-    base_private_domain = module.akv.secrets["${var.environment}-base-private-domain"]
-    gateways            = module.istio.gateways
-    system              = var.system
-  }
-}
-
 module "keycloak_app" {
   depends_on = [module.cnpg_operator, module.valkey_operator, module.mayastor, module.cert_manager, module.app_namespaces]
   source     = "./modules/app"
-  context    = local.app_context
-  app_name   = "keycloak"
-  namespace  = "keycloak"
-  replicas   = 1
-  image_tag  = var.system.keycloak_tag
-  backend    = { service = "keycloak", port = 8080 }
-  dns        = { labels = ["auth"], public = true }
-  secrets    = { admin-secret = module.akv.secrets.admin-secret }
-  postgres   = { base_gb = 20, wal_gb = 10, replicas = 1 }
-}
-
-resource "keycloak_realm" "this" {
-  depends_on   = [module.keycloak_app]
-  realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
-  display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${upper(var.environment)}"
-}
-
-resource "keycloak_oidc_identity_provider" "microsoft_entra_idp" {
-  realm        = keycloak_realm.this.id
-  alias        = "entra" # https://<KEYCLOAK_HOSTNAME>/realms/<REALM>/broker/entra/endpoint
-  display_name = "Microsoft Entra"
-
-  client_id     = module.akv.secrets.entra-app.client_id
-  client_secret = module.akv.secrets.entra-app.client_secret
-
-  issuer            = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/v2.0"
-  authorization_url = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/authorize"
-  token_url         = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/token"
-  logout_url        = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/logout"
-  jwks_url          = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/discovery/v2.0/keys"
-  user_info_url     = "https://graph.microsoft.com/oidc/userinfo"
-  default_scopes    = "openid offline_access"
-
-  sync_mode          = "IMPORT"
-  trust_email        = true
-  validate_signature = true
-}
-
-module "apps" {
-  depends_on = [module.keycloak_app]
-  for_each   = var.apps
-  source     = "./modules/app"
-  context    = local.app_context
-
-  app_name  = each.key
-  namespace = try(each.value.namespace, each.key)
-  replicas  = try(each.value.replicas, 1)
-  image_tag = try(each.value.image_tag, "latest")
-
-  chart = can(each.value.chart) ? each.value.chart : null
-
-  dns = can(each.value.dns) ? {
-    labels = try(each.value.dns.labels, [each.key])
-    public = try(each.value.dns.public, false)
-    } : {
-    labels = [each.key]
-    public = false
+  context    = local.context
+  name   = "keycloak"
+  config = {
+    namespace = "keycloak"
+    template_vars = {
+      image_tag = var.system.keycloak.image_tag
+      replicas = 1
+    }
+    route = {
+      dns_labels = ["auth"]
+      public = true
+      https_redirect = true
+      svc_name = "keycloak"
+      svc_port = 8080
+    }
+    postgres = {
+      base_gb = 20
+      wal_gb = 10
+      replicas = 1
+    }
   }
-
-  backend = can(each.value.backend) ? {
-    service = try(each.value.backend.service, each.key)
-    port    = try(each.value.backend.port, 80)
-    } : {
-    service = each.key
-    port    = 80
-  }
-
-  secrets  = try(each.value.secrets, {})
-  keycloak = try(each.value.keycloak, null)
-  postgres = try(each.value.postgres, null)
-  valkey   = try(each.value.valkey, null)
 }
+
+# resource "keycloak_realm" "this" {
+#   depends_on   = [module.keycloak_app]
+#   realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
+#   display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${upper(var.environment)}"
+# }
+#
+# resource "keycloak_oidc_identity_provider" "microsoft_entra_idp" {
+#   realm        = keycloak_realm.this.id
+#   alias        = "entra" # https://<KEYCLOAK_HOSTNAME>/realms/<REALM>/broker/entra/endpoint
+#   display_name = "Microsoft Entra"
+#
+#   client_id     = module.akv.secrets.entra-app.client_id
+#   client_secret = module.akv.secrets.entra-app.client_secret
+#
+#   issuer            = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/v2.0"
+#   authorization_url = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/authorize"
+#   token_url         = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/token"
+#   logout_url        = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/oauth2/v2.0/logout"
+#   jwks_url          = "https://login.microsoftonline.com/${module.akv.secrets.entra-app.tenant_id}/discovery/v2.0/keys"
+#   user_info_url     = "https://graph.microsoft.com/oidc/userinfo"
+#   default_scopes    = "openid offline_access"
+#
+#   sync_mode          = "IMPORT"
+#   trust_email        = true
+#   validate_signature = true
+# }
+
+# module "apps" {
+#   depends_on = [module.keycloak_app]
+#   for_each   = local.app_configs
+#   source     = "./modules/app"
+#   context    = local.context
+#   name   = each.key
+#   config = each.value
+# }

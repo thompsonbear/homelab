@@ -1,29 +1,39 @@
 locals {
-  resources_dir = "${path.root}/resources/${var.app_name}"
-  fqdns         = [for label in var.dns.labels : "${label}.${nonsensitive(var.dns.public ? var.context.base_public_domain : var.context.base_private_domain)}"]
+  resources_dir = "${path.root}/resources/${var.name}"
+  base_domain   = var.config.route.public ? var.context.base_public_domain : var.context.base_private_domain
+  fqdns = [ for label in var.config.route.dns_labels : "${label}.${local.base_domain}" ]
+
   app = {
-    name            = var.app_name
-    namespace       = var.namespace
-    replicas        = var.replicas
-    image_tag       = var.image_tag
+    name            = var.name
+    namespace       = var.config.namespace
     fqdn            = local.fqdns[0]
     fqdns           = local.fqdns
-    tls_secret_name = "${var.app_name}-tls"
-    gateway         = var.dns.public ? var.context.gateways.public : var.context.gateways.private
-    base_domain     = var.dns.public ? var.context.base_public_domain : var.context.base_private_domain
-    backend         = var.backend
+    tls_secret_name = "${var.name}-tls"
+    gateway         = var.config.route.public ? var.context.gateways.public : var.context.gateways.private
+    svc_name        = var.config.route.svc_name
+    svc_port        = var.config.route.svc_port
+    vars            = var.config.template_vars
     postgres = {
-      name   = var.app_name
-      host   = "postgres-${var.app_name}-rw.${var.namespace}.svc.cluster.local"
+      name   = var.name
+      host   = "postgres-${var.name}-rw.${var.config.namespace}.svc.cluster.local"
       port   = 5432
-      secret = "postgres-${var.app_name}-app"
+      secret = "postgres-${var.name}-app"
     }
     valkey = {
-      name   = var.app_name
-      host   = "valkey-${var.app_name}.${var.namespace}.svc.cluster.local"
+      name   = var.name
+      host   = "valkey-${var.name}.${var.config.namespace}.svc.cluster.local"
       port   = 6379
-      secret = "valkey-${var.app_name}-app"
+      secret = "valkey-${var.name}-app"
     }
+  }
+
+  manifests = {
+    for manifest in flatten([
+      for file in fileset("${local.resources_dir}/manifests", "*.{yml,yaml}") :
+      provider::kubernetes::manifest_decode_multi(
+        nonsensitive(templatefile("${local.resources_dir}/manifests/${file}", { app = local.app }))
+      )
+    ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
   }
 }
 
@@ -149,7 +159,7 @@ resource "kubectl_manifest" "httproute" {
 }
 
 module "cnpg_cluster" {
-  count            = var.postgres != null ? 1 : 0
+  count            = var.config.postgres != null ? 1 : 0
   source           = "./cnpg-cluster"
   app_name         = local.app.name
   namespace        = local.app.namespace
@@ -166,7 +176,7 @@ module "cnpg_cluster" {
 }
 
 module "valkey" {
-  count     = var.valkey != null ? 1 : 0
+  count     = var.config.valkey != null ? 1 : 0
   source    = "./valkey"
   app_name  = local.app.name
   namespace = local.app.namespace
@@ -177,27 +187,6 @@ module "valkey" {
   size_gb   = var.valkey.size_gb
 }
 
-resource "kubernetes_secret_v1" "secrets" {
-  # marked as non-sensitive as the keys/secret names are not secret
-  # the data values are still secret but should not appear in outputs
-  for_each = nonsensitive(var.secrets)
-  metadata {
-    name      = each.key
-    namespace = var.namespace
-  }
-  data = each.value
-}
-
-locals {
-  manifests = {
-    for manifest in flatten([
-      for file in fileset("${local.resources_dir}/manifests", "*.{yml,yaml}") :
-      provider::kubernetes::manifest_decode_multi(
-        nonsensitive(templatefile("${local.resources_dir}/manifests/${file}", { app = local.app }))
-      )
-    ]) : "${manifest.kind}/${manifest.metadata.name}" => manifest
-  }
-}
 
 resource "kubernetes_manifest" "app_manifests" {
   depends_on = [module.cnpg_cluster, kubernetes_secret_v1.secrets]
@@ -206,11 +195,11 @@ resource "kubernetes_manifest" "app_manifests" {
 }
 
 resource "helm_release" "chart" {
-  count      = var.chart != null ? 1 : 0
-  chart      = var.chart.name
-  repository = var.chart.repo
-  name       = var.app_name
-  namespace  = var.namespace
-  version    = var.chart.version
+  count      = var.config.chart != null ? 1 : 0
+  chart      = var.config.chart.name
+  repository = var.config.chart.repo
+  name       = var.name
+  namespace  = var.config.namespace
+  version    = var.config.chart.version
   values     = try([templatefile("${local.resources_dir}/helm/values.yaml", { app = local.app })], [])
 }
