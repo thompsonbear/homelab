@@ -26,9 +26,9 @@ locals {
         svc_port       = 80
       }, v.route)
 
-      keycloak = v.keycloak != null ? merge(var.system.keycloak.app_defaults, v.keycloak) : null
-      postgres = v.postgres != null ? merge(var.system.cnpg.app_defaults, v.postgres) : null
-      valkey   = v.valkey != null ? merge(var.system.valkey.app_defaults, v.valkey) : null
+      keycloak = v.keycloak != null ? merge(var.app_defaults.keycloak, v.keycloak) : null
+      postgres = v.postgres != null ? merge(var.app_defaults.postgres, v.postgres) : null
+      valkey   = v.valkey != null ? merge(var.app_defaults.valkey, v.valkey) : null
     }
   }
 }

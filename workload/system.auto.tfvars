@@ -4,14 +4,7 @@ system = {
   istio        = { chart_tag = "1.30.3" }
   csi_nfs      = { chart_tag = "4.13.4" }
   mayastor     = { chart_tag = "2.11.1" }
-
-  keycloak = {
-    image_tag = "26.7.2"
-    app_defaults = {
-      client_roles = ["admin"]
-    }
-  }
-
+  keycloak = { image_tag = "26.7.2" }
   cnpg = {
     operator = {
       image_tag = "1.30.0"
@@ -39,26 +32,11 @@ system = {
         }]
       }]
     }
-    app_defaults = {
-      version  = 18
-      base_gb  = 20
-      wal_gb   = 10
-      encoding = "UTF8"
-      sql      = []
-      replicas = 2
-    }
   }
-
   valkey = {
     operator = {
       chart_tag = "0.6.0"
     }
     chart_tag = "0.12.0"
-    app_defaults = {
-      clustered = false
-      shards    = 0
-      instances = 3
-      size_gb   = 10
-    }
   }
 }

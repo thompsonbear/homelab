@@ -22,7 +22,8 @@ variable "system" {
     istio        = object({ chart_tag = string })
     csi_nfs      = object({ chart_tag = string })
     mayastor     = object({ chart_tag = string })
-    keycloak     = object({ image_tag = string, app_defaults = map(any) })
+    keycloak     = object({ image_tag = string })
+
     cnpg         = object({
       operator = object({
         image_tag = string
@@ -33,11 +34,39 @@ variable "system" {
           extensions = optional(list(any))
         }))
       })
-      app_defaults = map(any)
     })
-    valkey       = object({ operator = object({ chart_tag = string }), chart_tag = string, app_defaults = map(any) })
+
+    valkey       = object({
+      operator = object({
+        chart_tag = string
+      })
+      chart_tag = string
+    })
+
   })
   description = "system configuration"
+}
+
+variable "app_defaults" {
+  type = object({
+    keycloak = object({
+      client_roles = list(string)
+    })
+    postgres = object({
+      version = number
+      base_gb = number
+      wal_gb = number
+      encoding = "UTF8"
+      sql = []
+      replicas = 2
+    })
+    valkey = object({
+      clustered = bool
+      shards    = number
+      instances = number
+      size_gb   = number
+    })
+  })
 }
 
 variable "apps" {

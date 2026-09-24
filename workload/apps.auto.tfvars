@@ -1,3 +1,23 @@
+app_defaults = {
+  keycloak = {
+    client_roles = ["admin"]
+  }
+  postgres = {
+    version  = 18
+    base_gb  = 20
+    wal_gb   = 10
+    encoding = "UTF8"
+    sql      = []
+    replicas = 2
+  }
+  valkey = {
+    clustered = false
+    shards    = 0
+    instances = 3
+    size_gb   = 10
+  }
+}
+
 apps = {
   home-assistant = {
     namespace = "home-assistant"
