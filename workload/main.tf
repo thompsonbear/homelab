@@ -97,31 +97,31 @@ module "app_namespaces" {
   name     = each.key
 }
 
-module "keycloak_app" {
-  depends_on = [module.cnpg_operator, module.valkey_operator, module.mayastor, module.cert_manager, module.app_namespaces]
-  source     = "./modules/app"
-  context    = local.context
-  name   = "keycloak"
-  config = {
-    namespace = "keycloak"
-    template_vars = {
-      image_tag = var.system.keycloak.image_tag
-      replicas = 1
-    }
-    route = {
-      dns_labels = ["auth"]
-      public = true
-      https_redirect = true
-      svc_name = "keycloak"
-      svc_port = 8080
-    }
-    postgres = {
-      base_gb = 20
-      wal_gb = 10
-      replicas = 1
-    }
-  }
-}
+# module "keycloak_app" {
+#   depends_on = [module.cnpg_operator, module.valkey_operator, module.mayastor, module.cert_manager, module.app_namespaces]
+#   source     = "./modules/app"
+#   context    = local.context
+#   name   = "keycloak"
+#   config = {
+#     namespace = "keycloak"
+#     template_vars = {
+#       image_tag = var.system.keycloak.image_tag
+#       replicas = 1
+#     }
+#     route = {
+#       dns_labels = ["auth"]
+#       public = true
+#       https_redirect = true
+#       svc_name = "keycloak"
+#       svc_port = 8080
+#     }
+#     postgres = {
+#       base_gb = 20
+#       wal_gb = 10
+#       replicas = 1
+#     }
+#   }
+# }
 
 # resource "keycloak_realm" "this" {
 #   depends_on   = [module.keycloak_app]
