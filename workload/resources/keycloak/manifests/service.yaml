@@ -8,7 +8,7 @@ metadata:
 spec:
   ports:
     - protocol: TCP
-      port: ${ app.backend.port }
+      port: ${ app.svc_port }
       targetPort: http
       name: http
   selector:

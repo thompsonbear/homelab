@@ -6,7 +6,7 @@ metadata:
   labels:
     app: ${ app.name }
 spec:
-  serviceName: ${ app.backend.service }
+  serviceName: ${ app.svc_name }
   # Run with one replica to save resources, or with two replicas to allow for rolling updates for configuration changes
   replicas: ${ app.replicas }
   selector:
@@ -51,7 +51,7 @@ spec:
                   key: "jdbc-uri"
           ports:
             - name: http
-              containerPort: ${ app.backend.port }
+              containerPort: ${ app.svc_port }
             - name: jgroups
               containerPort: 7800
             - name: jgroups-fd

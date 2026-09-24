@@ -1,7 +1,7 @@
 locals {
   resources_dir = "${path.root}/resources/${var.name}"
   base_domain   = var.config.route.public ? var.context.base_public_domain : var.context.base_private_domain
-  fqdns = [ for label in var.config.route.dns_labels : "${label}.${local.base_domain}" ]
+  fqdns = nonsensitive([ for label in var.config.route.dns_labels : "${label}.${local.base_domain}" ])
 
   app = {
     name            = var.name
