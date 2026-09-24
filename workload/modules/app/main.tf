@@ -162,7 +162,7 @@ module "cnpg_cluster" {
   app_name         = local.app.name
   namespace        = local.app.namespace
   pg_major_version = var.config.postgres.version
-  replicas         = var.config.postgres.replicas
+  instances         = var.config.postgres.instances
   base_gb          = var.config.postgres.base_gb
   wal_gb           = var.config.postgres.wal_gb
   db = {

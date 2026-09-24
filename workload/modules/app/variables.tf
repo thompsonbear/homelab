@@ -36,7 +36,7 @@ variable "config" {
       version  = number
       base_gb  = number
       wal_gb   = number
-      replicas = number
+      instances = number
       encoding = string
       sql      = list(string)
       extensions = list(object({

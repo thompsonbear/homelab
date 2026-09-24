@@ -10,7 +10,7 @@ variable "pg_major_version" {
   type = number
 }
 
-variable "replicas" {
+variable "instances" {
   type = number
 }
 

@@ -9,7 +9,7 @@ app_defaults = {
     encoding = "UTF8"
     sql      = []
     extensions = []
-    replicas = 2
+    instances = 2
   }
   valkey = {
     clustered = false

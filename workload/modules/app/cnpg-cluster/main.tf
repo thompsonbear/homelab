@@ -7,7 +7,7 @@ resource "kubectl_manifest" "cnpg_cluster" {
       namespace = var.namespace
     }
     spec = {
-      instances = var.replicas
+      instances = var.instances
       imageCatalogRef = {
         apiGroup = "postgresql.cnpg.io"
         kind     = "ClusterImageCatalog"
