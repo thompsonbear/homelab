@@ -11,7 +11,7 @@ resource "helm_release" "metallb" {
   namespace  = module.namespace.name
   version    = var.tag
 
-  values = [templatefile("${path.module}/resources/values.tftpl", { tag = var.tag })]
+  values = [templatefile("${path.module}/resources/values.yaml.tftpl", { tag = var.tag })]
 }
 
 resource "kubectl_manifest" "ipaddresspool" {

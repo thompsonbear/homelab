@@ -11,7 +11,7 @@ resource "helm_release" "cert_manager" {
   namespace  = module.namespace.name
   version    = var.tag
 
-  values = [templatefile("${path.module}/resources/values.tftpl", { replicas = var.replicas })]
+  values = [templatefile("${path.module}/resources/values.yaml.tftpl", { replicas = var.replicas })]
 }
 
 resource "kubernetes_secret_v1" "cloudflare_token" {

@@ -118,7 +118,7 @@ module "keycloak_app" {
       version = 18
       base_gb = 20
       wal_gb = 10
-      replicas = 1
+      instances = 1
       encoding = "UTF8"
       extensions = []
       sql = []

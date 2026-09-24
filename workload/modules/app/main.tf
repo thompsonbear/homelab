@@ -43,7 +43,7 @@ locals {
 
   manifests = {
     for manifest in flatten([
-      for file in fileset("${local.resources_dir}/manifests", "*.{yml,yaml}") :
+      for file in fileset("${local.resources_dir}/manifests", "*.{yml,yaml}.tftpl") :
       provider::kubernetes::manifest_decode_multi(
         nonsensitive(templatefile("${local.resources_dir}/manifests/${file}", { app = local.app }))
       )
@@ -199,5 +199,5 @@ resource "helm_release" "chart" {
   name       = var.name
   namespace  = var.config.namespace
   version    = var.config.chart.version
-  values     = try([templatefile("${local.resources_dir}/helm/values.yaml", { app = local.app })], [])
+  values     = try([templatefile("${local.resources_dir}/helm/values.yaml.tftpl", { app = local.app })], [])
 }

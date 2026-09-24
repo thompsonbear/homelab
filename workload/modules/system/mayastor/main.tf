@@ -11,7 +11,7 @@ resource "helm_release" "mayastor" {
   namespace  = module.namespace.name
   version    = var.tag
   timeout    = 900
-  values = [templatefile("${path.module}/resources/values.tftpl", {
+  values = [templatefile("${path.module}/resources/values.yaml.tftpl", {
     alloy_enabled     = var.alloy_enabled
     loki_enabled      = var.loki_enabled
     agents_ha_enabled = var.agents_ha_enabled
