@@ -189,7 +189,7 @@ module "valkey" {
 
 
 resource "kubernetes_manifest" "app_manifests" {
-  depends_on = [module.cnpg_cluster, kubernetes_secret_v1.secrets]
+  depends_on = [module.cnpg_cluster]
   for_each   = local.manifests
   manifest   = each.value
 }
