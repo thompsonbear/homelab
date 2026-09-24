@@ -59,9 +59,9 @@ resource "kubectl_manifest" "cert" {
 
       usages = ["server auth"]
       issuerRef = {
-        name  = var.dns.public ? "letsencrypt" : "ejbca"
+        name  = var.config.route.public ? "letsencrypt" : "ejbca"
         kind  = "ClusterIssuer"
-        group = var.dns.public ? "cert-manager.io" : "ejbca-issuer.keyfactor.com"
+        group = var.config.route.public ? "cert-manager.io" : "ejbca-issuer.keyfactor.com"
       }
     }
   })
@@ -147,8 +147,8 @@ resource "kubectl_manifest" "httproute" {
           ]
           "backendRefs" = [
             {
-              "name"     = local.app.backend.service
-              "port"     = local.app.backend.port
+              "name"     = var.config.route.svc_name
+              "port"     = var.config.route.svc_port
               "protocol" = "HTTP"
             }
           ]
@@ -163,15 +163,15 @@ module "cnpg_cluster" {
   source           = "./cnpg-cluster"
   app_name         = local.app.name
   namespace        = local.app.namespace
-  pg_major_version = var.postgres.version
-  replicas         = var.postgres.replicas
-  base_gb          = var.postgres.base_gb
-  wal_gb           = var.postgres.wal_gb
+  pg_major_version = var.config.postgres.version
+  replicas         = var.config.postgres.replicas
+  base_gb          = var.config.postgres.base_gb
+  wal_gb           = var.config.postgres.wal_gb
   db = {
     name       = local.app.name
-    encoding   = var.postgres.encoding
-    sql        = var.postgres.sql
-    extensions = var.postgres.extensions
+    encoding   = var.config.postgres.encoding
+    sql        = var.config.postgres.sql
+    extensions = var.config.postgres.extensions
   }
 }
 
@@ -180,11 +180,11 @@ module "valkey" {
   source    = "./valkey"
   app_name  = local.app.name
   namespace = local.app.namespace
-  tag       = var.context.system.valkey_tag
-  clustered = var.valkey.clustered
-  shards    = var.valkey.shards
-  instances = var.valkey.instances
-  size_gb   = var.valkey.size_gb
+  tag       = var.config.chart_tag
+  clustered = var.config.valkey.clustered
+  shards    = var.config.valkey.shards
+  instances = var.config.valkey.instances
+  size_gb   = var.config.valkey.size_gb
 }
 
 

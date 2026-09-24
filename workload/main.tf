@@ -27,7 +27,7 @@ locals {
 
       keycloak = v.keycloak != null ? merge(var.app_defaults.keycloak, v.keycloak) : null
       postgres = v.postgres != null ? merge(var.app_defaults.postgres, v.postgres) : null
-      valkey   = v.valkey != null ? merge(var.app_defaults.valkey, v.valkey) : null
+      valkey   = v.valkey != null ? merge(var.app_defaults.valkey, { chart_tag = var.system.valkey.chart_tag }, v.valkey) : null
     }
   }
 }

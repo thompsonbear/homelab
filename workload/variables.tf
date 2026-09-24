@@ -74,6 +74,7 @@ variable "app_defaults" {
     })
     valkey = object({
       clustered = bool
+      chart_tag = string
       shards    = number
       instances = number
       size_gb   = number
