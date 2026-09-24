@@ -23,7 +23,18 @@ variable "system" {
     csi_nfs      = object({ chart_tag = string })
     mayastor     = object({ chart_tag = string })
     keycloak     = object({ image_tag = string, app_defaults = map(any) })
-    cnpg         = object({ operator = object({ image_tag = string, chart_tag = string }), app_defaults = map(any) })
+    cnpg         = object({
+      operator = object({
+        image_tag = string
+        chart_tag = string
+        pg_images = list(object({
+          major = number
+          image = string
+          extensions = optional(list(any))
+        }))
+      })
+      app_defaults = map(any)
+    })
     valkey       = object({ operator = object({ chart_tag = string }), chart_tag = string, app_defaults = map(any) })
   })
   description = "system configuration"
