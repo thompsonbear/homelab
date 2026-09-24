@@ -66,6 +66,11 @@ variable "app_defaults" {
       encoding = string
       sql = list(string)
       replicas = number
+      extensions = list(object({
+        name = string
+        create = bool
+        preload = bool
+      }))
     })
     valkey = object({
       clustered = bool

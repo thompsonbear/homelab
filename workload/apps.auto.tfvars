@@ -8,6 +8,7 @@ app_defaults = {
     wal_gb   = 10
     encoding = "UTF8"
     sql      = []
+    extensions = []
     replicas = 2
   }
   valkey = {

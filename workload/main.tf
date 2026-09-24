@@ -115,9 +115,13 @@ module "keycloak_app" {
       svc_port = 8080
     }
     postgres = {
+      version = 18
       base_gb = 20
       wal_gb = 10
       replicas = 1
+      encoding = "UTF8"
+      extensions = []
+      sql = []
     }
   }
 }
