@@ -1,7 +1,7 @@
 locals {
   resources_dir = "${path.root}/resources/${var.name}"
   base_domain   = var.config.route.public ? var.context.base_public_domain : var.context.base_private_domain
-  fqdns = nonsensitive([ for label in var.config.route.dns_labels : "${label}.${local.base_domain}" ])
+  fqdns = [ for label in var.config.route.dns_labels : "${label}.${local.base_domain}" ]
 
   app = {
     name            = var.name
@@ -26,6 +26,20 @@ locals {
       secret = "valkey-${var.name}-app"
     }
   }
+
+  listeners = [for fqdn in local.fqdns : {
+    "name"     = fqdn
+    "hostname" = fqdn
+    "port"     = 443
+    "protocol" = "HTTPS"
+    "tls" = {
+      "certificateRefs" = [
+        {
+          "name" = local.app.tls_secret_name
+        }
+      ]
+    }
+  }]
 
   manifests = {
     for manifest in flatten([
@@ -68,26 +82,10 @@ resource "kubectl_manifest" "cert" {
 }
 
 resource "unifi_dns_record" "dns_a_records" {
-  for_each = toset(local.app.fqdns)
+  for_each = nonsensitive(toset(local.app.fqdns))
   name     = each.value
   record   = local.app.gateway.ip
   type     = "A"
-}
-
-locals {
-  listeners = [for fqdn in local.fqdns : {
-    "name"     = fqdn
-    "hostname" = fqdn
-    "port"     = 443
-    "protocol" = "HTTPS"
-    "tls" = {
-      "certificateRefs" = [
-        {
-          "name" = local.app.tls_secret_name
-        }
-      ]
-    }
-  }]
 }
 
 resource "kubectl_manifest" "listenerset" {
