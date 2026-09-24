@@ -31,7 +31,14 @@ variable "system" {
         pg_images = list(object({
           major = number
           image = string
-          extensions = optional(list(any))
+          extensions = optional(list(object({
+            name = string
+            image = object({
+              reference = string
+            })
+            dynamic_library_path = optional(list(string))
+            extension_control_path = optional(list(string))
+          })))
         }))
       })
     })
