@@ -65,7 +65,7 @@ variable "app_defaults" {
       wal_gb = number
       encoding = string
       sql = list(string)
-      replicas = number
+      instances = number
       extensions = list(object({
         name = string
         create = bool
