@@ -51,6 +51,7 @@ variable "config" {
       size_gb   = number
       shards    = number
       instances = number
+      chart_tag = string
     }), null)
   })
 }
