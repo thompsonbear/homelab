@@ -17,14 +17,14 @@ variable "environment" {
 
 variable "system" {
   type = object({
-    cert_manager = { chart_tag = string }
-    metallb      = { chart_tag = string }
-    istio        = { chart_tag = string }
-    csi_nfs      = { chart_tag = string }
-    mayastor     = { chart_tag = string }
-    keycloak     = { image_tag = string, app_defaults = map(any) }
-    cnpg         = { operator = { image_tag = string, chart_tag = string }, app_defaults = map(any) }
-    valkey       = { operator = { chart_tag = string }, chart_tag = string, app_defaults = map(any) }
+    cert_manager = object({ chart_tag = string })
+    metallb      = object({ chart_tag = string })
+    istio        = object({ chart_tag = string })
+    csi_nfs      = object({ chart_tag = string })
+    mayastor     = object({ chart_tag = string })
+    keycloak     = object({ image_tag = string, app_defaults = map(any) })
+    cnpg         = object({ operator = object({ image_tag = string, chart_tag = string }), app_defaults = map(any) })
+    valkey       = object({ operator = object({ chart_tag = string }), chart_tag = string, app_defaults = map(any) })
   })
   description = "system configuration"
 }
