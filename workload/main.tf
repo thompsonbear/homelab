@@ -6,7 +6,6 @@ locals {
       public  = { ip = cidrhost(module.akv.secrets["${var.environment}-network"].lb_ip_pool, 0), name = "public" }
       private = { ip = cidrhost(module.akv.secrets["${var.environment}-network"].lb_ip_pool, 1), name = "private" }
     }
-    # system = var.system
   }
 
   app_configs = {
@@ -42,7 +41,7 @@ module "akv" {
 module "cert_manager" {
   source             = "./modules/system/cert-manager"
   tag                = var.system.cert_manager.chart_tag
-  environment        = var.environment
+  environment        = "dev" # var.environment
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   acme_email         = module.akv.secrets.acme-email
   cloudflare_token   = module.akv.secrets.cloudflare-token
@@ -97,31 +96,31 @@ module "app_namespaces" {
   name     = each.key
 }
 
-# module "keycloak_app" {
-#   depends_on = [module.cnpg_operator, module.valkey_operator, module.mayastor, module.cert_manager, module.app_namespaces]
-#   source     = "./modules/app"
-#   context    = local.context
-#   name   = "keycloak"
-#   config = {
-#     namespace = "keycloak"
-#     template_vars = {
-#       image_tag = var.system.keycloak.image_tag
-#       replicas = 1
-#     }
-#     route = {
-#       dns_labels = ["auth"]
-#       public = true
-#       https_redirect = true
-#       svc_name = "keycloak"
-#       svc_port = 8080
-#     }
-#     postgres = {
-#       base_gb = 20
-#       wal_gb = 10
-#       replicas = 1
-#     }
-#   }
-# }
+module "keycloak_app" {
+  depends_on = [module.cnpg_operator, module.valkey_operator, module.mayastor, module.cert_manager, module.app_namespaces]
+  source     = "./modules/app"
+  context    = local.context
+  name   = "keycloak"
+  config = {
+    namespace = "keycloak"
+    template_vars = {
+      image_tag = var.system.keycloak.image_tag
+      replicas = 1
+    }
+    route = {
+      dns_labels = ["auth"]
+      public = true
+      https_redirect = true
+      svc_name = "keycloak"
+      svc_port = 8080
+    }
+    postgres = {
+      base_gb = 20
+      wal_gb = 10
+      replicas = 1
+    }
+  }
+}
 
 # resource "keycloak_realm" "this" {
 #   depends_on   = [module.keycloak_app]
