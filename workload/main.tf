@@ -80,9 +80,9 @@ module "mayastor" {
 module "cnpg_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/cnpg-operator"
-  image_tag  = var.system.cnpg_operator.image_tag
-  chart_tag  = var.system.cnpg_operator.chart_tag
-  pg_images  = var.system.cnpg_operator.pg_images
+  image_tag  = var.system.cnpg.operator.image_tag
+  chart_tag  = var.system.cnpg.operator.chart_tag
+  pg_images  = var.system.cnpg.operator.pg_images
 }
 
 module "valkey_operator" {
