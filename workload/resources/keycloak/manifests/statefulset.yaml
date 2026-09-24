@@ -22,16 +22,16 @@ spec:
           image: quay.io/keycloak/keycloak:${ app.image_tag }
           args: ["start"]
           env:
-            - name: KC_BOOTSTRAP_ADMIN_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: admin-secret
-                  key: "username"
-            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: admin-secret
-                  key: "password"
+            # - name: KC_BOOTSTRAP_ADMIN_USERNAME
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: admin-secret
+            #       key: "username"
+            # - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: admin-secret
+            #       key: "password"
             - name: KC_PROXY_HEADERS
               value: "xforwarded"
             - name: KC_HTTP_ENABLED
