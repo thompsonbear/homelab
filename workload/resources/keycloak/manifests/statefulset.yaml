@@ -8,7 +8,7 @@ metadata:
 spec:
   serviceName: ${ app.svc_name }
   # Run with one replica to save resources, or with two replicas to allow for rolling updates for configuration changes
-  replicas: ${ app.replicas }
+  replicas: ${ app.vars.replicas }
   selector:
     matchLabels:
       app: ${ app.name }
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: ${ app.name }
-          image: quay.io/keycloak/keycloak:${ app.image_tag }
+          image: quay.io/keycloak/keycloak:${ app.vars.image_tag }
           args: ["start"]
           env:
             # - name: KC_BOOTSTRAP_ADMIN_USERNAME
