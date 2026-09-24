@@ -126,8 +126,13 @@ module "keycloak_app" {
   }
 }
 
+resource "time_sleep" "wait_for_keycloak" {
+  depends_on      = [module.keycloak_app]
+  create_duration = "120s"
+}
+
 # resource "keycloak_realm" "this" {
-#   depends_on   = [module.keycloak_app]
+#   depends_on   = [time_sleep.wait_for_keycloak]
 #   realm        = "${module.akv.secrets.keycloak-realm-prefix}-${var.environment}"
 #   display_name = var.environment == "prod" ? title(module.akv.secrets.keycloak-realm-prefix) : "${title(module.akv.secrets.keycloak-realm-prefix)} ${upper(var.environment)}"
 # }
