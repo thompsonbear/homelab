@@ -10,9 +10,10 @@ locals {
 
   app_configs = {
     for k, v in local.apps : k => {
-      namespace = v.namespace != null ? v.namespace : k
+      namespace = can(v.namespace) ? v.namespace : k
 
-      chart = v.chart != null ? merge({
+
+      chart = can(v.chart) ? merge({
         name    = k
         version = "latest"
       }, v.chart) : null
@@ -23,11 +24,11 @@ locals {
         public         = false
         svc_name       = k
         svc_port       = 80
-      }, v.route)
+      }, can(v.route) ? v.route : {})
 
-      keycloak = v.keycloak != null ? merge(local.app_defaults.keycloak, v.keycloak) : null
-      postgres = v.postgres != null ? merge(local.app_defaults.postgres, v.postgres) : null
-      valkey   = v.valkey != null ? merge(local.app_defaults.valkey, { chart_tag = local.system.valkey.chart_tag }, v.valkey) : null
+      keycloak = can(v.keycloak) ? merge(local.app_defaults.keycloak, v.keycloak) : null
+      postgres = can(v.postgres) ? merge(local.app_defaults.postgres, v.postgres) : null
+      valkey   = can(v.valkey) ? merge(local.app_defaults.valkey, { chart_tag = local.system.valkey.chart_tag }, v.valkey) : null
     }
   }
 }
