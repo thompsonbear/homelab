@@ -9,7 +9,7 @@ locals {
   }
 
   app_configs = {
-    for k, v in var.apps : k => {
+    for k, v in local.apps : k => {
       namespace = v.namespace != null ? v.namespace : k
 
       chart = v.chart != null ? merge({
@@ -25,9 +25,9 @@ locals {
         svc_port       = 80
       }, v.route)
 
-      keycloak = v.keycloak != null ? merge(var.app_defaults.keycloak, v.keycloak) : null
-      postgres = v.postgres != null ? merge(var.app_defaults.postgres, v.postgres) : null
-      valkey   = v.valkey != null ? merge(var.app_defaults.valkey, { chart_tag = var.system.valkey.chart_tag }, v.valkey) : null
+      keycloak = v.keycloak != null ? merge(local.app_defaults.keycloak, v.keycloak) : null
+      postgres = v.postgres != null ? merge(local.app_defaults.postgres, v.postgres) : null
+      valkey   = v.valkey != null ? merge(local.app_defaults.valkey, { chart_tag = local.system.valkey.chart_tag }, v.valkey) : null
     }
   }
 }
@@ -40,7 +40,7 @@ module "akv" {
 
 module "cert_manager" {
   source             = "./modules/system/cert-manager"
-  tag                = var.system.cert_manager.chart_tag
+  tag                = local.system.cert_manager.chart_tag
   environment        = "dev" # var.environment
   base_public_domain = module.akv.secrets["${var.environment}-base-public-domain"]
   acme_email         = module.akv.secrets.acme-email
@@ -49,26 +49,26 @@ module "cert_manager" {
 
 module "metallb" {
   source  = "./modules/system/metallb"
-  tag     = var.system.metallb.chart_tag
+  tag     = local.system.metallb.chart_tag
   ip_pool = module.akv.secrets["${var.environment}-network"].lb_ip_pool
 }
 
 module "istio" {
   depends_on = [module.metallb]
   source     = "./modules/system/istio"
-  tag        = var.system.istio.chart_tag
+  tag        = local.system.istio.chart_tag
   gateways = local.context.gateways
 }
 
 module "csi-nfs" {
   source = "./modules/system/csi-nfs"
-  tag    = var.system.csi_nfs.chart_tag
+  tag    = local.system.csi_nfs.chart_tag
 }
 
 module "mayastor" {
   depends_on     = [module.csi-nfs]
   source         = "./modules/system/mayastor"
-  tag            = var.system.mayastor.chart_tag
+  tag            = local.system.mayastor.chart_tag
   nfs_storage_gb = 200
   diskpool_nodes = nonsensitive([
     for k, v in module.akv.secrets["${var.environment}-nodes"] :
@@ -79,20 +79,20 @@ module "mayastor" {
 module "cnpg_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/cnpg-operator"
-  image_tag  = var.system.cnpg.operator.image_tag
-  chart_tag  = var.system.cnpg.operator.chart_tag
-  pg_images  = var.system.cnpg.operator.pg_images
+  image_tag  = local.system.cnpg.operator.image_tag
+  chart_tag  = local.system.cnpg.operator.chart_tag
+  pg_images  = local.system.cnpg.operator.pg_images
 }
 
 module "valkey_operator" {
   depends_on = [module.mayastor]
   source     = "./modules/system/valkey-operator"
-  tag        = var.system.valkey.operator.chart_tag
+  tag        = local.system.valkey.operator.chart_tag
 }
 
 module "app_namespaces" {
   source   = "./modules/system/namespace"
-  for_each = toset(distinct(concat([for k, v in var.apps : try(v.namespace, k)], ["keycloak"])))
+  for_each = toset(distinct(concat([for k, v in local.apps : try(v.namespace, k)], ["keycloak"])))
   name     = each.key
 }
 
@@ -104,7 +104,7 @@ module "keycloak_app" {
   config = {
     namespace = "keycloak"
     template_vars = {
-      image_tag = var.system.keycloak.image_tag
+      image_tag = local.system.keycloak.image_tag
       replicas = 1
     }
     route = {
