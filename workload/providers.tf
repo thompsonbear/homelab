@@ -1,5 +1,8 @@
 terraform {
-  backend "azurerm" {}
+  backend "azurerm" {
+    use_cli = true
+    container_name = "workload"
+  }
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"

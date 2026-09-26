@@ -1,5 +1,8 @@
 terraform {
-  backend "azurerm" {}
+  backend "azurerm" {
+    use_cli = true
+    container_name = "platform"
+  }
   required_providers {
     unifi = {
       source  = "filipowm/unifi"
