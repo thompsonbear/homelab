@@ -1,4 +1,3 @@
-locals {
   app_defaults = {
     keycloak = {
       client_roles = ["admin"]
@@ -88,4 +87,3 @@ locals {
     #   }
     # }
   }
-}
