@@ -14,3 +14,77 @@ variable "environment" {
   type        = string
   description = "The environment type (prod/staging/dev/etc.)"
 }
+
+variable "app_defaults" {
+  type = object({
+    keycloak = object({
+      client_roles = list(string)
+    })
+    postgres = object({
+      version = number
+      base_gb = number
+      wal_gb = number
+      encoding = string
+      sql = list(string)
+      instances = number
+      extensions = list(object({
+        name = string
+        create = bool
+        preload = bool
+      }))
+    })
+    valkey = object({
+      clustered = bool
+      shards    = number
+      instances = number
+      size_gb   = number
+    })
+  })
+}
+
+variable "apps" {
+  type = map(object({
+    namespace = optional(string, null)
+
+    chart = optional(object({
+      name    = optional(string)
+      repo    = string
+      version = optional(string)
+    }), null)
+
+    route = optional(object({
+      dns_labels     = optional(list(string))
+      https_redirect = optional(bool)
+      public         = optional(bool)
+      svc_name       = optional(string)
+      svc_port       = optional(number)
+    }), null)
+
+    keycloak = optional(object({
+      redirect_uris = optional(list(string))
+      logout_uris   = optional(list(string))
+      client_roles  = optional(list(string))
+    }), null)
+
+    postgres = optional(object({
+      version  = optional(number)
+      base_gb  = optional(number)
+      wal_gb   = optional(number)
+      replicas = optional(number)
+      encoding = optional(string)
+      sql      = optional(list(string))
+      extensions = optional(list(object({
+        name    = string
+        create  = optional(bool)
+        preload = optional(bool)
+      })), [])
+    }), null)
+
+    valkey = optional(object({
+      clustered = optional(bool)
+      shards    = optional(number)
+      instances = optional(number)
+      size_gb   = optional(number)
+    }), null)
+  }))
+}

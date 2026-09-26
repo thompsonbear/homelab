@@ -9,32 +9,25 @@ locals {
   }
 
   app_configs = {
-    for k, v in local.apps : k => {
-      namespace = can(v.namespace) ? v.namespace : k
+    for k, v in var.apps : k => {
+      namespace = v.namespace != null ? v.namespace : k
 
-
-      chart = can(v.chart) ? merge({
+      chart = v.chart != null ? merge({
         name    = k
         version = "latest"
       }, v.chart) : null
 
-      route = can(v.route) ? merge({
+      route = merge({
         dns_labels     = [k]
         https_redirect = true
         public         = false
         svc_name       = k
         svc_port       = 80
-      }, v.route) : {
-        dns_labels     = [k]
-        https_redirect = true
-        public         = false
-        svc_name       = k
-        svc_port       = 80
-      }
+      }, v.route)
 
-      keycloak = can(v.keycloak) ? merge(local.app_defaults.keycloak, v.keycloak) : null
-      postgres = can(v.postgres) ? merge(local.app_defaults.postgres, v.postgres) : null
-      valkey   = can(v.valkey) ? merge(local.app_defaults.valkey, { chart_tag = local.system.valkey.chart_tag }, v.valkey) : null
+      keycloak = v.keycloak != null ? merge(var.app_defaults.keycloak, v.keycloak) : null
+      postgres = v.postgres != null ? merge(var.app_defaults.postgres, v.postgres) : null
+      valkey   = v.valkey != null ? merge(var.app_defaults.valkey, { chart_tag = local.system.valkey.chart_tag }, v.valkey) : null
     }
   }
 }
@@ -99,7 +92,7 @@ module "valkey_operator" {
 
 module "app_namespaces" {
   source   = "./modules/system/namespace"
-  for_each = toset(distinct(concat([for k, v in local.apps : try(v.namespace, k)], ["keycloak"])))
+  for_each = toset(distinct(concat([for k, v in var.apps : try(v.namespace, k)], ["keycloak"])))
   name     = each.key
 }
 
