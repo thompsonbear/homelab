@@ -18,13 +18,19 @@ locals {
         version = "latest"
       }, v.chart) : null
 
-      route = merge({
+      route = can(v.route) ? merge({
         dns_labels     = [k]
         https_redirect = true
         public         = false
         svc_name       = k
         svc_port       = 80
-      }, can(v.route) ? v.route : {})
+      }, v.route) : {
+        dns_labels     = [k]
+        https_redirect = true
+        public         = false
+        svc_name       = k
+        svc_port       = 80
+      }
 
       keycloak = can(v.keycloak) ? merge(local.app_defaults.keycloak, v.keycloak) : null
       postgres = can(v.postgres) ? merge(local.app_defaults.postgres, v.postgres) : null
