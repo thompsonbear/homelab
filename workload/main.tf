@@ -38,6 +38,29 @@ module "akv" {
   resource_group = var.az_key_vault_rg
 }
 
+data "azuread_client_config" "current" {}
+
+resource "time_rotating" "secret_rotation" {
+  rotation_days = 180
+}
+
+resource "azuread_application" "cluster" {
+  display_name = "homelab-${var.environment}-cluster"
+  owners = [ data.azuread_client_config.current.object_id ]
+
+  password {
+    display_name = "cluster-secret"
+    start_date = time_rotating.secret_rotation.id
+    end_date = timeadd(time_rotating.secret_rotation.id, "4320h")
+  }
+}
+
+module "external_secrets" {
+  source = "./modules/system/external-akv-secrets"
+  client_id = azuread_application.cluster.client_id
+  client_secret = tolist(azuread_application.cluster.password).0.value
+}
+
 module "cert_manager" {
   source             = "./modules/system/cert-manager"
   tag                = local.system.cert_manager.chart_tag
